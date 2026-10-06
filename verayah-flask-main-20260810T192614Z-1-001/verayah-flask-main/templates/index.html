@@ -118,6 +118,9 @@
         <a href="/products" class="btn-fill">Shop the Collection</a>
       </div>
     </div>
+    <div class="hero-visual" aria-hidden="true">
+      <img src="{{ url_for('static', filename='images/hero-hands.jpg') }}" alt="" loading="eager">
+    </div>
   </div>
 </section>
 
@@ -130,7 +133,7 @@
   <div class="wrap">
     <div class="about-grid">
       <div class="about-media">
-        <img src="{{ url_for('static', filename='images/products/img_85.jpg') }}" alt="Handmade jewellery in Panama">
+        <img src="{{ url_for('static', filename='images/about-duo.jpg') }}" alt="Handmade jewellery in Panama">
       </div>
       <div class="about-copy">
         <span class="eyebrow">About Verayah</span>
@@ -207,6 +210,13 @@
         <div class="collection-card-overlay">
           <h3>Bag Charms</h3>
           <span class="shop-now">Shop Now <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        </div>
+      </a>
+      <a href="/products" class="collection-card collection-card--all">
+        <div class="collection-card-overlay">
+          <span class="eyebrow">Everything</span>
+          <h3>Shop All</h3>
+          <span class="shop-now">Browse the Collection <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
         </div>
       </a>
     </div>

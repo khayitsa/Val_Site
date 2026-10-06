@@ -907,3 +907,24 @@ footer {
   .bag-qty, .bag-total { grid-column: 2; text-align: left; }
   .page-section h1 { font-size: 2rem; }
 }
+
+/* ============================================
+   HOME TWEAKS (feedback round)
+   ============================================ */
+/* Hero: copy left, photo right so the right side is not empty */
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 4rem; align-items: center; }
+.hero-visual { position: relative; justify-self: end; width: 100%; max-width: 440px; aspect-ratio: 4/5; max-height: 72vh; border-radius: 220px 220px 4px 4px; overflow: hidden; box-shadow: 0 30px 60px rgba(30,34,32,.22); border: 6px solid rgba(255,255,255,.55); }
+.hero-visual img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* About: centre the whole block so it is not left-heavy */
+.about-grid { max-width: 1100px; margin-left: auto; margin-right: auto; gap: 5rem; }
+.about-copy { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
+.about-media { max-width: 480px; width: 100%; justify-self: end; }
+
+/* Shop all card */
+.collection-card--all { background: linear-gradient(160deg, #3d5a54 0%, #6B9490 100%); display: flex; align-items: flex-end; }
+.collection-card--all .collection-card-overlay { position: static; background: none; padding: 2rem 1.5rem; color: #fff; }
+.collection-card--all .eyebrow { color: rgba(255,255,255,.75); display: block; margin-bottom: .4rem; }
+.collection-card--all h3 { font-size: 2rem; color: #fff; }
+.collection-card--all:hover { filter: brightness(1.06); }
+@media (max-width: 960px) { .hero-visual { display: none; } .hero .wrap { grid-template-columns: 1fr; } }

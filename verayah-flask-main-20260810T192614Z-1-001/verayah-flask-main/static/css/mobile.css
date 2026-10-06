@@ -12,6 +12,12 @@ body.nav-open { overflow: hidden; }
    this is the safety net). `clip` does not break position: sticky. */
 @supports (overflow: clip) { html, body { overflow-x: clip; } }
 
+/* Grid/flex children must be allowed to shrink, or cards push the page wider */
+.products-main, .products-layout > *, .contact-inner > * { min-width: 0; }
+.products-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.products-page .products-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 1100px) { .products-grid, .products-page .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
 /* --- Touch devices: nothing may depend on hover ------------------------ */
 @media (hover: none) {
   .product-overlay {
@@ -66,37 +72,9 @@ body.nav-open { overflow: hidden; }
   .hero-copy { margin-top: 0; }
   .hero-checks li { font-size: 16px; }
   .contact-section { padding: 4rem 0; }
-  .contact-inner { gap: 2rem; }
-  .contact-copy, .contact-form { flex: 1 1 100%; min-width: 0; width: 100%; }
   .section-head h2, .contact-copy h2 { overflow-wrap: anywhere; }
   .craft-copy .btn-fill { width: 100%; text-align: center; justify-content: center; }
   .story-section { padding: 64px 0; }
-
-  /* Shop page: categories become a swipeable row above the grid */
-  .products-hero-inner { flex-direction: column; gap: 1.5rem; }
-  .products-hero-inner > div:first-child { padding: 1rem 0 0; }
-  .products-hero { padding: 2.5rem 0 2rem !important; }
-  .products-hero h1 { font-size: clamp(2.1rem, 10vw, 3rem); }
-  .hero-illustration img { height: auto; aspect-ratio: 4/3; }
-  .products-page { padding-top: 2rem !important; }
-  .products-layout { flex-direction: column; gap: 1.25rem; }
-  .product-sidebar { position: static; flex: none; width: 100%; }
-  .product-sidebar .section-head { display: none; }
-  .product-nav-vertical {
-    flex-direction: row; gap: .5rem; overflow-x: auto; padding-bottom: .5rem;
-    scrollbar-width: none; -webkit-overflow-scrolling: touch;
-  }
-  .product-nav-vertical::-webkit-scrollbar { display: none; }
-  .product-nav-vertical a {
-    flex: 0 0 auto; white-space: nowrap; font-size: 14px; padding: .65rem 1rem;
-    border: 1px solid var(--border); border-radius: 999px; min-height: 44px;
-    display: inline-flex; align-items: center;
-  }
-  .product-nav-vertical a.active { background: var(--charcoal); color: var(--salt); border-color: var(--charcoal); }
-  .products-main { min-width: 0; width: 100%; }
-  .products-grid, .products-page .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem .9rem; }
-  .product-card { min-width: 0; }
-  .product-details h3 { overflow-wrap: anywhere; }
 
   /* Add to bag stays usable in narrow cards */
   .card-actions { display: grid; grid-template-columns: minmax(0, 1fr) 44px; gap: .5rem; align-items: stretch; }
@@ -149,6 +127,46 @@ body.nav-open { overflow: hidden; }
   .choice-group { padding: .85rem; }
 }
 
+
+/* --- Large phones in landscape, small tablets (up to 960px) ----------------- */
+/* The shop's sidebar + grid and the contact section need more room than these
+   screens have, so they stack like on a phone. */
+@media (max-width: 960px) {
+  .wrap, .trust-strip { width: 100%; max-width: none; padding-left: 1.25rem; padding-right: 1.25rem; }
+  .trust-strip .wrap { padding-left: 0; padding-right: 0; }
+  [id] { scroll-margin-top: 88px; }
+
+  .contact-inner { gap: 2rem; }
+  .contact-copy, .contact-form { flex: 1 1 100%; min-width: 0; width: 100%; max-width: none; }
+
+  /* Shop page: categories become a swipeable row above the grid */
+  .products-hero-inner { flex-direction: column; gap: 1.5rem; }
+  .products-hero-inner > div:first-child { padding: 1rem 0 0; }
+  .products-hero { padding: 2.5rem 0 2rem !important; }
+  .products-hero h1 { font-size: clamp(2.1rem, 10vw, 3rem); }
+  .hero-illustration img { height: auto; aspect-ratio: 4/3; max-height: 380px; }
+  .products-page { padding-top: 2rem !important; }
+  .products-layout { flex-direction: column; gap: 1.25rem; }
+  .product-sidebar { position: static; flex: none; width: 100%; }
+  .product-sidebar .section-head { display: none; }
+  .product-nav-vertical {
+    flex-direction: row; gap: .5rem; overflow-x: auto; padding-bottom: .5rem;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  }
+  .product-nav-vertical::-webkit-scrollbar { display: none; }
+  .product-nav-vertical a {
+    flex: 0 0 auto; white-space: nowrap; font-size: 14px; padding: .65rem 1rem;
+    border: 1px solid var(--border); border-radius: 999px; min-height: 44px;
+    display: inline-flex; align-items: center;
+  }
+  .product-nav-vertical a.active { background: var(--charcoal); color: var(--salt); border-color: var(--charcoal); }
+  .products-main { min-width: 0; width: 100%; }
+  .products-grid, .products-page .products-grid { gap: 1.25rem .9rem; }
+  .product-card { min-width: 0; }
+  .product-details h3 { overflow-wrap: anywhere; }
+
+}
+
 /* --- Small phones -------------------------------------------------------- */
 @media (max-width: 520px) {
   .collections-grid, .collections-grid--sm { grid-template-columns: 1fr 1fr; gap: .6rem; }
@@ -174,4 +192,11 @@ body.nav-open { overflow: hidden; }
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* Feedback round: more room above hero text under the sticky header */
+@media (max-width: 768px) {
+  .hero { padding-top: 5rem; }
+  .about-media { max-width: none; justify-self: stretch; }
+  .collection-card--all { aspect-ratio: auto; min-height: 140px; }
 }
