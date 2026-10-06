@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Privacy Policy | Verayah{% endblock %}
+{% block content %}
+<section class="page-section"><div class="wrap narrow legal">
+  <span class="eyebrow">Legal</span>
+  <h1>Privacy Policy</h1>
+  {% include 'legal/_draft_banner.html' %}
+
+  <h2>Who we are</h2>
+  <p>Verayah is a handmade jewellery business in {{ site.address }}, operated by {{ site.operator }}.
+     Contact: {{ site.phone }}{% if site.email %} · {{ site.email }}{% else %} · email <span class="tbc">not decided</span>{% endif %}.
+     Business registration (RUC/DV and Aviso de Operación): <span class="tbc">not decided</span>.</p>
+
+  <h2>What we collect, and why</h2>
+  <ul>
+    <li><strong>Orders:</strong> your name, email, phone/WhatsApp, delivery address and city, what you ordered, payment method and any note you add. We use this to prepare, deliver and support your order. You do not need an account to order.</li>
+    <li><strong>Contact messages:</strong> your name, email and message, so we can reply.</li>
+    <li><strong>Optional account:</strong> if you choose to create one, your name, email, a password (stored only as a one-way hash, never in plain text), and any phone, address, wishlist or past orders you save. You can use the shop without one.</li>
+    <li><strong>Newsletter / sneak-peek club:</strong> your email (and name if you give it), and which list(s) you chose. This is separate from buying or having an account, and always optional.</li>
+    <li><strong>Optional extras such as birthdays or jewellery sizes:</strong> <span class="tbc">not decided</span> — the site does not collect these yet.</li>
+  </ul>
+
+  <h2>Payments</h2>
+  <p>We take payment by Yappy or bank transfer, arranged directly with you after you place an order. The website does not process or store card or bank details.</p>
+
+  <h2>Marketing</h2>
+  <p>We only send newsletter or sneak-peek emails to people who choose them, and every email has an unsubscribe link. Marketing is never a condition of buying. WhatsApp or Instagram promotions: <span class="tbc">not decided</span>.
+     Customer reviews or photos are only used with your permission: <span class="tbc">process not decided</span>.</p>
+
+  <h2>Who can see your information</h2>
+  <p>Only the owner. Delivery details are shared with the courier (Uno Express) so your parcel can reach you. Where the website data is stored: <span class="tbc">hosting provider not decided</span>.</p>
+
+  <h2>Cookies</h2>
+  <p>The site uses one essential cookie to keep your shopping bag and sign-in working, and no analytics or advertising cookies. See the <a href="{{ url_for('main.cookies') }}">Cookies page</a>.</p>
+
+  <h2>How long we keep it</h2>
+  <p>Order records: <span class="tbc">retention period not decided</span>. Newsletter details until you unsubscribe. Account details until you delete your account.</p>
+
+  <h2>Your choices</h2>
+  <p>You can update your details and delete your account yourself from <a href="{{ url_for('account.dashboard') }}">My Account</a>. Deleting an account removes your saved details and wishlist; past orders are kept as business records but are no longer linked to you. To correct or delete any other information we hold, or to ask what we hold about you, contact us using the details above. You can unsubscribe from emails at any time.</p>
+
+  <h2>Changes</h2>
+  <p>We will update this page if how we handle information changes.</p>
+</div></section>
+{% endblock %}

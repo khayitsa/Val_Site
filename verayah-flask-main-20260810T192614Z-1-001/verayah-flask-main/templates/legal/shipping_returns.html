@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Shipping &amp; Returns | Verayah{% endblock %}
+{% block content %}
+<section class="page-section"><div class="wrap narrow legal">
+  <span class="eyebrow">Help</span>
+  <h1>Shipping &amp; Returns</h1>
+  {% include 'legal/_draft_banner.html' %}
+
+  <h2 id="shipping">Shipping &amp; delivery</h2>
+  <ul>
+    <li><strong>Where:</strong> within Panama only for now, by Uno Express courier. International orders: <span class="tbc">not decided</span>.</li>
+    <li><strong>Collection:</strong> available — choose it at checkout.</li>
+    <li><strong>Time:</strong> allow 4–5 days in total; courier delivery usually takes 2–3 days. <span class="tbc">Whether the 4–5 days includes courier time is not confirmed.</span></li>
+    <li><strong>Delivery fee:</strong> {% if delivery_fee %}${{ "%.2f"|format(delivery_fee|float) }}{% else %}<span class="tbc">not decided</span> — confirmed before you pay{% endif %}.</li>
+    <li><strong>Tracking:</strong> per Uno Express. Insurance: <span class="tbc">not decided</span>.</li>
+    <li><strong>Lost, damaged or undelivered parcels:</strong> <span class="tbc">process not decided</span>. Please contact us straight away.</li>
+  </ul>
+
+  <h2 id="returns">Returns, exchanges &amp; warranty</h2>
+  <ul>
+    <li><strong>Change of mind:</strong> every piece is unique (no two pearls are the same), so we do not offer change-of-mind returns. <span class="tbc">To be confirmed against consumer requirements.</span></li>
+    <li><strong>Sizing:</strong> adjustments are offered as a courtesy when a piece was made to the wrong size.</li>
+    <li><strong>Faulty or broken on arrival:</strong> we will exchange the piece.</li>
+    <li><strong>Warranty:</strong> 10 days from the shipping date.</li>
+    <li><strong>Condition:</strong> items must not show signs of use, wear or tarnish exposure, and are returned in their packaging.</li>
+    <li><strong>Return shipping:</strong> paid by Verayah for faulty items.</li>
+    <li><strong>Refunds / credit:</strong> store credit is offered; whether cash refunds are available in any case: <span class="tbc">not decided</span>.</li>
+    <li><strong>Earrings, sale items:</strong> <span class="tbc">not decided</span>.</li>
+    <li><strong>Personalised pieces:</strong> handled case by case with the owner, because they are made for you.</li>
+    <li><strong>Returns address:</strong> {% if site.returns_address %}{{ site.returns_address }}{% else %}<span class="tbc">not decided</span>{% endif %}</li>
+  </ul>
+  <p>To start a return or exchange, contact us at {{ site.phone }}{% if site.email %} or {{ site.email }}{% endif %} with your order number.</p>
+</div></section>
+{% endblock %}

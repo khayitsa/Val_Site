@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Terms of Sale | Verayah{% endblock %}
+{% block content %}
+<section class="page-section"><div class="wrap narrow legal">
+  <span class="eyebrow">Legal</span>
+  <h1>Terms of Sale</h1>
+  {% include 'legal/_draft_banner.html' %}
+
+  <h2>About these terms</h2>
+  <p>These terms apply to orders placed with Verayah ({{ site.operator }}, {{ site.address }}). By placing an order you confirm you have read them and the <a href="{{ url_for('main.privacy') }}">Privacy Policy</a>.</p>
+
+  <h2>Our pieces</h2>
+  <p>Pieces are handmade from 18k gold-coated chains, river pearls and natural crystals. Because pearls and crystals are natural, no two pieces are exactly alike, and colours and shapes may differ slightly from photos. Our jewellery is water resistant, not waterproof — see the <a href="{{ url_for('main.care') }}">Care Guide</a>.</p>
+  <p>Ready-made pieces are sold in limited quantities; stock shown on the site is current when you order. Waist chains come in S, M and L. Personalised pieces are arranged with the owner directly (see below).</p>
+
+  <h2>Ordering and payment</h2>
+  <p>You can buy without an account. After you place an order you receive an order number, and we confirm payment details with you for Yappy or bank transfer. An order is confirmed once payment is received. Prices are shown in US dollars. Whether prices include any applicable taxes: <span class="tbc">not decided (to be confirmed with the accountant)</span>.</p>
+
+  <h2>Personalised and made-to-order pieces</h2>
+  <p>Personalised pieces are agreed with the owner by message. A $20 deposit is required to begin. Balance due date and when production starts: <span class="tbc">not decided</span>.</p>
+
+  <h2>Cancelling or changing an order</h2>
+  <p>If an order is cancelled the customer can receive store credit. Until what point an order can be changed or cancelled: <span class="tbc">not decided</span>.</p>
+
+  <h2>Delivery, returns and faults</h2>
+  <p>See <a href="{{ url_for('main.shipping_returns') }}">Shipping &amp; Returns</a>.</p>
+
+  <h2>Your statutory rights</h2>
+  <p>Nothing in these terms limits any rights you have under Panamanian consumer law. <span class="tbc">Wording to be confirmed against the applicable consumer requirements.</span></p>
+
+  <h2>Contact</h2>
+  <p>{{ site.phone }}{% if site.email %} · {{ site.email }}{% endif %}</p>
+</div></section>
+{% endblock %}

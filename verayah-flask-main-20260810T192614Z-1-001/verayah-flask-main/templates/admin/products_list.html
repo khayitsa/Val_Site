@@ -1,0 +1,46 @@
+{% extends "admin/base.html" %}
+{% block title %}Products{% endblock %}
+{% block content %}
+<div class="admin-header">
+  <h1>Products</h1>
+  <a href="{{ url_for('admin.product_new') }}" class="btn btn-primary">+ Add product</a>
+</div>
+
+<div class="card">
+  {% if products %}
+  <table>
+    <tr><th></th><th>Name</th><th>Category</th><th>Price</th><th>Stock by shade</th><th>Visible</th><th></th></tr>
+    {% for p in products %}
+    <tr>
+      <td>
+        {% if p.image_filename %}
+        <img class="thumb" src="{{ url_for('static', filename='images/products/' + p.image_filename) }}" alt="">
+        {% endif %}
+      </td>
+      <td>{{ p.name }}</td>
+      <td>{{ p.category }}</td>
+      <td>{{ p.price_display() }}</td>
+      <td style="font-size:12px;">
+        {% for v in p.variants %}
+          <span class="{{ 'muted' if v.stock_quantity == 0 else '' }}">{{ v.shade }}: {{ v.stock_quantity }}</span>{% if not loop.last %}, {% endif %}
+        {% else %}
+          <span class="muted">No shades yet</span>
+        {% endfor %}
+      </td>
+      <td>{{ "Yes" if p.is_active else "Hidden" }}</td>
+      <td>
+        <a href="{{ url_for('admin.product_edit', product_id=p.id) }}" class="btn btn-outline btn-sm">Edit</a>
+        <form method="POST" action="{{ url_for('admin.product_delete', product_id=p.id) }}" style="display:inline;"
+              onsubmit="return confirm('Delete \'{{ p.name }}\'? This cannot be undone.');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="muted">No products yet. <a href="{{ url_for('admin.product_new') }}">Add your first one</a>.</p>
+  {% endif %}
+</div>
+{% endblock %}

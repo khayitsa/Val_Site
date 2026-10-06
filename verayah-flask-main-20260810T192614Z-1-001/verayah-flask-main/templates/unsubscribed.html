@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Unsubscribe | Verayah{% endblock %}
+{% block content %}
+<section class="page-section"><div class="wrap narrow">
+  <span class="eyebrow">Emails</span>
+  {% if done %}
+  <h1>You've been unsubscribed</h1>
+  <p>You won't receive any more newsletter or sneak-peek emails from us.</p>
+  {% else %}
+  <h1>Unsubscribe</h1>
+  <p>Stop all newsletter and sneak-peek club emails to {{ sub.email }}?</p>
+  <form method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn-fill" type="submit">Unsubscribe</button></form>
+  {% endif %}
+</div></section>
+{% endblock %}

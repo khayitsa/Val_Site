@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Cookies | Verayah{% endblock %}
+{% block content %}
+<section class="page-section"><div class="wrap narrow legal">
+  <span class="eyebrow">Legal</span>
+  <h1>Cookies</h1>
+  {% include 'legal/_draft_banner.html' %}
+
+  <p>Verayah uses only the cookie it needs to work. We do not use analytics, advertising or social-media tracking cookies or pixels, so there is nothing to switch off.</p>
+
+  <table class="legal-table">
+    <tr><th>Cookie</th><th>Purpose</th><th>Lasts</th></tr>
+    <tr><td><code>session</code></td><td>Essential. Keeps your shopping bag, signs you in if you have an account, and protects forms against forgery (CSRF).</td><td>Until you close your browser</td></tr>
+  </table>
+
+  <p>Fonts are served from this website itself, so your browser does not contact Google or any other third party to display the site.</p>
+  <p>If we add analytics or advertising tools in future, we will update this page and ask for your consent first.</p>
+</div></section>
+{% endblock %}

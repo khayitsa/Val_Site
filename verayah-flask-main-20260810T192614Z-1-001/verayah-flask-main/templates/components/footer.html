@@ -1,0 +1,69 @@
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div>
+        <div class="f-brand">
+          <img src="{{ url_for('static', filename='logos/Logo.png') }}" alt="Verayah">
+          <span class="f-brand-name">VERAYAH</span>
+        </div>
+        <p class="footer-brand-copy">
+          Handmade contemporary jewellery inspired by the ocean and crafted in Panama.
+          Discover timeless gold and pearl pieces designed for effortless everyday elegance.
+        </p>
+        <p class="footer-tagline">"Jewellery for your soul."</p>
+        {% if site.instagram or site.pinterest or site.tiktok %}
+        <div class="footer-socials">
+          {% if site.instagram %}<a href="{{ site.instagram }}" rel="noopener" target="_blank">Instagram</a>{% endif %}
+          {% if site.pinterest %}<a href="{{ site.pinterest }}" rel="noopener" target="_blank">Pinterest</a>{% endif %}
+          {% if site.tiktok %}<a href="{{ site.tiktok }}" rel="noopener" target="_blank">TikTok</a>{% endif %}
+        </div>
+        {% endif %}
+      </div>
+      <div class="footer-col">
+        <h4>Shop</h4>
+        <ul>
+          <li><a href="{{ url_for('products') }}">All Jewellery</a></li>
+          <li><a href="{{ url_for('shop.cart') }}">Shopping Bag</a></li>
+          <li><a href="{{ url_for('account.wishlist') }}">Wishlist</a></li>
+          <li><a href="{{ url_for('account.dashboard') }}">My Account (optional)</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Help</h4>
+        <ul>
+          <li><a href="{{ url_for('main.shipping_returns') }}#shipping">Shipping &amp; Delivery</a></li>
+          <li><a href="{{ url_for('main.shipping_returns') }}#returns">Returns &amp; Exchanges</a></li>
+          <li><a href="{{ url_for('main.care') }}">Care Guide</a></li>
+          <li><a href="{{ url_for('home') }}#contact">Contact Us</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Stay Connected</h4>
+        <p style="font-size:13px;color:rgba(249,247,244,.5);margin-bottom:1rem;font-weight:300;">
+          Join the newsletter and sneak-peek club for new pieces and early looks. No account needed.
+        </p>
+        <form method="POST" action="{{ url_for('main.subscribe') }}" class="f-newsletter-input">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="source" value="footer">
+          <input type="email" name="email" placeholder="Enter your email" required autocomplete="email" aria-label="Email address">
+          <button type="submit" aria-label="Join">→</button>
+        </form>
+        <p style="font-size:11px;color:rgba(249,247,244,.4);margin-top:.7rem;font-weight:300;line-height:1.5;">
+          By joining you agree to receive our emails. Unsubscribe any time.
+          <a href="{{ url_for('main.privacy') }}" style="text-decoration:underline;">Privacy</a> ·
+          <a href="{{ url_for('main.subscribe') }}" style="text-decoration:underline;">Choose lists</a>
+        </p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="f-copy">© 2026 Verayah. All rights reserved.</div>
+      <div class="f-copy footer-legal">
+        <a href="{{ url_for('main.privacy') }}">Privacy</a>
+        <a href="{{ url_for('main.terms') }}">Terms</a>
+        <a href="{{ url_for('main.shipping_returns') }}">Shipping &amp; Returns</a>
+        <a href="{{ url_for('main.cookies') }}">Cookies</a>
+        <a href="{{ url_for('main.care') }}">Jewellery Care</a>
+      </div>
+    </div>
+  </div>
+</footer>

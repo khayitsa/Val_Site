@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Checkout | Verayah{% endblock %}
+{% macro err(field) %}{% for e in field.errors %}<span class="field-error">{{ e }}</span>{% endfor %}{% endmacro %}
+{% block content %}
+<section class="page-section"><div class="wrap checkout-layout">
+  <div>
+    <span class="eyebrow">Checkout</span>
+    <h1>Your details</h1>
+    {% if not customer %}
+    <p class="muted">You don't need an account. <a href="{{ url_for('account.login', next=url_for('shop.checkout')) }}">Sign in</a> if you have one to fill this in faster.</p>
+    {% endif %}
+    <form method="POST" class="contact-form" novalidate>
+      {{ form.hidden_tag() }}
+      <div class="fields-row">
+        <div class="field">{{ form.name.label }}{{ form.name(autocomplete="name") }}{{ err(form.name) }}</div>
+        <div class="field">{{ form.email.label }}{{ form.email(autocomplete="email") }}{{ err(form.email) }}</div>
+      </div>
+      <div class="field">{{ form.phone.label }}{{ form.phone(autocomplete="tel") }}{{ err(form.phone) }}</div>
+
+      <fieldset class="choice-group">
+        <legend>Delivery (Panama only)</legend>
+        {% for sub in form.delivery_method %}<label class="choice">{{ sub }} {{ sub.label.text }}</label>{% endfor %}
+        <p class="muted small">{% if delivery_fee %}Courier fee: ${{ "%.2f"|format(delivery_fee|float) }}.{% else %}The delivery fee is confirmed with your payment details.{% endif %} Usually 4-5 days in total.</p>
+      </fieldset>
+      <div class="field">{{ form.shipping_address.label }}{{ form.shipping_address(autocomplete="street-address") }}{{ err(form.shipping_address) }}</div>
+      <div class="field">{{ form.shipping_city.label }}{{ form.shipping_city(autocomplete="address-level2") }}{{ err(form.shipping_city) }}</div>
+
+      <fieldset class="choice-group">
+        <legend>Payment</legend>
+        {% for sub in form.payment_method %}<label class="choice">{{ sub }} {{ sub.label.text }}</label>{% endfor %}
+        <p class="muted small">You won't be charged on the website. After ordering you'll see how to pay by Yappy or bank transfer.</p>
+      </fieldset>
+
+      <div class="field">{{ form.notes.label }}{{ form.notes(rows=3) }}{{ err(form.notes) }}</div>
+
+      {% if customer %}<label class="choice">{{ form.save_details() }} {{ form.save_details.label.text }}</label>{% endif %}
+
+      <fieldset class="choice-group">
+        <legend>Stay in touch (optional)</legend>
+        <label class="choice">{{ form.newsletter() }} {{ form.newsletter.label.text }}</label>
+        <label class="choice">{{ form.sneak_peek() }} {{ form.sneak_peek.label.text }}</label>
+        <p class="muted small">Not required to order. Unsubscribe any time.</p>
+      </fieldset>
+
+      <label class="choice">{{ form.accept() }} <span>I have read and accept the <a href="{{ url_for('main.terms') }}" target="_blank">Terms</a>, <a href="{{ url_for('main.shipping_returns') }}" target="_blank">Shipping &amp; Returns</a> and <a href="{{ url_for('main.privacy') }}" target="_blank">Privacy Policy</a></span></label>
+      {{ err(form.accept) }}
+      <button type="submit" class="btn-fill">Place order</button>
+    </form>
+  </div>
+  <aside class="order-summary">
+    <h3>Order summary</h3>
+    {% for l in lines %}
+    <div class="sum-row"><span>{{ l.product.name }} ({{ l.variant.shade }}) × {{ l.qty }}</span><span>${{ "%.2f"|format(l.line_total) }}</span></div>
+    {% endfor %}
+    <div class="sum-row sum-total"><span>Subtotal</span><span>${{ "%.2f"|format(subtotal) }}</span></div>
+    <a href="{{ url_for('shop.cart') }}" class="muted small">Edit bag</a>
+  </aside>
+</div></section>
+{% endblock %}

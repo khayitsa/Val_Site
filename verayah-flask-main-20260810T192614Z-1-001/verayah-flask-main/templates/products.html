@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verayah | Fine Jewellery</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=17">
+<style>
+  /* Fixes based on annotations */
+  /* Widen the borders of the website */
+  .wrap {
+    max-width: 1400px;
+    width: 90%;
+    margin: 0 auto;
+  }
+  
+  /* Align Trust Strip banner with content borders */
+  .trust-strip {
+    max-width: 1400px;
+    width: 90%;
+    margin: 0 auto;
+  }
+  .trust-strip .wrap {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  /* Flexbox Layout for Vertical Sidebar */
+  .products-layout {
+    display: flex;
+    flex-direction: row;
+    gap: 4rem;
+    align-items: flex-start;
+  }
+  .product-sidebar {
+    flex: 0 0 220px;
+    position: sticky;
+    top: 100px; /* Adjust based on your header height */
+  }
+  .product-nav-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .product-nav-vertical a {
+    text-decoration: none;
+    color: #333;
+    font-size: 1.1rem;
+    transition: color 0.3s;
+  }
+  .product-nav-vertical a.active, .product-nav-vertical a:hover {
+    font-weight: bold;
+    color: #000;
+  }
+  .products-main {
+    flex: 1;
+  }
+
+  /* Match product hero image height to text content */
+  .products-hero-inner {
+    display: flex;
+    align-items: stretch;
+    gap: 4rem;
+  }
+  .products-hero-inner > div:first-child {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem 0; /* Optional: adds a little breathing room */
+  }
+  .hero-illustration {
+    flex: 1;
+    display: flex;
+  }
+  .hero-illustration img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Mobile responsiveness for the product hero */
+  @media (max-width: 768px) {
+    .products-hero-inner {
+      flex-direction: column;
+      gap: 2rem;
+    }
+  }
+
+  /* Product descriptions & available shades */
+  .product-desc {
+    font-size: 13px; font-weight: 300; color: var(--muted);
+    line-height: 1.6; margin: 8px 0 6px;
+  }
+  .product-shades {
+    font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--teal); font-weight: 500;
+  }
+</style>
+</head>
+<body>
+
+{% include 'components/navbar.html' %}
+
+
+<!-- HERO -->
+<section class="products-hero">
+  <div class="wrap">
+    <div class="products-hero-inner">
+      <div>
+        <span class="eyebrow">Ocean Whispers</span>
+        <h1>Delicate.<br>Organic.<br>Eternal.</h1>
+        <p style="margin-top:1.2rem;">
+          Inspired by the ocean's quiet magic, this collection celebrates fluidity,
+          femininity, and the beauty found in nature's details.
+        </p>
+      </div>
+      <div class="hero-illustration">
+        <img src="{{ url_for('static', filename='images/products/img_08.jpg') }}" alt="Ocean collection">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTS MAIN WITH SIDEBAR (Combines old CATEGORY NAV and PRODUCTS GRID) -->
+<section class="products-page" id="collection" style="padding-top: 4rem;">
+  <div class="wrap products-layout">
+    
+    <!-- Left Hand Side Vertical Nav (Originally CATEGORY NAV) -->
+    <aside class="product-sidebar">
+      <div class="section-head" style="margin-bottom: 2rem;">
+        <span class="eyebrow">Filter</span>
+        <h3 style="margin-top: 0.5rem; font-size: 1.5rem;">Categories</h3>
+      </div>
+      <nav class="product-nav-vertical">
+        <a href="#" class="active" data-filter="all">All</a>
+        <a href="#" data-filter="Body Chain">Body Chains</a>
+        <a href="#" data-filter="Hand Chain">Hand Chains</a>
+        <a href="#" data-filter="Waist Chain">Waist Chains</a>
+        <a href="#" data-filter="Anklet">Anklets</a>
+        <a href="#" data-filter="Earring">Earrings</a>
+      </nav>
+    </aside>
+
+    <!-- Main Products Grid -->
+    <div class="products-main">
+      <div class="section-head">
+        <span class="eyebrow">Collection</span>
+        <h2>Signature Pieces</h2>
+        <p style="color:var(--muted);font-weight:300;font-size:15px;">Designed to become heirlooms.</p>
+      </div>
+
+      <div class="products-grid">
+
+        {% for p in products %}
+        {% set avail = p.variants|selectattr('stock_quantity','gt',0)|list %}
+        {% set vlist = [] %}
+        {% for v in avail %}{% set _ = vlist.append({'id': v.id, 'label': v.shade ~ ' - ' ~ v.stock_quantity ~ ' left'}) %}{% endfor %}
+        <article class="product-card" data-category="{{ p.category }}">
+          <div class="product-media">
+            <img src="{{ url_for('static', filename='images/products/' + p.image_filename) }}" alt="{{ p.name }}">
+            <div class="product-overlay">
+              <a href="#" class="quick-view-trigger"
+                 data-image="{{ url_for('static', filename='images/products/' + p.image_filename) }}"
+                 data-name="{{ p.name }}"
+                 data-category="{{ p.category }}"
+                 data-price="{{ p.price_display() }}"
+                 data-description="{{ p.description }}"
+                 data-shades="{{ p.shades_display() }}"
+                 data-variants='{{ vlist|tojson }}'>Quick View</a>
+            </div>
+          </div>
+          <div class="product-details">
+            <span class="product-category">{{ p.category }}</span>
+            <h3>{{ p.name }}</h3>
+            <div class="price">{{ p.price_display() }}</div>
+            <p class="product-desc">{{ p.description }}</p>
+            <div class="product-shades">{{ p.shades_display() }}</div>
+            <div class="card-actions">
+              {% if avail %}
+              <form method="POST" action="{{ url_for('shop.cart_add') }}" class="add-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="quantity" value="1">
+                <select name="variant_id" aria-label="Choose shade for {{ p.name }}">
+                  {% for v in avail %}<option value="{{ v.id }}">{{ v.shade }} - {{ v.stock_quantity }} left</option>{% endfor %}
+                </select>
+                <button type="submit" class="btn-fill">Add to bag</button>
+              </form>
+              {% else %}
+              <span class="sold-out">Sold out</span>
+              {% endif %}
+              <form method="POST" action="{{ url_for('account.wishlist_toggle', product_id=p.id) }}" class="wish-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="next" value="{{ url_for('products') }}">
+                <button type="submit" class="wish-btn {{ 'on' if p.id in wishlist_ids }}" aria-label="{{ 'Remove from' if p.id in wishlist_ids else 'Add to' }} wishlist" title="Wishlist (needs a free account)">&#9829;</button>
+              </form>
+            </div>
+          </div>
+        </article>
+        {% endfor %}
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick View modal -->
+  <div class="quick-view-backdrop" id="quickViewBackdrop">
+    <div class="quick-view-modal" role="dialog" aria-modal="true" aria-label="Product quick view">
+      <button type="button" class="quick-view-close" id="quickViewClose" aria-label="Close">&times;</button>
+      <div class="quick-view-media">
+        <img id="qvImage" src="" alt="">
+      </div>
+      <div class="quick-view-info">
+        <span class="product-category" id="qvCategory"></span>
+        <h3 id="qvName"></h3>
+        <div class="price" id="qvPrice"></div>
+        <p class="product-desc" id="qvDescription"></p>
+        <div class="product-shades" id="qvShades"></div>
+        <form method="POST" action="{{ url_for('shop.cart_add') }}" class="add-form" id="qvForm" style="margin-top:1.5rem;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="quantity" value="1">
+          <select name="variant_id" id="qvVariant" aria-label="Choose shade"></select>
+          <button type="submit" class="btn-fill" id="qvAdd">Add to bag</button>
+        </form>
+        <p class="sold-out" id="qvSoldOut" style="display:none;margin-top:1.5rem;">Sold out</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- TRUST STRIP -->
+<div class="trust-strip">
+  <div class="wrap">
+    <div class="trust-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Handmade with Intention
+    </div>
+    <div class="trust-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+      Natural Pearls &amp; Stones
+    </div>
+    <div class="trust-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Made to Last with Care
+    </div>
+    <div class="trust-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20"/></svg>
+      Pay by Yappy or Bank Transfer
+    </div>
+  </div>
+</div>
+
+
+<!-- FOOTER -->
+{% include 'components/footer.html' %}
+
+<script>
+(function(){
+  var header = document.getElementById('siteHeader');
+  window.addEventListener('scroll', function(){
+    header.classList.toggle('scrolled', window.scrollY > 20);
+  });
+  var burger = document.getElementById('burger');
+  var navlinks = document.getElementById('navlinks');
+  burger.addEventListener('click', function(){
+    var open = navlinks.classList.toggle('open');
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  /* Category filter for the products grid */
+  document.querySelectorAll('.product-nav-vertical a').forEach(function(a){
+    a.addEventListener('click', function(e){
+      e.preventDefault();
+      document.querySelectorAll('.product-nav-vertical a').forEach(function(l){ l.classList.remove('active'); });
+      this.classList.add('active');
+
+      var filter = this.getAttribute('data-filter');
+      document.querySelectorAll('.product-card').forEach(function(card){
+        var show = (filter === 'all') || (card.getAttribute('data-category') === filter);
+        card.style.display = show ? '' : 'none';
+      });
+    });
+  });
+
+  /* Quick View modal */
+  var backdrop = document.getElementById('quickViewBackdrop');
+  var qvImage = document.getElementById('qvImage');
+  var qvCategory = document.getElementById('qvCategory');
+  var qvName = document.getElementById('qvName');
+  var qvPrice = document.getElementById('qvPrice');
+  var qvDescription = document.getElementById('qvDescription');
+  var qvShades = document.getElementById('qvShades');
+
+  function openQuickView(trigger){
+    qvImage.src = trigger.getAttribute('data-image');
+    qvImage.alt = trigger.getAttribute('data-name');
+    qvCategory.textContent = trigger.getAttribute('data-category');
+    qvName.textContent = trigger.getAttribute('data-name');
+    qvPrice.textContent = trigger.getAttribute('data-price');
+    qvDescription.textContent = trigger.getAttribute('data-description');
+    qvShades.textContent = trigger.getAttribute('data-shades');
+    var variants = [];
+    try { variants = JSON.parse(trigger.getAttribute('data-variants') || '[]'); } catch (err) {}
+    var sel = document.getElementById('qvVariant');
+    sel.innerHTML = '';
+    variants.forEach(function(v){
+      var o = document.createElement('option'); o.value = v.id; o.textContent = v.label; sel.appendChild(o);
+    });
+    document.getElementById('qvForm').style.display = variants.length ? '' : 'none';
+    document.getElementById('qvSoldOut').style.display = variants.length ? 'none' : '';
+    backdrop.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeQuickView(){
+    backdrop.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.querySelectorAll('.quick-view-trigger').forEach(function(trigger){
+    trigger.addEventListener('click', function(e){
+      e.preventDefault();
+      openQuickView(trigger);
+    });
+  });
+  document.getElementById('quickViewClose').addEventListener('click', closeQuickView);
+  backdrop.addEventListener('click', function(e){
+    if (e.target === backdrop) closeQuickView();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && backdrop.classList.contains('open')) closeQuickView();
+  });
+})();
+</script>
+
+</body>
+</html>

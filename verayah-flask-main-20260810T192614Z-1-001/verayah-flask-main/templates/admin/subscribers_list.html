@@ -1,0 +1,30 @@
+{% extends "admin/base.html" %}
+{% block title %}Newsletter{% endblock %}
+{% block content %}
+<div class="admin-header">
+  <h1>Newsletter &amp; sneak-peek club</h1>
+  <a href="{{ url_for('admin.subscribers_export') }}" class="btn btn-outline">Export active (CSV)</a>
+</div>
+<div class="card">
+  {% if subscribers %}
+  <table>
+    <tr><th>Email</th><th>Name</th><th>Newsletter</th><th>Sneak-peek</th><th>Joined via</th><th>Date</th><th>Status</th><th></th></tr>
+    {% for s in subscribers %}
+    <tr>
+      <td>{{ s.email }}</td><td>{{ s.name or '—' }}</td>
+      <td>{{ 'Yes' if s.newsletter else '—' }}</td><td>{{ 'Yes' if s.sneak_peek else '—' }}</td>
+      <td>{{ s.consent_source or '—' }}</td>
+      <td>{{ s.consented_at.strftime('%d %b %Y') if s.consented_at else '—' }}</td>
+      <td>{{ 'Active' if s.active else 'Unsubscribed' }}</td>
+      <td>
+        <form method="POST" action="{{ url_for('admin.subscriber_delete', sub_id=s.id) }}" onsubmit="return confirm('Remove this subscriber permanently?');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-danger btn-sm" type="submit">Remove</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}<p class="muted">No subscribers yet.</p>{% endif %}
+</div>
+{% endblock %}

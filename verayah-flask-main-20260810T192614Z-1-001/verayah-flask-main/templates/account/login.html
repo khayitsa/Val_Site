@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Sign in | Verayah{% endblock %}
+{% block content %}
+<section class="page-section"><div class="wrap narrow form-narrow">
+  <span class="eyebrow">My account</span>
+  <h1>Sign in</h1>
+  <p class="muted">An account is optional. It lets you save delivery details and a wishlist. You can always <a href="{{ url_for('products') }}">shop as a guest</a>.</p>
+  <form method="POST" class="contact-form">
+    {{ form.hidden_tag() }}
+    {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+    <div class="field">{{ form.email.label }}{{ form.email(autocomplete="email") }}{% for e in form.email.errors %}<span class="field-error">{{ e }}</span>{% endfor %}</div>
+    <div class="field">{{ form.password.label }}{{ form.password(autocomplete="current-password") }}</div>
+    <button class="btn-fill" type="submit">Sign in</button>
+  </form>
+  <p class="muted small">Forgot your password? Contact us and we'll help you get back in.</p>
+  <p>New here? <a href="{{ url_for('account.register') }}">Create a free account</a></p>
+</div></section>
+{% endblock %}

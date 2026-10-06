@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Create account | Verayah{% endblock %}
+{% macro err(field) %}{% for e in field.errors %}<span class="field-error">{{ e }}</span>{% endfor %}{% endmacro %}
+{% block content %}
+<section class="page-section"><div class="wrap narrow form-narrow">
+  <span class="eyebrow">My account</span>
+  <h1>Create an account</h1>
+  <p class="muted">Optional. Save your delivery details and a wishlist. You never need an account to buy.</p>
+  <form method="POST" class="contact-form" novalidate>
+    {{ form.hidden_tag() }}
+    <div class="field">{{ form.name.label }}{{ form.name(autocomplete="name") }}{{ err(form.name) }}</div>
+    <div class="field">{{ form.email.label }}{{ form.email(autocomplete="email") }}{{ err(form.email) }}</div>
+    <div class="field">{{ form.phone.label }}{{ form.phone(autocomplete="tel") }}{{ err(form.phone) }}</div>
+    <div class="field">{{ form.password.label }}{{ form.password(autocomplete="new-password") }}{{ err(form.password) }}</div>
+    <div class="field">{{ form.confirm.label }}{{ form.confirm(autocomplete="new-password") }}{{ err(form.confirm) }}</div>
+    <label class="choice">{{ form.marketing() }} {{ form.marketing.label.text }}</label>
+    <label class="choice">{{ form.accept() }} <span>I have read the <a href="{{ url_for('main.privacy') }}" target="_blank">Privacy Policy</a> and <a href="{{ url_for('main.terms') }}" target="_blank">Terms</a></span></label>
+    {{ err(form.accept) }}
+    <button class="btn-fill" type="submit">Create account</button>
+  </form>
+  <p>Already have one? <a href="{{ url_for('account.login') }}">Sign in</a></p>
+</div></section>
+{% endblock %}

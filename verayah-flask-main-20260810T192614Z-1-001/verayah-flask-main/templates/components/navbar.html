@@ -1,0 +1,35 @@
+<header id="siteHeader">
+  <nav class="wrap">
+    <a href="{{ url_for('home') }}" class="brand">
+      <img src="{{ url_for('static', filename='logos/Logo.png') }}" alt="Verayah">
+    </a>
+    <div class="nav-center" id="navlinks">
+      <a href="{{ url_for('products') }}">Shop</a>
+      <a href="{{ url_for('home') }}#collections">Collections</a>
+      <a href="{{ url_for('home') }}#about">About</a>
+      <a href="{{ url_for('home') }}#custom">Custom</a>
+      <a href="{{ url_for('journal') }}">Journal</a>
+    </div>
+    <div class="nav-icons">
+      <a href="{{ url_for('account.dashboard') }}" aria-label="{{ 'My account' if customer else 'Sign in' }}" title="{{ 'My account' if customer else 'Sign in (optional)' }}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </a>
+      <a href="{{ url_for('shop.cart') }}" class="bag-link" aria-label="Shopping bag ({{ cart_count }})">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        {% if cart_count %}<span class="bag-count">{{ cart_count }}</span>{% endif %}
+      </a>
+    </div>
+    <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+</header>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="site-flashes wrap" role="status" aria-live="polite">
+    {% for category, message in messages %}
+      <div class="site-flash site-flash-{{ category if category in ('error','success','info') else 'info' }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+{% endwith %}

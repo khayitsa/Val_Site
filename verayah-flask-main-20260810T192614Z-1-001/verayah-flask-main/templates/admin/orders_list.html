@@ -1,0 +1,37 @@
+{% extends "admin/base.html" %}
+{% block title %}Orders{% endblock %}
+{% block content %}
+<div class="admin-header">
+  <h1>Orders &amp; Shipping</h1>
+  <a href="{{ url_for('admin.order_new') }}" class="btn btn-primary">+ Log an order</a>
+</div>
+
+<div style="margin-bottom:1rem;">
+  <a href="{{ url_for('admin.orders_list') }}" class="btn btn-sm {{ 'btn-primary' if not status_filter else 'btn-outline' }}">All</a>
+  {% for s in statuses %}
+  <a href="{{ url_for('admin.orders_list', status=s) }}" class="btn btn-sm {{ 'btn-primary' if status_filter == s else 'btn-outline' }}">{{ s.capitalize() }}</a>
+  {% endfor %}
+</div>
+
+<div class="card">
+  {% if orders %}
+  <table>
+    <tr><th>Order</th><th>Customer</th><th>Ship to</th><th>Status</th><th>Payment</th><th>Total</th><th>Placed</th><th></th></tr>
+    {% for order in orders %}
+    <tr>
+      <td>#{{ order.id }}</td>
+      <td>{{ order.customer_name }}</td>
+      <td>{{ order.shipping_city }}, {{ order.shipping_country }}</td>
+      <td><span class="badge badge-{{ order.status }}">{{ order.status }}</span></td>
+      <td>{{ 'Paid' if order.payment_status == 'paid' else 'Unpaid' }}{% if order.source == 'website' %} · web{% endif %}</td>
+      <td>${{ "%.2f"|format(order.total()) }}</td>
+      <td>{{ order.created_at.strftime('%d %b %Y') }}</td>
+      <td><a href="{{ url_for('admin.order_detail', order_id=order.id) }}">View</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="muted">No orders in this view.</p>
+  {% endif %}
+</div>
+{% endblock %}

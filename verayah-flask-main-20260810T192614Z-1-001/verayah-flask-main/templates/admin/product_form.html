@@ -1,0 +1,118 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ "Edit" if mode == "edit" else "Add" }} Product{% endblock %}
+{% block content %}
+<div class="admin-header">
+  <h1>{{ "Edit product" if mode == "edit" else "Add product" }}</h1>
+  <a href="{{ url_for('admin.products_list') }}" class="btn btn-outline">Back to products</a>
+</div>
+
+<div class="card" style="max-width:560px;">
+  <form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+    <div class="field">
+      {{ form.name.label }}
+      {{ form.name() }}
+      {% for e in form.name.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="field">
+      {{ form.category.label }}
+      {{ form.category() }}
+    </div>
+
+    <div class="field">
+      {{ form.price.label }}
+      {{ form.price() }}
+      {% for e in form.price.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="field">
+      {{ form.description.label }}
+      {{ form.description() }}
+    </div>
+
+    <div class="field">
+      <label>Shades &amp; stock</label>
+      <div class="hint" style="margin-top:-2px; margin-bottom:0.5rem;">Add one row per shade you sell this in, with how many you currently have.</div>
+      <table class="order-items-table" id="variantsTable">
+        <tr><th>Shade</th><th style="width:110px;">Stock</th><th></th></tr>
+        {% if mode == "edit" %}
+          {% for v in product.variants %}
+          <tr>
+            <td>
+              <input type="hidden" name="variant_id" value="{{ v.id }}">
+              <input type="text" name="variant_shade" value="{{ v.shade }}" placeholder="e.g. Seafoam">
+            </td>
+            <td><input type="number" name="variant_stock" value="{{ v.stock_quantity }}" min="0" style="width:90px;"></td>
+            <td><button type="button" class="btn btn-outline btn-sm remove-row">Remove</button></td>
+          </tr>
+          {% endfor %}
+        {% endif %}
+      </table>
+      <button type="button" class="btn btn-outline btn-sm" id="addVariantBtn" style="margin-top:0.5rem;">+ Add shade</button>
+    </div>
+
+    <div class="field">
+      {{ form.image.label }}
+      {% if mode == "edit" and product.image_filename %}
+      <div style="margin-bottom:0.5rem;">
+        <img class="thumb" style="width:70px;height:70px;" src="{{ url_for('static', filename='images/products/' + product.image_filename) }}" alt="">
+      </div>
+      {% endif %}
+      {{ form.image() }}
+      <div class="hint">JPG, PNG or WEBP. Leave blank to keep the current photo.</div>
+      {% for e in form.image.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="field">
+      {{ form.sort_order.label }}
+      {{ form.sort_order() }}
+      <div class="hint">Lower numbers show first in the grid.</div>
+    </div>
+
+    <div class="field checkbox-row">
+      {{ form.is_active() }}
+      {{ form.is_active.label }}
+    </div>
+
+    {{ form.submit(class="btn btn-primary") }}
+  </form>
+</div>
+
+<template id="variantRowTemplate">
+  <tr>
+    <td>
+      <input type="hidden" name="variant_id" value="">
+      <input type="text" name="variant_shade" placeholder="e.g. Seafoam">
+    </td>
+    <td><input type="number" name="variant_stock" value="0" min="0" style="width:90px;"></td>
+    <td><button type="button" class="btn btn-outline btn-sm remove-row">Remove</button></td>
+  </tr>
+</template>
+
+<script>
+(function(){
+  var table = document.getElementById('variantsTable');
+  var template = document.getElementById('variantRowTemplate');
+
+  function wireRemove(tr){
+    tr.querySelector('.remove-row').addEventListener('click', function(){ tr.remove(); });
+  }
+  table.querySelectorAll('tr').forEach(function(tr){
+    if (tr.querySelector('.remove-row')) wireRemove(tr);
+  });
+
+  document.getElementById('addVariantBtn').addEventListener('click', function(){
+    var row = template.content.cloneNode(true);
+    var tr = row.querySelector('tr');
+    table.appendChild(row);
+    wireRemove(table.lastElementChild);
+  });
+
+  {% if mode == "new" %}
+  document.getElementById('addVariantBtn').click(); // start with one row for a brand-new product
+  {% endif %}
+})();
+</script>
+{% endblock %}

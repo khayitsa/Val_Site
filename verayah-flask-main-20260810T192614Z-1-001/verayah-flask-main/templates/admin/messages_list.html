@@ -1,0 +1,27 @@
+{% extends "admin/base.html" %}
+{% block title %}Messages{% endblock %}
+{% block content %}
+<div class="admin-header"><h1>Contact messages</h1></div>
+{% if messages %}
+{% for m in messages %}
+<div class="card" style="margin-bottom:1rem;">
+  <div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+    <strong>{{ m.name }}</strong>
+    <span class="muted">{{ m.created_at.strftime('%d %b %Y, %H:%M') }} · {{ m.inquiry_type }}</span>
+  </div>
+  <p style="margin:.3rem 0;"><a href="mailto:{{ m.email }}">{{ m.email }}</a></p>
+  <p style="white-space:pre-wrap;">{{ m.message }}</p>
+  <div style="display:flex;gap:.5rem;">
+    <form method="POST" action="{{ url_for('admin.message_handled', msg_id=m.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-sm {{ 'btn-outline' if m.handled else 'btn-primary' }}" type="submit">{{ 'Mark as new' if m.handled else 'Mark handled' }}</button>
+    </form>
+    <form method="POST" action="{{ url_for('admin.message_delete', msg_id=m.id) }}" onsubmit="return confirm('Delete this message?');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+    </form>
+  </div>
+</div>
+{% endfor %}
+{% else %}<div class="card"><p class="muted">No messages yet.</p></div>{% endif %}
+{% endblock %}

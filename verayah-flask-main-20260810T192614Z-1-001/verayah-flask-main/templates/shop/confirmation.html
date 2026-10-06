@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Order received | Verayah{% endblock %}
+{% block content %}
+<section class="page-section"><div class="wrap narrow">
+  <span class="eyebrow">Thank you</span>
+  <h1>Order #{{ order.id }} received</h1>
+  <p>Thank you, {{ order.customer_name.split(' ')[0] }}. Your pieces are reserved for you. <strong>Your order is confirmed once payment is received.</strong></p>
+
+  <h2>How to pay ({{ 'Yappy' if order.payment_method == 'yappy' else 'bank transfer' }})</h2>
+  {% if order.payment_method == 'yappy' and site.yappy %}
+    <p>Send <strong>${{ "%.2f"|format(order.total()) }}</strong> by Yappy to <strong>{{ site.yappy }}</strong>, using order #{{ order.id }} as the reference.</p>
+  {% elif order.payment_method == 'bank_transfer' and site.bank_details %}
+    <p>Transfer <strong>${{ "%.2f"|format(order.total()) }}</strong> with reference order #{{ order.id }}:</p>
+    <pre class="bank-details">{{ site.bank_details }}</pre>
+  {% else %}
+    <p>We will send you the {{ 'Yappy' if order.payment_method == 'yappy' else 'bank transfer' }} details{% if order.customer_email %} at {{ order.customer_email }}{% endif %} and on WhatsApp ({{ order.customer_phone }}) shortly.</p>
+  {% endif %}
+  <p>Then send your payment proof to us{% if site.whatsapp %} on <a href="https://wa.me/{{ site.whatsapp }}">WhatsApp</a>{% else %} on {{ site.phone }}{% endif %}.</p>
+
+  <h2>Your order</h2>
+  <table class="legal-table">
+    {% for item in order.items %}<tr><td>{{ item.product_name }} ({{ item.shade }}) × {{ item.quantity }}</td><td>${{ "%.2f"|format(item.unit_price * item.quantity) }}</td></tr>{% endfor %}
+    <tr><td>Delivery{% if order.delivery_method == 'collection' %} (collection){% endif %}</td><td>{% if order.delivery_method == 'collection' %}$0.00{% elif order.delivery_fee and order.delivery_fee > 0 %}${{ "%.2f"|format(order.delivery_fee) }}{% else %}to be confirmed{% endif %}</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>${{ "%.2f"|format(order.total()) }}</strong>{% if order.delivery_method == 'courier' and not (order.delivery_fee and order.delivery_fee > 0) %} + delivery{% endif %}</td></tr>
+  </table>
+  <p class="muted">{% if order.delivery_method == 'collection' %}Collection{% else %}Delivering to {{ order.shipping_address }}, {{ order.shipping_city }}{% endif %}. Keep this page's link for your records.</p>
+
+  {% if not customer %}
+  <p>Want to save your details and a wishlist for next time? <a href="{{ url_for('account.register', email=order.customer_email, name=order.customer_name) }}">Create a free account</a> (optional).</p>
+  {% endif %}
+  <a href="{{ url_for('products') }}" class="btn-outline">Continue shopping</a>
+</div></section>
+{% endblock %}

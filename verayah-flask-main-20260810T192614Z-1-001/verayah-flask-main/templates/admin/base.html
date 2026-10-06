@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>{% block title %}Admin{% endblock %} — Verayah Admin</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+<div class="admin-shell">
+  <aside class="admin-sidebar">
+    <a class="brand" href="{{ url_for('admin.dashboard') }}">VERAYAH Admin</a>
+    <nav>
+      <a href="{{ url_for('admin.dashboard') }}" class="{{ 'active' if request.endpoint == 'admin.dashboard' }}">Dashboard</a>
+      <a href="{{ url_for('admin.products_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('admin.product') }}">Products</a>
+      <a href="{{ url_for('admin.orders_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('admin.order') }}">Orders &amp; Shipping</a>
+      <a href="{{ url_for('admin.customers_list') }}" class="{{ 'active' if request.endpoint == 'admin.customers_list' }}">Customer accounts</a>
+      <a href="{{ url_for('admin.subscribers_list') }}" class="{{ 'active' if request.endpoint == 'admin.subscribers_list' }}">Newsletter</a>
+      <a href="{{ url_for('admin.messages_list') }}" class="{{ 'active' if request.endpoint == 'admin.messages_list' }}">Messages</a>
+      <a href="{{ url_for('home') }}" target="_blank">View live site &#8599;</a>
+    </nav>
+    <div class="logout">
+      <span class="muted" style="font-size:12px;">Logged in as {{ current_user.username }}</span><br>
+      <a href="{{ url_for('admin.logout') }}">Log out</a>
+    </div>
+  </aside>
+  <main class="admin-main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash flash-{{ 'error' if category == 'error' else 'success' }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+</body>
+</html>

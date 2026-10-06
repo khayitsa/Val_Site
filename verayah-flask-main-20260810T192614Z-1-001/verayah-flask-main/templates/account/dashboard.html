@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}My account | Verayah{% endblock %}
+{% macro err(field) %}{% for e in field.errors %}<span class="field-error">{{ e }}</span>{% endfor %}{% endmacro %}
+{% block content %}
+<section class="page-section"><div class="wrap narrow">
+  <span class="eyebrow">My account</span>
+  <h1>Hello, {{ customer.name.split(' ')[0] }}</h1>
+  <p class="muted">{{ customer.email }} · <a href="{{ url_for('account.wishlist') }}">My wishlist</a></p>
+
+  <h2>Saved details</h2>
+  <form method="POST" class="contact-form">
+    {{ form.hidden_tag() }}
+    <div class="field">{{ form.name.label }}{{ form.name() }}{{ err(form.name) }}</div>
+    <div class="field">{{ form.phone.label }}{{ form.phone() }}{{ err(form.phone) }}</div>
+    <div class="field">{{ form.shipping_address.label }}{{ form.shipping_address() }}{{ err(form.shipping_address) }}</div>
+    <div class="field">{{ form.shipping_city.label }}{{ form.shipping_city() }}{{ err(form.shipping_city) }}</div>
+    <button class="btn-fill" type="submit">Save details</button>
+  </form>
+
+  <h2>Your orders</h2>
+  {% if orders %}
+  <table class="legal-table">
+    <tr><th>Order</th><th>Placed</th><th>Status</th><th>Total</th><th></th></tr>
+    {% for o in orders %}
+    <tr><td>#{{ o.id }}</td><td>{{ o.created_at.strftime('%d %b %Y') }}</td><td>{{ o.status }}{% if o.payment_status == 'unpaid' and o.status != 'cancelled' %} (awaiting payment){% endif %}</td><td>${{ "%.2f"|format(o.total()) }}</td>
+        <td>{% if o.public_token %}<a href="{{ url_for('shop.order_confirmation', token=o.public_token) }}">View</a>{% endif %}</td></tr>
+    {% endfor %}
+  </table>
+  {% else %}<p class="muted">No orders yet.</p>{% endif %}
+
+  <h2>Sign out</h2>
+  <form method="POST" action="{{ url_for('account.logout') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn-outline" type="submit">Sign out</button>
+  </form>
+
+  <h2>Delete my account</h2>
+  <p class="muted">This erases your saved details and wishlist. Past orders are kept as business records but are no longer linked to you. Newsletter emails are managed separately: use the unsubscribe link in any email.</p>
+  <form method="POST" action="{{ url_for('account.delete_account') }}" class="contact-form">
+    {{ delete_form.hidden_tag() }}
+    <div class="field">{{ delete_form.password.label }}{{ delete_form.password(autocomplete="current-password") }}</div>
+    <button class="btn-outline danger" type="submit">Delete my account</button>
+  </form>
+</div></section>
+{% endblock %}

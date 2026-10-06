@@ -1,0 +1,36 @@
+{% extends "admin/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="admin-header"><h1>Dashboard</h1></div>
+
+<div class="stat-grid">
+  <div class="stat-card"><div class="num">{{ stats.active_product_count }}</div><div class="label">Active products</div></div>
+  <div class="stat-card"><div class="num">{{ stats.product_count }}</div><div class="label">Total products</div></div>
+  <div class="stat-card"><div class="num">{{ stats.pending_orders }}</div><div class="label">Pending orders</div></div>
+  <div class="stat-card"><div class="num">{{ stats.processing_orders }}</div><div class="label">Processing orders</div></div>
+  <div class="stat-card"><div class="num">{{ stats.awaiting_payment }}</div><div class="label">Awaiting payment</div></div>
+  <div class="stat-card"><div class="num">{{ stats.new_messages }}</div><div class="label">New messages</div></div>
+  <div class="stat-card"><div class="num">{{ stats.customers }}</div><div class="label">Customer accounts</div></div>
+  <div class="stat-card"><div class="num">{{ stats.subscribers }}</div><div class="label">Subscribers</div></div>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0;">Recent orders</h3>
+  {% if recent_orders %}
+  <table>
+    <tr><th>Order</th><th>Customer</th><th>Status</th><th>Placed</th><th></th></tr>
+    {% for order in recent_orders %}
+    <tr>
+      <td>#{{ order.id }}</td>
+      <td>{{ order.customer_name }}</td>
+      <td><span class="badge badge-{{ order.status }}">{{ order.status }}</span></td>
+      <td>{{ order.created_at.strftime('%d %b %Y') }}</td>
+      <td><a href="{{ url_for('admin.order_detail', order_id=order.id) }}">View</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="muted">No orders yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

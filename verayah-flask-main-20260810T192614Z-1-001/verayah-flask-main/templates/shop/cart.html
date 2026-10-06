@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Your Bag | Verayah{% endblock %}
+{% block content %}
+<section class="page-section"><div class="wrap narrow">
+  <span class="eyebrow">Shopping bag</span>
+  <h1>Your bag</h1>
+  {% if lines %}
+  <div class="bag-list">
+    {% for l in lines %}
+    <div class="bag-row">
+      <img src="{{ url_for('static', filename='images/products/' + l.product.image_filename) }}" alt="{{ l.product.name }}">
+      <div class="bag-info">
+        <h3>{{ l.product.name }}</h3>
+        <p class="muted">{{ l.variant.shade }} · {{ l.product.price_display() }}</p>
+        {% if l.over_stock %}<p class="field-error">Only {{ l.variant.stock_quantity }} left - please reduce the quantity.</p>{% endif %}
+      </div>
+      <form method="POST" action="{{ url_for('shop.cart_update') }}" class="bag-qty">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="variant_id" value="{{ l.variant.id }}">
+        <input type="number" name="quantity" min="1" max="{{ [l.variant.stock_quantity, 10]|min }}" value="{{ l.qty }}" aria-label="Quantity">
+        <button type="submit" class="btn-outline">Update</button>
+      </form>
+      <div class="bag-total">${{ "%.2f"|format(l.line_total) }}</div>
+      <form method="POST" action="{{ url_for('shop.cart_remove') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="variant_id" value="{{ l.variant.id }}">
+        <button type="submit" class="link-btn" aria-label="Remove {{ l.product.name }}">Remove</button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="bag-summary">
+    <p>Subtotal <strong>${{ "%.2f"|format(subtotal) }}</strong></p>
+    <p class="muted">Delivery within Panama is added at checkout. No account needed.</p>
+    <a href="{{ url_for('shop.checkout') }}" class="btn-fill">Checkout</a>
+    <a href="{{ url_for('products') }}" class="btn-outline">Keep shopping</a>
+  </div>
+  {% else %}
+  <p>Your bag is empty.</p>
+  <a href="{{ url_for('products') }}" class="btn-fill">Shop the collection</a>
+  {% endif %}
+</div></section>
+{% endblock %}

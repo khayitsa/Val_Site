@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Verayah | Fine Jewellery{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=17">
+{% block head %}{% endblock %}
+</head>
+<body>
+{% include 'components/navbar.html' %}
+
+{% block content %}{% endblock %}
+
+{% include 'components/footer.html' %}
+<script>
+(function(){
+  var header = document.getElementById('siteHeader');
+  window.addEventListener('scroll', function(){ header.classList.toggle('scrolled', window.scrollY > 20); });
+  var burger = document.getElementById('burger');
+  var navlinks = document.getElementById('navlinks');
+  burger.addEventListener('click', function(){
+    var open = navlinks.classList.toggle('open');
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+})();
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

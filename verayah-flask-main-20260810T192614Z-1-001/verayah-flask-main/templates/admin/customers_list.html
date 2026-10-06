@@ -1,0 +1,25 @@
+{% extends "admin/base.html" %}
+{% block title %}Customer accounts{% endblock %}
+{% block content %}
+<div class="admin-header"><h1>Customer accounts</h1></div>
+<p class="muted">Accounts are optional - guests can always order. Delete an account here when a customer asks; their past orders are kept but unlinked.</p>
+<div class="card">
+  {% if customers %}
+  <table>
+    <tr><th>Name</th><th>Email</th><th>Phone</th><th>Orders</th><th>Joined</th><th></th></tr>
+    {% for c in customers %}
+    <tr>
+      <td>{{ c.name }}</td><td>{{ c.email }}</td><td>{{ c.phone or '—' }}</td>
+      <td>{{ c.orders|length }}</td><td>{{ c.created_at.strftime('%d %b %Y') }}</td>
+      <td>
+        <form method="POST" action="{{ url_for('admin.customer_delete', customer_id=c.id) }}" onsubmit="return confirm('Delete this account?');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}<p class="muted">No customer accounts yet.</p>{% endif %}
+</div>
+{% endblock %}

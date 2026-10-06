@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Journal — Verayah</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=17">
+<style>
+  .wrap { max-width: 1400px; width: 90%; margin: 0 auto; }
+  .journal-hero {
+    min-height: 60vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+    padding: 8rem 1.5rem 6rem;
+  }
+  .journal-hero .eyebrow { display: block; margin-bottom: 1rem; }
+  .journal-hero h1 { max-width: 640px; margin-bottom: 1.25rem; }
+  .journal-hero p { max-width: 480px; color: var(--muted); font-weight: 300; margin-bottom: 2rem; }
+</style>
+</head>
+<body>
+
+{% include 'components/navbar.html' %}
+
+<section class="journal-hero">
+  <span class="eyebrow">The Journal</span>
+  <h1>Stories from the shoreline, coming soon.</h1>
+  <p>
+    We're putting together behind-the-scenes notes on how each piece is made,
+    care tips, and the ocean moments that inspire our collections. Check back soon.
+  </p>
+  <a href="/products" class="btn-fill">Shop the Collection</a>
+</section>
+
+<!-- FOOTER -->
+{% include 'components/footer.html' %}
+
+<script>
+(function(){
+  var header = document.getElementById('siteHeader');
+  window.addEventListener('scroll', function(){
+    header.classList.toggle('scrolled', window.scrollY > 20);
+  });
+  var burger = document.getElementById('burger');
+  var navlinks = document.getElementById('navlinks');
+  burger.addEventListener('click', function(){
+    var open = navlinks.classList.toggle('open');
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+})();
+</script>
+
+</body>
+</html>

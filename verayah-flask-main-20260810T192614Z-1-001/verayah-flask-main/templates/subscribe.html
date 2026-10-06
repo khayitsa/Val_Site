@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Join the list | Verayah{% endblock %}
+{% block content %}
+<section class="page-section"><div class="wrap narrow form-narrow">
+  <span class="eyebrow">Stay connected</span>
+  <h1>Join the list</h1>
+  <p class="muted">No account needed. Choose what you'd like to receive; you can unsubscribe at any time.</p>
+  <form method="POST" class="contact-form" novalidate>
+    {{ form.hidden_tag() }}
+    <div class="field">{{ form.email.label }}{{ form.email(autocomplete="email") }}{% for e in form.email.errors %}<span class="field-error">{{ e }}</span>{% endfor %}</div>
+    <div class="field">{{ form.name.label }}{{ form.name(autocomplete="name") }}</div>
+    <label class="choice">{{ form.newsletter() }} {{ form.newsletter.label.text }}</label>
+    <label class="choice">{{ form.sneak_peek() }} {{ form.sneak_peek.label.text }}</label>
+    <p class="muted small">We use your email only for the lists you pick. See the <a href="{{ url_for('main.privacy') }}">Privacy Policy</a>.</p>
+    <button class="btn-fill" type="submit">Join</button>
+  </form>
+</div></section>
+{% endblock %}

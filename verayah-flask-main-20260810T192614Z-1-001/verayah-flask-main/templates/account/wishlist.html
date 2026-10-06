@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Wishlist | Verayah{% endblock %}
+{% block content %}
+<section class="page-section"><div class="wrap">
+  <span class="eyebrow">My account</span>
+  <h1>My wishlist</h1>
+  {% if products %}
+  <div class="products-grid">
+    {% for p in products %}
+    <article class="product-card">
+      <div class="product-media"><img src="{{ url_for('static', filename='images/products/' + p.image_filename) }}" alt="{{ p.name }}"></div>
+      <div class="product-details">
+        <span class="product-category">{{ p.category }}</span>
+        <h3>{{ p.name }}</h3>
+        <div class="price">{{ p.price_display() }}</div>
+        <div class="product-shades">{{ p.shades_display() }}</div>
+        <div class="card-actions">
+          <a href="{{ url_for('products') }}" class="btn-outline">View in shop</a>
+          <form method="POST" action="{{ url_for('account.wishlist_toggle', product_id=p.id) }}" class="wish-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="next" value="{{ url_for('account.wishlist') }}">
+            <button type="submit" class="wish-btn on" aria-label="Remove from wishlist">&#9829;</button>
+          </form>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="muted">Nothing saved yet. Tap the heart on any piece in the <a href="{{ url_for('products') }}">shop</a>.</p>
+  {% endif %}
+</div></section>
+{% endblock %}

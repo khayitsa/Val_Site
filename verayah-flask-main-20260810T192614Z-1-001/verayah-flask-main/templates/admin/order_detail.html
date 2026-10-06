@@ -1,0 +1,83 @@
+{% extends "admin/base.html" %}
+{% block title %}Order #{{ order.id }}{% endblock %}
+{% block content %}
+<div class="admin-header">
+  <h1>Order #{{ order.id }}</h1>
+  <a href="{{ url_for('admin.orders_list') }}" class="btn btn-outline">Back to orders</a>
+</div>
+
+<div style="display:grid; grid-template-columns: 1.3fr 1fr; gap:1.5rem;">
+  <div class="card">
+    <h3 style="margin-top:0;">Items</h3>
+    <table>
+      <tr><th>Product</th><th>Shade</th><th>Qty</th><th>Unit price</th><th>Subtotal</th></tr>
+      {% for item in order.items %}
+      <tr>
+        <td>{{ item.product_name }}</td>
+        <td>{{ item.shade or "—" }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>${{ "%.2f"|format(item.unit_price) }}</td>
+        <td>${{ "%.2f"|format(item.unit_price * item.quantity) }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <p style="text-align:right; margin-top:0.75rem;">
+      Subtotal: ${{ "%.2f"|format(order.subtotal()) }}<br>
+      Delivery ({{ order.delivery_method }}): ${{ "%.2f"|format(order.delivery_fee or 0) }}<br>
+      <strong>Total: ${{ "%.2f"|format(order.total()) }}</strong>
+    </p>
+    <p class="muted" style="font-size:13px;">
+      Placed via {{ order.source }} · payment by {{ (order.payment_method or 'not set')|replace('_',' ') }}
+      {% if order.customer_id %}· has a customer account{% else %}· guest{% endif %}
+    </p>
+
+    <h3>Customer &amp; shipping details</h3>
+    <form method="POST" action="{{ url_for('admin.order_customer_update', order_id=order.id) }}">
+      {{ customer_form.hidden_tag() }}
+      <div class="field">{{ customer_form.customer_name.label }}{{ customer_form.customer_name() }}</div>
+      <div class="field">{{ customer_form.customer_email.label }}{{ customer_form.customer_email() }}</div>
+      <div class="field">{{ customer_form.customer_phone.label }}{{ customer_form.customer_phone() }}</div>
+      <div class="field">{{ customer_form.shipping_address.label }}{{ customer_form.shipping_address() }}</div>
+      <div class="field">{{ customer_form.shipping_city.label }}{{ customer_form.shipping_city() }}</div>
+      <div class="field">{{ customer_form.shipping_country.label }}{{ customer_form.shipping_country() }}</div>
+      {{ customer_form.submit(class="btn btn-outline") }}
+    </form>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Status &amp; tracking</h3>
+    <p class="muted" style="font-size:13px;">Placed {{ order.created_at.strftime('%d %b %Y, %H:%M') }}</p>
+    <form method="POST" action="{{ url_for('admin.order_update', order_id=order.id) }}">
+      {{ form.hidden_tag() }}
+      <div class="field">
+        {{ form.status.label }}
+        {{ form.status() }}
+      </div>
+      <div class="field">
+        {{ form.payment_status.label }}
+        {{ form.payment_status() }}
+      </div>
+      <div class="field">
+        {{ form.delivery_fee.label }}
+        {{ form.delivery_fee() }}
+      </div>
+      <div class="field">
+        {{ form.tracking_number.label }}
+        {{ form.tracking_number() }}
+      </div>
+      <div class="field">
+        {{ form.notes.label }}
+        {{ form.notes() }}
+      </div>
+      {{ form.submit(class="btn btn-primary") }}
+    </form>
+    <hr style="margin:1.5rem 0; border:none; border-top:1px solid var(--border-light);">
+    <h3 style="margin-top:0;">Delete order</h3>
+    <p class="muted" style="font-size:13px;">Permanently erases this order and its customer details (for example on a data-deletion request). Open orders return their stock. This cannot be undone.</p>
+    <form method="POST" action="{{ url_for('admin.order_delete', order_id=order.id) }}" onsubmit="return confirm('Permanently delete order #{{ order.id }}? This cannot be undone.');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn btn-danger btn-sm">Delete order</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
