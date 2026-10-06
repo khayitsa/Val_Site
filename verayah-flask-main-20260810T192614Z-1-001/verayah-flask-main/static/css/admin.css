@@ -103,3 +103,30 @@ form .checkbox-row input { width: auto; }
   .admin-sidebar { width: 100%; }
   .stat-grid { grid-template-columns: repeat(2, 1fr); }
 }
+/* --- Mobile admin ---------------------------------------------------------- */
+html { -webkit-text-size-adjust: 100%; }
+img { max-width: 100%; }
+.order-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 1.5rem; align-items: start; }
+.card { overflow-x: auto; }
+.card > table { min-width: 520px; }
+.admin-header { flex-wrap: wrap; gap: .75rem; }
+.login-card { width: min(340px, 92vw); }
+
+@media (max-width: 800px) {
+  .admin-sidebar { padding: .75rem 1rem; }
+  .admin-sidebar .brand { margin-bottom: .5rem; }
+  .admin-sidebar nav { display: flex; gap: .25rem; overflow-x: auto; padding-bottom: .25rem; scrollbar-width: none; }
+  .admin-sidebar nav::-webkit-scrollbar { display: none; }
+  .admin-sidebar nav a { flex: 0 0 auto; white-space: nowrap; padding: .65rem .8rem; margin: 0; min-height: 44px; display: inline-flex; align-items: center; }
+  .admin-sidebar .logout { margin-top: .5rem; padding-top: .5rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+  .admin-sidebar .logout a { padding: .6rem 0; display: inline-block; }
+  .admin-main { padding: 1.25rem 1rem 3rem; min-width: 0; max-width: none; width: 100%; }
+  .order-grid { grid-template-columns: 1fr; }
+  .btn, .btn-sm { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+  form input[type=text], form input[type=email], form input[type=password], form input[type=number], form select, form textarea { font-size: 16px; min-height: 44px; }
+  .stat-card .num { font-size: 1.5rem; }
+}
+@media (max-width: 420px) {
+  .stat-grid { grid-template-columns: 1fr 1fr; gap: .6rem; }
+  .card { padding: 1rem; }
+}

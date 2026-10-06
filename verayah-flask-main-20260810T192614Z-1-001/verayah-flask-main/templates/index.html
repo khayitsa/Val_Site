@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Verayah — Jewellery for Your Soul</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=17">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=18">
 <style>
   /* Fixes based on annotations */
   /* Widen the borders of the website */
@@ -90,6 +90,7 @@
     box-sizing: border-box;
   }
 </style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}?v=1">
 </head>
 <body>
 
@@ -379,20 +380,6 @@
 <!-- FOOTER -->
 {% include 'components/footer.html' %}
 
-<script>
-(function(){
-  var header = document.getElementById('siteHeader');
-  window.addEventListener('scroll', function(){
-    header.classList.toggle('scrolled', window.scrollY > 20);
-  });
-  var burger = document.getElementById('burger');
-  var navlinks = document.getElementById('navlinks');
-  burger.addEventListener('click', function(){
-    var open = navlinks.classList.toggle('open');
-    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
-  });
-})();
-</script>
-
+<script src="{{ url_for('static', filename='js/site.js') }}?v=1" defer></script>
 </body>
 </html>

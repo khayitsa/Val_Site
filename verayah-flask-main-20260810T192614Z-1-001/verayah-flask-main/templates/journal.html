@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Journal — Verayah</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=17">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=18">
 <style>
   .wrap { max-width: 1400px; width: 90%; margin: 0 auto; }
   .journal-hero {
@@ -16,6 +16,7 @@
   .journal-hero h1 { max-width: 640px; margin-bottom: 1.25rem; }
   .journal-hero p { max-width: 480px; color: var(--muted); font-weight: 300; margin-bottom: 2rem; }
 </style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}?v=1">
 </head>
 <body>
 
@@ -34,20 +35,6 @@
 <!-- FOOTER -->
 {% include 'components/footer.html' %}
 
-<script>
-(function(){
-  var header = document.getElementById('siteHeader');
-  window.addEventListener('scroll', function(){
-    header.classList.toggle('scrolled', window.scrollY > 20);
-  });
-  var burger = document.getElementById('burger');
-  var navlinks = document.getElementById('navlinks');
-  burger.addEventListener('click', function(){
-    var open = navlinks.classList.toggle('open');
-    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
-  });
-})();
-</script>
-
+<script src="{{ url_for('static', filename='js/site.js') }}?v=1" defer></script>
 </body>
 </html>

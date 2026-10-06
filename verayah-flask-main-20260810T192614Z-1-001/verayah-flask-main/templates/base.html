@@ -4,8 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}Verayah | Fine Jewellery{% endblock %}</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=17">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=18">
 {% block head %}{% endblock %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}?v=1">
 </head>
 <body>
 {% include 'components/navbar.html' %}
@@ -13,18 +14,7 @@
 {% block content %}{% endblock %}
 
 {% include 'components/footer.html' %}
-<script>
-(function(){
-  var header = document.getElementById('siteHeader');
-  window.addEventListener('scroll', function(){ header.classList.toggle('scrolled', window.scrollY > 20); });
-  var burger = document.getElementById('burger');
-  var navlinks = document.getElementById('navlinks');
-  burger.addEventListener('click', function(){
-    var open = navlinks.classList.toggle('open');
-    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
-  });
-})();
-</script>
+<script src="{{ url_for('static', filename='js/site.js') }}?v=1" defer></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>
