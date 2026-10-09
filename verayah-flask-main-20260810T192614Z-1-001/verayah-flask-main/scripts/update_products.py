@@ -15,16 +15,16 @@ from models import db, Product
 
 # product name -> (new image filename or None to keep, new description or None to keep)
 UPDATES = {
-    'Peace in Mind Body Chain': (None, 'Deep and bold, the oceanic shade evokes the strength of the sea. Handcrafted in 18k gold coated chain, this body chain is a statement of elegance and resilience.'),
-    'Trinity Hand Chain': ('product_trinity_hand_chain_v3.jpg', None),
-    'Serenity Waist Chain': (None, 'An adornment of calm and grace, the Serenity Waist Chain is shaped with artisanal care in 18k gold coated chain, embodying balance and serenity across every tone.'),
-    'Trinity Body Chain': ('product_trinity_body_chain_v2.jpg', "Fluid and empowering, the Trinity Body Chain flows seamlessly with the body's movement. Handcrafted in 18k gold coated chain, each shade carries its own symbolism of romance, vitality, or resilience."),
-    'Wishes Body Chain': (None, 'A symbolic piece where each handcrafted link represents a wish. Made in 18k gold coated chain, the Wishes Body Chain is a luminous emblem of harmony and aspiration.'),
-    'Twin Souls Anklet': ('product_twin_souls_anklet.jpg', 'A delicate anklet symbolizing connection and balance. Handcrafted in 18k gold coated chain, each one is a crafted expression of individuality.'),
-    'Two Paths Waist Chain': ('product_two_paths_waist_chain_v2.jpg', None),
-    'High Tide Body Chain': ('product_high_tide_body_chain_v2.jpg', None),
-    'Starfish Hand Chain': (None, "Inspired by the starfish's resilience, this hand chain is delicately handcrafted in 18k gold coated chain, symbolizing renewal and strength."),
-    'Dream Catcher Earring Set': (None, None),
+    'Peace in Mind Body Chain': ('product_peace_in_mind_body_chain_val.jpg', 'Deep and bold, the oceanic shade evokes the strength of the sea. Handcrafted in 18k gold coated chain, this body chain is a statement of elegance and resilience.'),
+    'Trinity Hand Chain': ('product_trinity_hand_chain_val.jpg', None),
+    'Serenity Waist Chain': ('product_serenity_waist_chain_val.jpg', 'An adornment of calm and grace, the Serenity Waist Chain is shaped with artisanal care in 18k gold coated chain, embodying balance and serenity across every tone.'),
+    'Trinity Body Chain': ('product_trinity_body_chain_val.jpg', "Fluid and empowering, the Trinity Body Chain flows seamlessly with the body's movement. Handcrafted in 18k gold coated chain, each shade carries its own symbolism of romance, vitality, or resilience."),
+    'Wishes Body Chain': ('product_wishes_body_chain_val.jpg', 'A symbolic piece where each handcrafted link represents a wish. Made in 18k gold coated chain, the Wishes Body Chain is a luminous emblem of harmony and aspiration.'),
+    'Twin Souls Anklet': ('product_twin_souls_anklet_val.jpg', 'A delicate anklet symbolizing connection and balance. Handcrafted in 18k gold coated chain, each one is a crafted expression of individuality.'),
+    'Two Paths Waist Chain': ('product_two_paths_waist_chain_val.jpg', None),
+    'High Tide Body Chain': ('product_high_tide_body_chain_val.jpg', None),
+    'Starfish Hand Chain': ('product_starfish_hand_chain_val.jpg', "Inspired by the starfish's resilience, this hand chain is delicately handcrafted in 18k gold coated chain, symbolizing renewal and strength."),
+    'Dream Catcher Earring Set': ('product_dream_catcher_earrings_val.jpg', None),
 }
 
 with app.app_context():
