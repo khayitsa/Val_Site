@@ -296,8 +296,17 @@
     navLinks.forEach(function(l){
       if (l.getAttribute('data-filter') === wanted){
         applyFilter(wanted, l.textContent.trim());
-        var main = document.querySelector('.products-main');
-        if (main && window.matchMedia('(max-width: 900px)').matches) main.scrollIntoView({behavior:'smooth', block:'start'});
+        /* Jump straight to the collection so the visitor lands on the filtered products */
+        var target = document.getElementById('collection');
+        if (target){
+          var go = function(){
+            var navH = (document.querySelector('header, .nav, nav') || {offsetHeight: 0}).offsetHeight || 0;
+            var y = target.getBoundingClientRect().top + window.pageYOffset - navH - 8;
+            window.scrollTo({top: Math.max(0, y), behavior: 'smooth'});
+          };
+          if (document.readyState === 'complete') setTimeout(go, 100);
+          else window.addEventListener('load', function(){ setTimeout(go, 100); });
+        }
       }
     });
   }
