@@ -140,6 +140,9 @@
         <a href="#" data-filter="Waist Chain">Waist Chains</a>
         <a href="#" data-filter="Anklet">Anklets</a>
         <a href="#" data-filter="Earring">Earrings</a>
+        <a href="#" data-filter="Necklace">Necklaces</a>
+        <a href="#" data-filter="Swimsuit Charm">Swimsuit Charms</a>
+        <a href="#" data-filter="Bag Charm">Bag Charms</a>
       </nav>
     </aside>
 
@@ -151,6 +154,10 @@
         <p style="color:var(--muted);font-weight:300;font-size:15px;">Designed to become heirlooms.</p>
       </div>
 
+      <div id="categoryEmpty" style="display:none;text-align:center;padding:3rem 1rem;color:var(--muted);font-weight:300;">
+        <p style="font-size:1.1rem;">Our <strong></strong> are on their way.</p>
+        <p style="font-size:14px;">Follow along for the launch, or <a href="#" onclick="document.querySelector('.product-nav-vertical a[data-filter=all]').click();return false;" style="text-decoration:underline;">browse everything</a> in the meantime.</p>
+      </div>
       <div class="products-grid">
 
         {% for p in products %}
@@ -259,19 +266,41 @@
 <script>
 (function(){
   /* Category filter for the products grid */
-  document.querySelectorAll('.product-nav-vertical a').forEach(function(a){
+  var navLinks = document.querySelectorAll('.product-nav-vertical a');
+  var emptyMsg = document.getElementById('categoryEmpty');
+  function applyFilter(filter, label){
+    navLinks.forEach(function(l){ l.classList.toggle('active', l.getAttribute('data-filter') === filter); });
+    var shown = 0;
+    document.querySelectorAll('.product-card').forEach(function(card){
+      var show = (filter === 'all') || (card.getAttribute('data-category') === filter);
+      card.style.display = show ? '' : 'none';
+      if (show) shown++;
+    });
+    if (emptyMsg){
+      emptyMsg.style.display = shown ? 'none' : '';
+      var n = emptyMsg.querySelector('strong');
+      if (n) n.textContent = label || '';
+    }
+  }
+  navLinks.forEach(function(a){
     a.addEventListener('click', function(e){
       e.preventDefault();
-      document.querySelectorAll('.product-nav-vertical a').forEach(function(l){ l.classList.remove('active'); });
-      this.classList.add('active');
-
-      var filter = this.getAttribute('data-filter');
-      document.querySelectorAll('.product-card').forEach(function(card){
-        var show = (filter === 'all') || (card.getAttribute('data-category') === filter);
-        card.style.display = show ? '' : 'none';
-      });
+      var f = this.getAttribute('data-filter');
+      applyFilter(f, this.textContent.trim());
+      if (history.replaceState) history.replaceState(null, '', f === 'all' ? '/products' : '/products?category=' + encodeURIComponent(f).replace(/%20/g, '+'));
     });
   });
+  /* Arrive from a homepage tile: /products?category=Anklet */
+  var wanted = new URLSearchParams(window.location.search).get('category');
+  if (wanted){
+    navLinks.forEach(function(l){
+      if (l.getAttribute('data-filter') === wanted){
+        applyFilter(wanted, l.textContent.trim());
+        var main = document.querySelector('.products-main');
+        if (main && window.matchMedia('(max-width: 900px)').matches) main.scrollIntoView({behavior:'smooth', block:'start'});
+      }
+    });
+  }
 
   /* Quick View modal */
   var backdrop = document.getElementById('quickViewBackdrop');

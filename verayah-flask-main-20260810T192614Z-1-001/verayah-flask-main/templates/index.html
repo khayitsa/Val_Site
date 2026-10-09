@@ -161,54 +161,41 @@
       <h2>Explore the Collections</h2>
     </div>
     <!-- Merged all items into one standard grid so they have uniform sizing -->
+    <style>@media (min-width: 961px){ .collections-grid{ grid-template-columns: repeat(3, 1fr); } }</style>
     <div class="collections-grid">
-      <a href="/products" class="collection-card">
-        <img src="{{ url_for('static', filename='images/products/img_03.jpg') }}" alt="Body Chains">
+      <a href="/products?category=Body+Chain" class="collection-card">
+        <img src="{{ url_for('static', filename='images/category-body-chains.jpg') }}" alt="Body Chains">
         <div class="collection-card-overlay">
           <h3>Body Chains</h3>
           <span class="shop-now">Shop Now <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
         </div>
       </a>
-      <a href="/products" class="collection-card">
-        <img src="{{ url_for('static', filename='images/products/img_22.jpg') }}" alt="Hand Chains">
+      <a href="/products?category=Hand+Chain" class="collection-card">
+        <img src="{{ url_for('static', filename='images/category-hand-chains.jpg') }}" alt="Hand Chains">
         <div class="collection-card-overlay">
           <h3>Hand Chains</h3>
           <span class="shop-now">Shop Now <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
         </div>
       </a>
-      <a href="/products" class="collection-card">
-        <img src="{{ url_for('static', filename='images/products/img_35.jpg') }}" alt="Waist Chains">
+      <a href="/products?category=Waist+Chain" class="collection-card">
+        <img src="{{ url_for('static', filename='images/category-waist-chains.jpg') }}" alt="Waist Chains">
         <div class="collection-card-overlay">
           <h3>Waist Chains</h3>
           <span class="shop-now">Shop Now <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
         </div>
       </a>
-      <a href="/products" class="collection-card">
-        <img src="{{ url_for('static', filename='images/products/img_48.jpg') }}" alt="Necklaces">
-        <div class="collection-card-overlay">
-          <h3>Necklaces</h3>
-          <span class="shop-now">Shop Now <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-        </div>
-      </a>
       <!-- Previously --sm cards, now standard size -->
-      <a href="/products" class="collection-card">
-        <img src="{{ url_for('static', filename='images/products/img_58.jpg') }}" alt="Anklets">
+      <a href="/products?category=Anklet" class="collection-card">
+        <img src="{{ url_for('static', filename='images/category-anklets.jpg') }}" alt="Anklets">
         <div class="collection-card-overlay">
           <h3>Anklets</h3>
           <span class="shop-now">Shop Now <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
         </div>
       </a>
-      <a href="/products" class="collection-card">
-        <img src="{{ url_for('static', filename='images/products/img_67.jpg') }}" alt="Swimsuit Charms">
+      <a href="/products?category=Earring" class="collection-card">
+        <img src="{{ url_for('static', filename='images/category-earrings.jpg') }}" alt="Earrings">
         <div class="collection-card-overlay">
-          <h3>Swimsuit Charms</h3>
-          <span class="shop-now">Shop Now <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-        </div>
-      </a>
-      <a href="/products" class="collection-card">
-        <img src="{{ url_for('static', filename='images/products/img_75.jpg') }}" alt="Bag Charms">
-        <div class="collection-card-overlay">
-          <h3>Bag Charms</h3>
+          <h3>Earrings</h3>
           <span class="shop-now">Shop Now <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
         </div>
       </a>
