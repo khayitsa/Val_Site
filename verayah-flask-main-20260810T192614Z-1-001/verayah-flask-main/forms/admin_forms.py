@@ -11,7 +11,10 @@ from wtforms import (
 )
 from wtforms.validators import DataRequired, Length, NumberRange, Optional, Email
 
-CATEGORIES = ["Body Chain", "Hand Chain", "Waist Chain", "Anklet", "Earring"]
+# Keep in sync with the filter links in templates/products.html (data-filter values).
+CATEGORIES = ["Body Chain", "Hand Chain", "Waist Chain", "Anklet", "Earring",
+              "Necklace", "Swimsuit Charm", "Bag Charm"]
+DECIMAL_KW = {"type": "text", "inputmode": "decimal", "autocomplete": "off"}
 ORDER_STATUSES = ["pending", "processing", "shipped", "delivered", "cancelled"]
 
 
@@ -24,11 +27,12 @@ class LoginForm(FlaskForm):
 class ProductForm(FlaskForm):
     name = StringField("Product name", validators=[DataRequired(), Length(max=150)])
     category = SelectField("Category", choices=[(c, c) for c in CATEGORIES], validators=[DataRequired()])
-    price = DecimalField("Price (USD)", places=2, validators=[DataRequired(), NumberRange(min=0)])
+    price = DecimalField("Price (USD)", places=2, validators=[DataRequired(), NumberRange(min=0)],
+                         render_kw=DECIMAL_KW)
     description = TextAreaField("Description", validators=[DataRequired()])
     image = FileField("Product photo", validators=[
         Optional(), FileAllowed(["jpg", "jpeg", "png", "webp"], "Images only (jpg, png, webp).")
-    ])
+    ], render_kw={"accept": ".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"})
     is_active = BooleanField("Visible on the site", default=True)
     sort_order = IntegerField("Display order", validators=[Optional(), NumberRange(min=0)], default=0)
     submit = SubmitField("Save product")
@@ -39,7 +43,8 @@ class OrderStatusForm(FlaskForm):
                           validators=[DataRequired()])
     payment_status = SelectField("Payment", choices=[("unpaid", "Awaiting payment"), ("paid", "Paid")],
                                  validators=[DataRequired()])
-    delivery_fee = DecimalField("Delivery fee (USD)", places=2, validators=[Optional(), NumberRange(min=0)])
+    delivery_fee = DecimalField("Delivery fee (USD)", places=2, validators=[Optional(), NumberRange(min=0)],
+                                render_kw=DECIMAL_KW)
     tracking_number = StringField("Tracking number", validators=[Optional(), Length(max=100)])
     notes = TextAreaField("Internal notes", validators=[Optional()])
     submit = SubmitField("Update order")

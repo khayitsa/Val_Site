@@ -510,6 +510,7 @@ def message_handled(msg_id):
     msg = ContactMessage.query.get_or_404(msg_id)
     msg.handled = not msg.handled
     db.session.commit()
+    flash("Message marked as handled." if msg.handled else "Message marked as new.", "success")
     return redirect(url_for("admin.messages_list"))
 
 

@@ -23,7 +23,11 @@
     </table>
     <p style="text-align:right; margin-top:0.75rem;">
       Subtotal: ${{ "%.2f"|format(order.subtotal()) }}<br>
+      {% if order.delivery_method == 'courier' and not order.delivery_fee %}
+      Delivery (courier): <em>fee not set yet - add it under Status &amp; tracking</em><br>
+      {% else %}
       Delivery ({{ order.delivery_method }}): ${{ "%.2f"|format(order.delivery_fee or 0) }}<br>
+      {% endif %}
       <strong>Total: ${{ "%.2f"|format(order.total()) }}</strong>
     </p>
     <p class="muted" style="font-size:13px;">

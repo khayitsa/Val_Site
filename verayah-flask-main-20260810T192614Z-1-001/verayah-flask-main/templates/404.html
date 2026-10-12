@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Page not found | Verayah{% endblock %}
+{% block content %}
+<section class="page-section"><div class="wrap" style="text-align:center;padding:5rem 0;">
+  <span class="eyebrow">404</span>
+  <h1>We couldn't find that page</h1>
+  <p class="muted">The link may be old, or the piece may no longer be available.</p>
+  <p style="margin-top:1.5rem;">
+    <a href="{{ url_for('products') }}" class="btn-fill">Shop the collection</a>
+    &nbsp; <a href="{{ url_for('home') }}" style="text-decoration:underline;">Back to home</a>
+  </p>
+</div></section>
+{% endblock %}

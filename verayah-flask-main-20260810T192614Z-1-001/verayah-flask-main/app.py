@@ -18,6 +18,10 @@ app = Flask(__name__)
 # means it can never be used to forge a session, but it also logs everyone
 # out on restart - set a real SECRET_KEY env var for real deployments.
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or os.urandom(32).hex()
+if not os.environ.get("SECRET_KEY"):
+    # A random per-process key logs everyone out on restart and breaks CSRF
+    # tokens when several workers run. Set SECRET_KEY in the host's environment.
+    print("WARNING: SECRET_KEY is not set - using a temporary random key.", flush=True)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
@@ -93,6 +97,11 @@ def inject_site():
         "wishlist_ids": wishlist_ids,
         "delivery_fee": app.config["DELIVERY_FEE"],
     }
+
+
+@app.errorhandler(404)
+def not_found(_err):
+    return render_template("404.html"), 404
 
 
 @app.after_request

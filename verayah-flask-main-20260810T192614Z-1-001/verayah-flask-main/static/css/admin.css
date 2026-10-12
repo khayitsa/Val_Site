@@ -106,9 +106,10 @@ form .checkbox-row input { width: auto; }
 /* --- Mobile admin ---------------------------------------------------------- */
 html { -webkit-text-size-adjust: 100%; }
 img { max-width: 100%; }
-.order-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 1.5rem; align-items: start; }
+.order-grid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr); gap: 1.5rem; align-items: start; }
 .card { overflow-x: auto; }
-.card > table { min-width: 520px; }
+.card > table { min-width: 460px; }
+button[disabled] { opacity: .6; cursor: wait; }
 .admin-header { flex-wrap: wrap; gap: .75rem; }
 .login-card { width: min(340px, 92vw); }
 

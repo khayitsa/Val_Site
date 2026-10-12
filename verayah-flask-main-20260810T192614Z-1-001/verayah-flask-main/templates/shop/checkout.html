@@ -7,7 +7,7 @@
     <span class="eyebrow">Checkout</span>
     <h1>Your details</h1>
     {% if not customer %}
-    <p class="muted">You don't need an account. <a href="{{ url_for('account.login', next=url_for('shop.checkout')) }}">Sign in</a> if you have one to fill this in faster.</p>
+    <p class="muted" style="margin-bottom:1.25rem;">You don't need an account. <a href="{{ url_for('account.login', next=url_for('shop.checkout')) }}">Sign in</a> if you have one to fill this in faster.</p>
     {% endif %}
     <form method="POST" class="contact-form" novalidate>
       {{ form.hidden_tag() }}
@@ -53,6 +53,7 @@
     <div class="sum-row"><span>{{ l.product.name }} ({{ l.variant.shade }}) × {{ l.qty }}</span><span>${{ "%.2f"|format(l.line_total) }}</span></div>
     {% endfor %}
     <div class="sum-row sum-total"><span>Subtotal</span><span>${{ "%.2f"|format(subtotal) }}</span></div>
+    <div class="sum-row"><span>Delivery</span><span>{% if delivery_fee %}${{ "%.2f"|format(delivery_fee|float) }} if delivered{% else %}confirmed with payment details{% endif %}</span></div>
     <a href="{{ url_for('shop.cart') }}" class="muted small">Edit bag</a>
   </aside>
 </div></section>

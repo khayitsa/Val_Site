@@ -61,7 +61,7 @@
       </div>
       {% endif %}
       {{ form.image() }}
-      <div class="hint">JPG, PNG or WEBP. Leave blank to keep the current photo.</div>
+      <div class="hint">JPG, PNG or WEBP, up to 5 MB.{% if mode == "edit" and product.image_filename %} Leave blank to keep the current photo.{% endif %}</div>
       {% for e in form.image.errors %}<div class="errors">{{ e }}</div>{% endfor %}
     </div>
 
