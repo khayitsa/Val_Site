@@ -1,0 +1,60 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ "Edit" if mode == "edit" else "New" }} Journal post{% endblock %}
+{% block content %}
+<div class="admin-header">
+  <h1>{{ "Edit post" if mode == "edit" else "Write a post" }}</h1>
+  <a href="{{ url_for('admin.journal_list') }}" class="btn btn-outline">Back to journal</a>
+</div>
+
+<div class="card" style="max-width:760px;">
+  <form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+    <div class="field">
+      {{ form.title.label }}
+      {{ form.title() }}
+      {% for e in form.title.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="field">
+      {{ form.excerpt.label }}
+      {{ form.excerpt(rows=2, maxlength=300) }}
+      {% for e in form.excerpt.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="field">
+      {{ form.body.label }}
+      {{ form.body(rows=20) }}
+      <div class="hint">
+        Leave a blank line between paragraphs. Formatting: <code>## Heading</code>, <code>### Smaller heading</code>,
+        <code>**bold**</code>, <code>*italic*</code>, <code>- list item</code> (one per line),
+        <code>[link text](https://example.com)</code>.
+      </div>
+      {% for e in form.body.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="field">
+      {{ form.image.label }}
+      {% if mode == "edit" and post.cover_image %}
+      <div style="margin-bottom:0.5rem;">
+        <img class="thumb" style="width:120px;height:80px;" src="{{ url_for('static', filename='images/journal/' + post.cover_image) }}" alt="">
+      </div>
+      {% endif %}
+      {{ form.image() }}
+      <div class="hint">JPG, PNG or WEBP, up to 5 MB.{% if mode == "edit" and post.cover_image %} Leave blank to keep the current photo.{% endif %}</div>
+      {% for e in form.image.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+      {% if mode == "edit" and post.cover_image %}
+      <div class="field checkbox-row" style="margin-top:.5rem;">{{ form.remove_image() }} {{ form.remove_image.label }}</div>
+      {% endif %}
+    </div>
+
+    <div class="field checkbox-row">
+      {{ form.is_published() }}
+      {{ form.is_published.label }}
+    </div>
+    <div class="hint" style="margin-bottom:1rem;">Leave this unticked to keep it as a draft. You can preview drafts from the Journal list.</div>
+
+    {{ form.submit(class="btn btn-primary") }}
+  </form>
+</div>
+{% endblock %}

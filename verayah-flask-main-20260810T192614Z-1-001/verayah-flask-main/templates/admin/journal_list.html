@@ -1,0 +1,39 @@
+{% extends "admin/base.html" %}
+{% block title %}Journal{% endblock %}
+{% block content %}
+<div class="admin-header">
+  <h1>Journal</h1>
+  <a href="{{ url_for('admin.journal_new') }}" class="btn btn-primary">+ Write a post</a>
+</div>
+
+<div class="card">
+  {% if posts %}
+  <table>
+    <tr><th></th><th>Title</th><th>Status</th><th>Date</th><th></th></tr>
+    {% for p in posts %}
+    <tr>
+      <td>
+        {% if p.cover_image %}
+        <img class="thumb" src="{{ url_for('static', filename='images/journal/' + p.cover_image) }}" alt="{{ p.title }}">
+        {% endif %}
+      </td>
+      <td>{{ p.title }}<br><span class="muted" style="font-size:12px;">/journal/{{ p.slug }}</span></td>
+      <td>{{ "Published" if p.is_published else "Draft" }}</td>
+      <td>{% if p.published_at %}{{ p.published_at.strftime('%d %b %Y') }}{% else %}<span class="muted">{{ p.created_at.strftime('%d %b %Y') }}</span>{% endif %}</td>
+      <td>
+        <a href="{{ url_for('journal_post', slug=p.slug) }}" target="_blank" class="btn btn-outline btn-sm">{{ "View" if p.is_published else "Preview" }}</a>
+        <a href="{{ url_for('admin.journal_edit', post_id=p.id) }}" class="btn btn-outline btn-sm">Edit</a>
+        <form method="POST" action="{{ url_for('admin.journal_delete', post_id=p.id) }}" style="display:inline;"
+              onsubmit='return confirm({{ ("Delete " ~ p.title ~ "? This cannot be undone.")|tojson }});'>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="muted">No posts yet. <a href="{{ url_for('admin.journal_new') }}">Write your first one</a>.</p>
+  {% endif %}
+</div>
+{% endblock %}

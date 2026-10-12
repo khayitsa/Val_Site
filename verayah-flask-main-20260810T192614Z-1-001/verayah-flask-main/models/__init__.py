@@ -222,3 +222,19 @@ class ContactMessage(db.Model):
     message = db.Column(db.Text, nullable=False)
     handled = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class JournalPost(db.Model):
+    """A Journal (blog) post written in the admin portal."""
+    __tablename__ = "journal_posts"
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    slug = db.Column(db.String(220), unique=True, nullable=False, index=True)
+    excerpt = db.Column(db.String(300), nullable=True)
+    body = db.Column(db.Text, nullable=False)
+    cover_image = db.Column(db.String(255), nullable=True)   # file under static/images/journal/
+    is_published = db.Column(db.Boolean, nullable=False, default=False)
+    published_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow)

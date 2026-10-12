@@ -1,7 +1,7 @@
 import os
 import click
-from flask import Flask, render_template, session, request
-from flask_login import LoginManager
+from flask import Flask, render_template, session, request, abort
+from flask_login import LoginManager, current_user
 from flask_wtf import CSRFProtect
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -11,9 +11,10 @@ try:  # load .env so SECRET_KEY etc. work without setting host variables
 except ImportError:
     pass
 
-from models import db, AdminUser, Product, WishlistItem
+from models import db, AdminUser, Product, WishlistItem, JournalPost
 from models.schema import upgrade_schema
 from services import cart as bag
+from services.journal import render_body
 from services.customer_auth import current_customer
 
 app = Flask(__name__)
@@ -141,9 +142,23 @@ def products():
     products = Product.query.filter_by(is_active=True).order_by(Product.sort_order, Product.name).all()
     return render_template('products.html', products=products)
 
+app.jinja_env.filters["journal_body"] = render_body
+
+
 @app.route('/journal')
 def journal():
-    return render_template('journal.html')
+    posts = (JournalPost.query.filter_by(is_published=True)
+             .order_by(JournalPost.published_at.desc()).all())
+    return render_template('journal.html', posts=posts)
+
+
+@app.route('/journal/<slug>')
+def journal_post(slug):
+    post = JournalPost.query.filter_by(slug=slug).first_or_404()
+    # Drafts are only visible to a logged-in admin (as a preview).
+    if not post.is_published and not current_user.is_authenticated:
+        abort(404)
+    return render_template('journal_post.html', post=post)
 
 
 # --- CLI: create/reset the admin account --------------------------------

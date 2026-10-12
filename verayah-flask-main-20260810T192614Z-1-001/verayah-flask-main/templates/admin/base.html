@@ -15,6 +15,7 @@
       <a href="{{ url_for('admin.dashboard') }}" class="{{ 'active' if request.endpoint == 'admin.dashboard' }}">Dashboard</a>
       <a href="{{ url_for('admin.products_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('admin.product') }}">Products</a>
       <a href="{{ url_for('admin.orders_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('admin.order') }}">Orders &amp; Shipping</a>
+      <a href="{{ url_for('admin.journal_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('admin.journal') }}">Journal</a>
       <a href="{{ url_for('admin.customers_list') }}" class="{{ 'active' if request.endpoint == 'admin.customers_list' }}">Customer accounts</a>
       <a href="{{ url_for('admin.subscribers_list') }}" class="{{ 'active' if request.endpoint == 'admin.subscribers_list' }}">Newsletter</a>
       <a href="{{ url_for('admin.messages_list') }}" class="{{ 'active' if request.endpoint == 'admin.messages_list' }}">Messages</a>

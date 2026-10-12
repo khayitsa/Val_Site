@@ -52,6 +52,36 @@ class ProductForm(FlaskForm):
     submit = SubmitField("Save product")
 
 
+def _check_image_signature(field):
+    """Check the real file signature (jpg/png/webp), not just the extension."""
+    f = field.data
+    if not f or not getattr(f, "stream", None):
+        return
+    head = f.stream.read(12)
+    f.stream.seek(0)
+    ok = (head.startswith(b"\xff\xd8\xff")
+          or head.startswith(b"\x89PNG\r\n\x1a\n")
+          or (head[:4] == b"RIFF" and head[8:12] == b"WEBP"))
+    if not ok:
+        from wtforms.validators import ValidationError
+        raise ValidationError("That file is not a real JPG, PNG or WEBP image.")
+
+
+class JournalForm(FlaskForm):
+    title = StringField("Title", validators=[DataRequired(), Length(max=200)])
+    excerpt = TextAreaField("Short summary (shown on the Journal page)", validators=[Optional(), Length(max=300)])
+    body = TextAreaField("Story", validators=[DataRequired(), Length(max=50000)])
+    image = FileField("Cover photo", validators=[
+        Optional(), FileAllowed(["jpg", "jpeg", "png", "webp"], "Images only (jpg, png, webp).")
+    ], render_kw={"accept": ".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"})
+    remove_image = BooleanField("Remove the current cover photo")
+    is_published = BooleanField("Published (visible on the site)", default=False)
+    submit = SubmitField("Save post")
+
+    def validate_image(self, field):
+        _check_image_signature(field)
+
+
 class OrderStatusForm(FlaskForm):
     status = SelectField("Status", choices=[(s, s.capitalize()) for s in ORDER_STATUSES],
                           validators=[DataRequired()])

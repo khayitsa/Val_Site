@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ post.title }} | Verayah Journal{% endblock %}
+{% block head %}
+{% if post.excerpt %}<meta name="description" content="{{ post.excerpt }}">{% endif %}
+{% if not post.is_published %}<meta name="robots" content="noindex">{% endif %}
+<style>
+  .post { max-width: 720px; margin: 0 auto; padding: 7rem 1.5rem 4rem; }
+  .post .eyebrow { display: block; margin-bottom: 1rem; }
+  .post h1 { margin-bottom: .75rem; }
+  .post .post-date { color: var(--muted); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+  .post .post-cover { margin: 2rem 0; }
+  .post .post-cover img { width: 100%; height: auto; display: block; }
+  .post .post-body { font-weight: 300; line-height: 1.85; font-size: 1.05rem; }
+  .post .post-body p { margin: 0 0 1.4rem; }
+  .post .post-body h2 { font-family: var(--display); font-weight: 400; font-size: 1.9rem; margin: 2.4rem 0 1rem; }
+  .post .post-body h3 { font-family: var(--display); font-weight: 400; font-size: 1.4rem; margin: 2rem 0 .8rem; }
+  .post .post-body ul { margin: 0 0 1.4rem 1.2rem; }
+  .post .post-body a { text-decoration: underline; }
+  .post .draft-banner { background: var(--cream); border: 1px solid var(--border); padding: .75rem 1rem; margin-bottom: 1.5rem; font-size: 14px; }
+  .post .post-back { margin-top: 3rem; display: inline-block; text-decoration: underline; }
+</style>
+{% endblock %}
+{% block content %}
+<article class="post">
+  {% if not post.is_published %}<div class="draft-banner">Draft preview - only you can see this. Tick "Published" in the admin to make it live.</div>{% endif %}
+  <span class="eyebrow">The Journal</span>
+  <h1>{{ post.title }}</h1>
+  {% if post.published_at %}<span class="post-date">{{ post.published_at.strftime('%d %B %Y') }}</span>{% endif %}
+  {% if post.cover_image %}
+  <div class="post-cover"><img src="{{ url_for('static', filename='images/journal/' + post.cover_image) }}" alt="{{ post.title }}"></div>
+  {% endif %}
+  <div class="post-body">{{ post.body|journal_body }}</div>
+  <a class="post-back" href="{{ url_for('journal') }}">&larr; Back to the Journal</a>
+</article>
+{% endblock %}

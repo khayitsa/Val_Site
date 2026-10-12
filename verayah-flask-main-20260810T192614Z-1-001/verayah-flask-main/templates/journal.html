@@ -1,40 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Journal — Verayah</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=20">
+{% extends "base.html" %}
+{% block title %}Journal | Verayah{% endblock %}
+{% block head %}
+<meta name="description" content="Stories from the shoreline: behind-the-scenes notes, care tips and the ocean moments that inspire Verayah.">
 <style>
-  .wrap { max-width: 1400px; width: 90%; margin: 0 auto; }
-  .journal-hero {
-    min-height: 60vh; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; text-align: center;
-    padding: 8rem 1.5rem 6rem;
-  }
+  .journal-hero { text-align: center; padding: 8rem 1.5rem 3rem; }
   .journal-hero .eyebrow { display: block; margin-bottom: 1rem; }
-  .journal-hero h1 { max-width: 640px; margin-bottom: 1.25rem; }
-  .journal-hero p { max-width: 480px; color: var(--muted); font-weight: 300; margin-bottom: 2rem; }
+  .journal-hero h1 { max-width: 640px; margin: 0 auto 1.25rem; }
+  .journal-hero p { max-width: 520px; margin: 0 auto 2rem; color: var(--muted); font-weight: 300; }
+  .journal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; padding: 1rem 0 5rem; }
+  .journal-card { text-decoration: none; color: inherit; display: block; }
+  .journal-card .jc-media { aspect-ratio: 4 / 3; background: var(--cream); overflow: hidden; }
+  .journal-card .jc-media img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--slow) var(--ease); display: block; }
+  .journal-card:hover .jc-media img { transform: scale(1.04); }
+  .journal-card .jc-date { display: block; margin: 1rem 0 .3rem; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--teal); }
+  .journal-card h3 { font-family: var(--display); font-weight: 400; font-size: 1.5rem; margin: 0 0 .5rem; }
+  .journal-card p { color: var(--muted); font-weight: 300; font-size: 14px; line-height: 1.6; margin: 0; }
+  @media (max-width: 900px) { .journal-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .journal-grid { grid-template-columns: 1fr; gap: 2rem; } .journal-hero { padding-top: 6rem; } }
 </style>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}?v=2">
-</head>
-<body>
-
-{% include 'components/navbar.html' %}
-
+{% endblock %}
+{% block content %}
 <section class="journal-hero">
   <span class="eyebrow">The Journal</span>
+  {% if posts %}
+  <h1>Stories from the shoreline</h1>
+  <p>Behind-the-scenes notes on how each piece is made, care tips, and the ocean moments that inspire our collections.</p>
+  {% else %}
   <h1>Stories from the shoreline, coming soon.</h1>
-  <p>
-    We're putting together behind-the-scenes notes on how each piece is made,
-    care tips, and the ocean moments that inspire our collections. Check back soon.
-  </p>
-  <a href="/products" class="btn-fill">Shop the Collection</a>
+  <p>We're putting together behind-the-scenes notes on how each piece is made, care tips, and the ocean moments that inspire our collections. Check back soon.</p>
+  <a href="{{ url_for('products') }}" class="btn-fill">Shop the Collection</a>
+  {% endif %}
 </section>
 
-<!-- FOOTER -->
-{% include 'components/footer.html' %}
-
-<script src="{{ url_for('static', filename='js/site.js') }}?v=1" defer></script>
-</body>
-</html>
+{% if posts %}
+<section><div class="wrap">
+  <div class="journal-grid">
+    {% for p in posts %}
+    <a class="journal-card" href="{{ url_for('journal_post', slug=p.slug) }}">
+      <div class="jc-media">
+        {% if p.cover_image %}<img src="{{ url_for('static', filename='images/journal/' + p.cover_image) }}" alt="{{ p.title }}" loading="lazy">{% endif %}
+      </div>
+      <span class="jc-date">{{ p.published_at.strftime('%d %B %Y') if p.published_at else '' }}</span>
+      <h3>{{ p.title }}</h3>
+      {% if p.excerpt %}<p>{{ p.excerpt }}</p>{% endif %}
+    </a>
+    {% endfor %}
+  </div>
+</div></section>
+{% endif %}
+{% endblock %}

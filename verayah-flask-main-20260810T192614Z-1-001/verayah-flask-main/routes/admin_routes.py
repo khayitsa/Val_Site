@@ -25,10 +25,11 @@ from werkzeug.utils import secure_filename
 
 from models import (
     db, AdminUser, Product, ProductVariant, Order, OrderItem,
-    Customer, Subscriber, ContactMessage
+    Customer, Subscriber, ContactMessage, JournalPost
 )
+from services.journal import unique_slug
 from services.security import admin_login_throttle, client_ip
-from forms.admin_forms import LoginForm, ProductForm, OrderStatusForm, OrderForm, OrderCustomerForm
+from forms.admin_forms import LoginForm, ProductForm, OrderStatusForm, OrderForm, OrderCustomerForm, JournalForm
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin", template_folder="../templates/admin")
 
@@ -42,11 +43,11 @@ def _allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def _save_product_image(file_storage):
-    """Save an uploaded product photo under a random filename and return it."""
+def _save_product_image(file_storage, subdir="products"):
+    """Save an uploaded photo under a random filename and return it."""
     ext = secure_filename(file_storage.filename).rsplit(".", 1)[1].lower()
     random_name = f"{uuid.uuid4().hex}.{ext}"
-    dest_dir = os.path.join(current_app.root_path, "static", "images", "products")
+    dest_dir = os.path.join(current_app.root_path, "static", "images", subdir)
     os.makedirs(dest_dir, exist_ok=True)
     file_storage.save(os.path.join(dest_dir, random_name))
     return random_name
@@ -228,6 +229,84 @@ def product_delete(product_id):
     db.session.commit()
     flash(f'"{name}" was deleted.', "success")
     return redirect(url_for("admin.products_list"))
+
+
+# --- Journal ------------------------------------------------------------------
+
+def _delete_journal_image(filename):
+    if filename:
+        path = os.path.join(current_app.root_path, "static", "images", "journal", os.path.basename(filename))
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+
+
+@admin_bp.route("/journal")
+@login_required
+def journal_list():
+    posts = JournalPost.query.order_by(JournalPost.created_at.desc()).all()
+    return render_template("admin/journal_list.html", posts=posts)
+
+
+@admin_bp.route("/journal/new", methods=["GET", "POST"])
+@login_required
+def journal_new():
+    form = JournalForm()
+    if form.validate_on_submit():
+        post = JournalPost(
+            title=form.title.data.strip(),
+            slug=unique_slug(form.title.data),
+            excerpt=(form.excerpt.data or "").strip() or None,
+            body=form.body.data.strip(),
+            is_published=form.is_published.data,
+        )
+        if post.is_published:
+            post.published_at = datetime.utcnow()
+        if form.image.data:
+            post.cover_image = _save_product_image(form.image.data, "journal")
+        db.session.add(post)
+        db.session.commit()
+        flash(f'"{post.title}" was saved' + (" and published." if post.is_published else " as a draft."), "success")
+        return redirect(url_for("admin.journal_list"))
+    return render_template("admin/journal_form.html", form=form, mode="new")
+
+
+@admin_bp.route("/journal/<int:post_id>/edit", methods=["GET", "POST"])
+@login_required
+def journal_edit(post_id):
+    post = JournalPost.query.get_or_404(post_id)
+    form = JournalForm(obj=post)
+    if form.validate_on_submit():
+        post.title = form.title.data.strip()
+        post.excerpt = (form.excerpt.data or "").strip() or None
+        post.body = form.body.data.strip()
+        if form.is_published.data and not post.is_published and not post.published_at:
+            post.published_at = datetime.utcnow()
+        post.is_published = form.is_published.data
+        if form.image.data:
+            _delete_journal_image(post.cover_image)
+            post.cover_image = _save_product_image(form.image.data, "journal")
+        elif form.remove_image.data and post.cover_image:
+            _delete_journal_image(post.cover_image)
+            post.cover_image = None
+        post.updated_at = datetime.utcnow()
+        db.session.commit()
+        flash(f'"{post.title}" was updated.', "success")
+        return redirect(url_for("admin.journal_list"))
+    return render_template("admin/journal_form.html", form=form, mode="edit", post=post)
+
+
+@admin_bp.route("/journal/<int:post_id>/delete", methods=["POST"])
+@login_required
+def journal_delete(post_id):
+    post = JournalPost.query.get_or_404(post_id)
+    title = post.title
+    _delete_journal_image(post.cover_image)
+    db.session.delete(post)
+    db.session.commit()
+    flash(f'"{title}" was deleted.', "success")
+    return redirect(url_for("admin.journal_list"))
 
 
 # --- Orders / shipping ----------------------------------------------------
