@@ -1,8 +1,15 @@
 import os
 import click
-from flask import Flask, render_template, session
+from flask import Flask, render_template, session, request
 from flask_login import LoginManager
 from flask_wtf import CSRFProtect
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+try:  # load .env so SECRET_KEY etc. work without setting host variables
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 from models import db, AdminUser, Product, WishlistItem
 from models.schema import upgrade_schema
@@ -10,6 +17,11 @@ from services import cart as bag
 from services.customer_auth import current_customer
 
 app = Flask(__name__)
+
+# Behind a hosting proxy (PythonAnywhere etc.) trust ONE proxy hop for the real
+# visitor IP and https scheme. Set TRUST_PROXY=0 if you run without a proxy.
+if os.environ.get("TRUST_PROXY", "1") != "0":
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=0)
 
 # --- Core security config ---------------------------------------------
 # SECRET_KEY signs session cookies and CSRF tokens - it must come from the
@@ -109,6 +121,8 @@ def security_headers(resp):
     resp.headers.setdefault("X-Content-Type-Options", "nosniff")
     resp.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
     resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    if request.is_secure:
+        resp.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
     # Pages with a personal bag/account/order must never be cached by shared proxies.
     if resp.mimetype == "text/html":
         resp.headers.setdefault("Cache-Control", "private, no-cache")

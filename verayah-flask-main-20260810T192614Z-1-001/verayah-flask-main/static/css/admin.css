@@ -131,3 +131,5 @@ button[disabled] { opacity: .6; cursor: wait; }
   .stat-grid { grid-template-columns: 1fr 1fr; gap: .6rem; }
   .card { padding: 1rem; }
 }
+
+.logout button.linklike { background:none; border:0; padding:0; color:inherit; font:inherit; text-decoration:underline; cursor:pointer; }

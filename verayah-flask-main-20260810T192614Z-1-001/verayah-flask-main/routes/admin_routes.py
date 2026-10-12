@@ -5,8 +5,8 @@ Security measures in this file:
 - every route except /admin/login requires an authenticated session (Flask-Login)
 - login attempts are throttled per-username to slow down brute force
 - all forms use Flask-WTF, which enforces CSRF tokens automatically
-- uploaded images are re-validated (extension + content) and saved under a
-  random filename, never the name the browser sent
+- uploaded images are validated (extension + file signature, see forms/admin_forms.py)
+  and saved under a random filename, never the name the browser sent
 - all DB access goes through the ORM (parameterized), never raw SQL strings
 """
 import csv
@@ -27,35 +27,15 @@ from models import (
     db, AdminUser, Product, ProductVariant, Order, OrderItem,
     Customer, Subscriber, ContactMessage
 )
+from services.security import admin_login_throttle, client_ip
 from forms.admin_forms import LoginForm, ProductForm, OrderStatusForm, OrderForm, OrderCustomerForm
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin", template_folder="../templates/admin")
 
 ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png", "webp"}
 
-# --- Simple in-memory login throttle -----------------------------------
-# Good enough for a single small-business site on one worker process.
-# If this ever runs behind multiple workers/dynos, swap this for
-# Flask-Limiter backed by Redis instead.
-_failed_attempts = {}  # username(lowercase) -> [timestamps]
-MAX_ATTEMPTS = 5
-LOCKOUT_SECONDS = 15 * 60
-
-
-def _is_locked_out(username):
-    key = username.lower().strip()
-    attempts = [t for t in _failed_attempts.get(key, []) if time.time() - t < LOCKOUT_SECONDS]
-    _failed_attempts[key] = attempts
-    return len(attempts) >= MAX_ATTEMPTS
-
-
-def _record_failed_attempt(username):
-    key = username.lower().strip()
-    _failed_attempts.setdefault(key, []).append(time.time())
-
-
-def _clear_failed_attempts(username):
-    _failed_attempts.pop(username.lower().strip(), None)
+# Login throttling lives in services/security.py (keyed on username + address,
+# so a stranger cannot lock the real admin out from another connection).
 
 
 def _allowed_file(filename):
@@ -130,23 +110,24 @@ def login():
     if form.validate_on_submit():
         username = form.username.data.strip()
 
-        if _is_locked_out(username):
+        tkey = username.lower() + "|" + client_ip()
+        if admin_login_throttle.blocked(tkey):
             flash("Too many failed attempts. Please wait 15 minutes and try again.", "error")
             return render_template("admin/login.html", form=form)
 
         user = AdminUser.query.filter_by(username=username).first()
         if user and user.check_password(form.password.data):
-            _clear_failed_attempts(username)
+            admin_login_throttle.clear(tkey)
             login_user(user)
             return redirect(url_for("admin.dashboard"))
 
-        _record_failed_attempt(username)
+        admin_login_throttle.record(tkey)
         flash("Incorrect username or password.", "error")
 
     return render_template("admin/login.html", form=form)
 
 
-@admin_bp.route("/logout")
+@admin_bp.route("/logout", methods=["POST"])
 @login_required
 def logout():
     logout_user()

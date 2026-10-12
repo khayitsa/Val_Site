@@ -6,7 +6,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from models import db, ContactMessage, Subscriber
 from forms.public_forms import ContactForm, SubscribeForm
 from services.newsletter import record_consent
-from services.security import signup_throttle
+from services.security import signup_throttle, client_ip
 
 main_bp = Blueprint("main", __name__)
 
@@ -56,7 +56,7 @@ def contact():
     form = ContactForm()
     if request.method == "GET":
         return redirect(url_for("home") + "#contact")
-    key = request.remote_addr or "?"
+    key = client_ip()
     if signup_throttle.blocked("contact:" + key):
         flash("Too many messages in a short time. Please try again later.", "error")
         return _back("#contact")
@@ -88,7 +88,7 @@ def subscribe():
             # the explicit choice; the full page lets people pick one list.
             form.newsletter.data = True
             form.sneak_peek.data = True
-        key = request.remote_addr or "?"
+        key = client_ip()
         if signup_throttle.blocked("sub:" + key):
             flash("Too many sign-ups in a short time. Please try again later.", "error")
             return redirect(url_for("main.subscribe"))

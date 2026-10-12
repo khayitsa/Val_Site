@@ -33,6 +33,20 @@ class ProductForm(FlaskForm):
     image = FileField("Product photo", validators=[
         Optional(), FileAllowed(["jpg", "jpeg", "png", "webp"], "Images only (jpg, png, webp).")
     ], render_kw={"accept": ".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"})
+    def validate_image(self, field):
+        """Check the real file signature, not just the extension."""
+        f = field.data
+        if not f or not getattr(f, "stream", None):
+            return
+        head = f.stream.read(12)
+        f.stream.seek(0)
+        ok = (head.startswith(b"\xff\xd8\xff")                       # jpeg
+              or head.startswith(b"\x89PNG\r\n\x1a\n")               # png
+              or (head[:4] == b"RIFF" and head[8:12] == b"WEBP"))     # webp
+        if not ok:
+            from wtforms.validators import ValidationError
+            raise ValidationError("That file is not a real JPG, PNG or WEBP image.")
+
     is_active = BooleanField("Visible on the site", default=True)
     sort_order = IntegerField("Display order", validators=[Optional(), NumberRange(min=0)], default=0)
     submit = SubmitField("Save product")

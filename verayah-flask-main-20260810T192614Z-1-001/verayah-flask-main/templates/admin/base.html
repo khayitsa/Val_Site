@@ -22,7 +22,10 @@
     </nav>
     <div class="logout">
       <span class="muted" style="font-size:12px;">Logged in as {{ current_user.username }}</span><br>
-      <a href="{{ url_for('admin.logout') }}">Log out</a>
+      <form method="POST" action="{{ url_for('admin.logout') }}" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="linklike">Log out</button>
+      </form>
     </div>
   </aside>
   <main class="admin-main">

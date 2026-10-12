@@ -5,6 +5,14 @@ workers, swap for Flask-Limiter + Redis.
 """
 import time
 
+from flask import request
+
+
+def client_ip():
+    """Visitor address. app.py wraps the app in ProxyFix so this is the real
+    visitor, not the hosting proxy, when the site is served behind one."""
+    return request.remote_addr or "?"
+
 
 class Throttle:
     def __init__(self, max_attempts=5, window_seconds=15 * 60):
@@ -32,3 +40,5 @@ class Throttle:
 # one throttle per kind of action
 customer_login_throttle = Throttle(max_attempts=5, window_seconds=15 * 60)
 signup_throttle = Throttle(max_attempts=10, window_seconds=60 * 60)   # subscribe/contact/register spam brake
+order_throttle = Throttle(max_attempts=5, window_seconds=60 * 60)     # guest checkouts reserve stock, so cap them per visitor
+admin_login_throttle = Throttle(max_attempts=5, window_seconds=15 * 60)  # keyed on username + address

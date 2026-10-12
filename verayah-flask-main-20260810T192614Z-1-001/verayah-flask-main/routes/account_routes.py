@@ -11,7 +11,7 @@ from services.customer_auth import (
     current_customer, login_customer, logout_customer, customer_required, safe_next
 )
 from services.newsletter import record_consent
-from services.security import customer_login_throttle, signup_throttle
+from services.security import customer_login_throttle, signup_throttle, client_ip
 
 account_bp = Blueprint("account", __name__, url_prefix="/account")
 
@@ -25,7 +25,7 @@ def register():
         form.email.data = request.args.get("email", "")
         form.name.data = request.args.get("name", "")
     if form.validate_on_submit():
-        key = "reg:" + (request.remote_addr or "?")
+        key = "reg:" + client_ip()
         if signup_throttle.blocked(key):
             flash("Too many sign-ups in a short time. Please try again later.", "error")
             return render_template("account/register.html", form=form)
@@ -56,7 +56,7 @@ def login():
     nxt = safe_next(request.args.get("next") or request.form.get("next"))
     if form.validate_on_submit():
         email = form.email.data.strip().lower()
-        tkey = email + "|" + (request.remote_addr or "?")
+        tkey = email + "|" + client_ip()
         if customer_login_throttle.blocked(tkey):
             flash("Too many failed attempts. Please wait 15 minutes and try again.", "error")
             return render_template("account/login.html", form=form, next=nxt)

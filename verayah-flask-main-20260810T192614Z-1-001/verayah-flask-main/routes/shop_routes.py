@@ -1,6 +1,7 @@
 """Bag and checkout. Guests can always buy; an account is never required."""
 from decimal import Decimal, InvalidOperation
 
+from sqlalchemy import update
 from flask import (
     Blueprint, render_template, redirect, url_for, flash, request, abort, current_app
 )
@@ -10,6 +11,7 @@ from forms.public_forms import CheckoutForm
 from services import cart as bag
 from services.customer_auth import current_customer
 from services.newsletter import record_consent
+from services.security import order_throttle, client_ip
 
 shop_bp = Blueprint("shop", __name__)
 
@@ -95,6 +97,11 @@ def checkout():
         form.shipping_city.data = customer.shipping_city
 
     if form.validate_on_submit():
+        okey = "order:" + client_ip()
+        if order_throttle.blocked(okey):
+            flash("Too many orders from this connection in a short time. Please try again later "
+                  "or contact us to place your order.", "error")
+            return redirect(url_for("shop.cart"))
         # Re-check stock at the moment of ordering.
         problems = [f"{l['product'].name} ({l['variant'].shade}): only {l['variant'].stock_quantity} left"
                     for l in lines if l["qty"] > l["variant"].stock_quantity]
@@ -128,7 +135,19 @@ def checkout():
                 quantity=l["qty"],
                 unit_price=l["product"].price,
             ))
-            l["variant"].stock_quantity -= l["qty"]
+            # Atomic decrement: only succeeds while enough stock remains, so two
+            # shoppers buying the last piece at once cannot both get it.
+            res = db.session.execute(
+                update(ProductVariant)
+                .where(ProductVariant.id == l["variant"].id,
+                       ProductVariant.stock_quantity >= l["qty"])
+                .values(stock_quantity=ProductVariant.stock_quantity - l["qty"])
+            )
+            if res.rowcount != 1:
+                db.session.rollback()
+                flash(f"Sorry - {l['product'].name} ({l['variant'].shade}) just sold out or changed. "
+                      f"Please update your bag.", "error")
+                return redirect(url_for("shop.cart"))
         db.session.add(order)
 
         # Optional extras - each is a separate, explicit choice.
@@ -141,6 +160,7 @@ def checkout():
         record_consent(order.customer_email, order.customer_name,
                        form.newsletter.data, form.sneak_peek.data, source="checkout")
         db.session.commit()
+        order_throttle.record(okey)
         bag.clear()
         return redirect(url_for("shop.order_confirmation", token=order.public_token))
 
