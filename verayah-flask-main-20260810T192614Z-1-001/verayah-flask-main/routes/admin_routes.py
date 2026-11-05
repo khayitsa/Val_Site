@@ -531,6 +531,13 @@ def subscribers_list():
     return render_template("admin/subscribers_list.html", subscribers=subscribers)
 
 
+def _csv_safe(value):
+    """Stop spreadsheet formula injection: a subscriber who types a name like
+    =HYPERLINK(...) must not get it executed when the owner opens the CSV in Excel."""
+    text = "" if value is None else str(value)
+    return "'" + text if text[:1] in ("=", "+", "-", "@", "\t", "\r") else text
+
+
 @admin_bp.route("/subscribers/export.csv")
 @login_required
 def subscribers_export():
@@ -539,8 +546,8 @@ def subscribers_export():
     writer.writerow(["email", "name", "newsletter", "sneak_peek", "consent_source", "consented_at"])
     for s in Subscriber.query.filter(Subscriber.unsubscribed_at.is_(None)).order_by(Subscriber.email):
         if s.newsletter or s.sneak_peek:
-            writer.writerow([s.email, s.name or "", int(s.newsletter), int(s.sneak_peek),
-                             s.consent_source or "", s.consented_at.strftime("%Y-%m-%d") if s.consented_at else ""])
+            writer.writerow([_csv_safe(s.email), _csv_safe(s.name), int(s.newsletter), int(s.sneak_peek),
+                             _csv_safe(s.consent_source), s.consented_at.strftime("%Y-%m-%d") if s.consented_at else ""])
     return Response(buf.getvalue(), mimetype="text/csv",
                     headers={"Content-Disposition": "attachment; filename=verayah-subscribers.csv"})
 
