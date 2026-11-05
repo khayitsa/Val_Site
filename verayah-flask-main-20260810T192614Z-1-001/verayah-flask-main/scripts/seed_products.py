@@ -32,7 +32,7 @@ PRODUCTS = [
     ("product_wishes_body_chain_val.jpg", "Body Chain", "Wishes Body Chain", "55.00",
      "A symbolic piece where each handcrafted link represents a wish. Made in 18k gold coated chain, the Wishes Body Chain is a luminous emblem of harmony and aspiration.",
      ["Seafoam"]),
-    ("product_twin_souls_anklet_val.jpg", "Anklet", "Twin Souls Anklet", "25.00",
+    ("product_twin_souls_anklet_shoot.jpg", "Anklet", "Twin Souls Anklet", "25.00",
      "A delicate anklet symbolizing connection and balance. Handcrafted in 18k gold coated chain, each one is a crafted expression of individuality.",
      ["Blushed", "Seafoam", "Oceanic"]),
     ("product_two_paths_waist_chain_val.jpg", "Waist Chain", "Two Paths Waist Chain", "50.00",

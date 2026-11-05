@@ -20,7 +20,7 @@ UPDATES = {
     'Serenity Waist Chain': ('product_serenity_waist_chain_val.jpg', 'An adornment of calm and grace, the Serenity Waist Chain is shaped with artisanal care in 18k gold coated chain, embodying balance and serenity across every tone.'),
     'Trinity Body Chain': ('product_trinity_body_chain_val.jpg', "Fluid and empowering, the Trinity Body Chain flows seamlessly with the body's movement. Handcrafted in 18k gold coated chain, each shade carries its own symbolism of romance, vitality, or resilience."),
     'Wishes Body Chain': ('product_wishes_body_chain_val.jpg', 'A symbolic piece where each handcrafted link represents a wish. Made in 18k gold coated chain, the Wishes Body Chain is a luminous emblem of harmony and aspiration.'),
-    'Twin Souls Anklet': ('product_twin_souls_anklet_val.jpg', 'A delicate anklet symbolizing connection and balance. Handcrafted in 18k gold coated chain, each one is a crafted expression of individuality.'),
+    'Twin Souls Anklet': ('product_twin_souls_anklet_shoot.jpg', 'A delicate anklet symbolizing connection and balance. Handcrafted in 18k gold coated chain, each one is a crafted expression of individuality.'),
     'Two Paths Waist Chain': ('product_two_paths_waist_chain_val.jpg', None),
     'High Tide Body Chain': ('product_high_tide_body_chain_val.jpg', None),
     'Starfish Hand Chain': ('product_starfish_hand_chain_val.jpg', "Inspired by the starfish's resilience, this hand chain is delicately handcrafted in 18k gold coated chain, symbolizing renewal and strength."),
