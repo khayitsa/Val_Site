@@ -6,29 +6,60 @@
   <h1>Shipping &amp; Returns</h1>
   {% include 'legal/_draft_banner.html' %}
 
+  <p>Verayah is run by {{ site.operator }}, {{ site.address }}. Contact: {{ site.phone }}{% if site.email %} · {{ site.email }}{% endif %}. RUC / aviso de operación: <span class="tbc">to be added</span>.</p>
+
   <h2 id="shipping">Shipping &amp; delivery</h2>
   <ul>
-    <li><strong>Where:</strong> within Panama only for now, by Uno Express courier. International orders: <span class="tbc">not decided</span>.</li>
+    <li><strong>Where:</strong> within Panama only for now, by Uno Express courier. We do not ship internationally at the moment. Whether Uno Express brings your parcel to your door or to your nearest Uno branch for pickup: <span class="tbc">to be confirmed with Uno Express</span>. We tell you which before you pay.</li>
     <li><strong>Collection:</strong> available — choose it at checkout.</li>
-    <li><strong>Time:</strong> allow 4–5 days in total; courier delivery usually takes 2–3 days. <span class="tbc">Whether the 4–5 days includes courier time is not confirmed.</span></li>
-    <li><strong>Delivery fee:</strong> {% if delivery_fee %}${{ "%.2f"|format(delivery_fee|float) }}{% else %}<span class="tbc">not decided</span> — confirmed before you pay{% endif %}.</li>
-    <li><strong>Tracking:</strong> per Uno Express. Insurance: <span class="tbc">not decided</span>.</li>
-    <li><strong>Lost, damaged or undelivered parcels:</strong> <span class="tbc">process not decided</span>. Please contact us straight away.</li>
+    <li><strong>Delivery time:</strong> allow 4–5 days in total from the day we confirm your payment; courier delivery itself usually takes 2–3 days. We give you an estimated delivery date when we confirm your order. Personalised pieces take longer, and we agree the date with you before production starts.</li>
+    <li><strong>Delivery fee:</strong> {% if delivery_fee %}${{ "%.2f"|format(delivery_fee|float) }}{% else %}<span class="tbc">not decided</span> — confirmed before you pay{% endif %}. It is shown as its own line and is always confirmed before you pay.</li>
+    <li><strong>Payment:</strong> Yappy or bank transfer. Prices are in US dollars (balboas), and you receive an invoice for every order.</li>
+    <li><strong>Tracking:</strong> you receive your Uno Express tracking details once your parcel is dispatched.</li>
+    <li><strong>Late orders:</strong> if your order has not arrived within 7 days of the estimated delivery date, you can cancel it and we refund everything you paid, including the delivery fee.</li>
+    <li><strong>Lost or damaged in transit:</strong> your parcel is our responsibility until it is delivered to you. If it is lost, or arrives damaged, we replace it or refund you in full, your choice. For visible damage, please message us within 48 hours of delivery with photos of the parcel and the piece. We deal with the courier ourselves.</li>
   </ul>
 
   <h2 id="returns">Returns, exchanges &amp; warranty</h2>
+
+  <h3>Legal warranty (garantía)</h3>
   <ul>
-    <li><strong>Change of mind:</strong> every piece is unique (no two pearls are the same), so we do not offer change-of-mind returns. <span class="tbc">To be confirmed against consumer requirements.</span></li>
-    <li><strong>Sizing:</strong> adjustments are offered as a courtesy when a piece was made to the wrong size.</li>
-    <li><strong>Faulty or broken on arrival:</strong> we will exchange the piece.</li>
-    <li><strong>Warranty:</strong> 10 days from the shipping date.</li>
-    <li><strong>Condition:</strong> items must not show signs of use, wear or tarnish exposure, and are returned in their packaging.</li>
-    <li><strong>Return shipping:</strong> paid by Verayah for faulty items.</li>
-    <li><strong>Refunds / credit:</strong> store credit is offered; whether cash refunds are available in any case: <span class="tbc">not decided</span>.</li>
-    <li><strong>Earrings, sale items:</strong> <span class="tbc">not decided</span>.</li>
-    <li><strong>Personalised pieces:</strong> handled case by case with the owner, because they are made for you.</li>
-    <li><strong>Returns address:</strong> {% if site.returns_address %}{{ site.returns_address }}{% else %}<span class="tbc">not decided</span>{% endif %}</li>
+    <li><strong>Covered:</strong> every piece has a <strong>3-month warranty from the day it is delivered</strong> against manufacturing defects, such as a broken clasp or link, a loose setting, a stone or pearl coming loose, or plating that fails early under normal use.</li>
+    <li><strong>What we do:</strong> we repair the piece for free. If it cannot be repaired we replace it, and if we cannot replace it we refund what you paid. We complete this within 30 days of your claim.</li>
+    <li><strong>Shipping:</strong> Verayah pays the shipping both ways for warranty claims, and the piece does not need to be unworn.</li>
+    <li><strong>Not covered:</strong> damage from not following the <a href="{{ url_for('main.care') }}">Care Guide</a> (for example water, perfume, chlorine or knocks), normal wear, and loss.</li>
+    <li><strong>Please note:</strong> our chains are 18k gold-<em>coated</em>, not solid gold. Our jewellery is water resistant, not waterproof.</li>
+    <li><strong>This warranty cannot be reduced by anything else on this page.</strong> It applies to sale items and personalised pieces too.</li>
   </ul>
-  <p>To start a return or exchange, contact us at {{ site.phone }}{% if site.email %} or {{ site.email }}{% endif %} with your order number.</p>
+  <p><strong>Garantía:</strong> todas las piezas tienen una garantía legal de <strong>3 meses desde la entrega</strong> contra defectos de fabricación. Reparamos la pieza sin costo; si no es posible, la reemplazamos o devolvemos el dinero pagado. Nosotros pagamos el envío en reclamos de garantía. Para reclamar, escríbanos a {{ site.phone }}{% if site.email %} o {{ site.email }}{% endif %} con su número de pedido y fotos. <span class="tbc">Spanish wording to be checked by Val.</span></p>
+
+  <h3>Not as described</h3>
+  <ul>
+    <li>If the piece you receive is clearly different in quality or appearance from its description or photos, contact us within <strong>7 days of delivery</strong>.</li>
+    <li>We arrange the return at our cost and refund you in full once we receive it. Natural variation in pearls and crystals (no two are identical) is normal and is not a defect.</li>
+  </ul>
+
+  <h3>Changed your mind</h3>
+  <ul>
+    <li>Every piece is unique, so we do not offer change-of-mind returns or refunds. Please check sizes and details before you order. This does not affect your warranty or your rights if a piece is faulty or not as described.</li>
+    <li><strong>Sizing:</strong> if a waist chain or other piece was made to the wrong size, we adjust it as a courtesy.</li>
+    <li><strong>Personalised pieces:</strong> they are made for you, so we do not offer change-of-mind returns on them. We only begin once you have approved the design, measurements and materials in writing (WhatsApp or email). If a personalised piece does not match what you approved, we remake it or refund you.</li>
+  </ul>
+
+  <h3>Refunds</h3>
+  <ul>
+    <li>When we owe you a refund, we pay it <strong>in money, never forced into store credit</strong>, within 10 days of receiving the returned piece (or of approving your claim where no return is needed). We send it by Yappy or bank transfer to the account you paid from.</li>
+    <li>If you would rather have a replacement or store credit, just tell us. That is always your choice.</li>
+  </ul>
+
+  <h3>How to make a claim</h3>
+  <ul>
+    <li>Contact us at {{ site.phone }}{% if site.email %} or {{ site.email }}{% endif %} with your order number and photos. We reply within 2 working days.</li>
+    <li><strong>Returns address:</strong> {% if site.returns_address %}{{ site.returns_address }}{% else %}<span class="tbc">not decided</span>{% endif %}. Please send pieces in their packaging, and we will confirm how to ship before you send anything.</li>
+    <li><strong>Sale items</strong> keep the same warranty as full-price pieces.</li>
+  </ul>
+
+  <h2 id="complaints">Not happy with our answer?</h2>
+  <p>You can contact ACODECO (Autoridad de Protección al Consumidor y Defensa de la Competencia): line <strong>311</strong>, 510-1300, <a href="mailto:info@acodeco.gob.pa">info@acodeco.gob.pa</a>, <a href="https://www.acodeco.gob.pa" rel="noopener" target="_blank">acodeco.gob.pa</a>. Nothing on this page limits your rights under Panamanian consumer law.</p>
 </div></section>
 {% endblock %}
