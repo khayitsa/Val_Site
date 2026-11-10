@@ -17,10 +17,10 @@ STARTING_STOCK = 10  # placeholder - adjust real counts in the admin panel
 
 # (image, category, name, price, description, [shades...])
 PRODUCTS = [
-    ("product_peace_in_mind_body_chain_val.jpg", "Body Chain", "Peace in Mind Body Chain", "40.00",
+    ("product_peace_in_mind_body_chain_shoot2.jpg", "Body Chain", "Peace in Mind Body Chain", "40.00",
      "Deep and bold, the oceanic shade evokes the strength of the sea. Handcrafted in 18k gold coated chain, this body chain is a statement of elegance and resilience.",
      ["Oceanic"]),
-    ("product_trinity_hand_chain_val.jpg", "Hand Chain", "Trinity Hand Chain", "25.00",
+    ("product_trinity_hand_chain_shoot2.jpg", "Hand Chain", "Trinity Hand Chain", "25.00",
      "Handcrafted in radiant 18k gold coated chains, the Trinity Hand Chain drapes delicately across the hand — each shade reflecting a different facet of elegance, from tender romance to oceanic strength.",
      ["Blushed", "Seafoam", "Oceanic"]),
     ("product_serenity_waist_chain_shoot.jpg", "Waist Chain", "Serenity Waist Chain", "35.00",
@@ -29,10 +29,10 @@ PRODUCTS = [
     ("product_trinity_body_chain_shoot.jpg", "Body Chain", "Trinity Body Chain", "45.00",
      "Fluid and empowering, the Trinity Body Chain flows seamlessly with the body's movement. Handcrafted in 18k gold coated chain, each shade carries its own symbolism of romance, vitality, or resilience.",
      ["Blushed", "Seafoam", "Oceanic"]),
-    ("product_wishes_body_chain_shoot.jpg", "Body Chain", "Wishes Body Chain", "55.00",
+    ("product_wishes_body_chain_shoot2.jpg", "Body Chain", "Wishes Body Chain", "55.00",
      "A symbolic piece where each handcrafted link represents a wish. Made in 18k gold coated chain, the Wishes Body Chain is a luminous emblem of harmony and aspiration.",
      ["Seafoam"]),
-    ("product_twin_souls_anklet_shoot.jpg", "Anklet", "Twin Souls Anklet", "25.00",
+    ("product_twin_souls_anklet_shoot2.jpg", "Anklet", "Twin Souls Anklet", "25.00",
      "A delicate anklet symbolizing connection and balance. Handcrafted in 18k gold coated chain, each one is a crafted expression of individuality.",
      ["Blushed", "Seafoam", "Oceanic"]),
     ("product_two_paths_waist_chain_shoot.jpg", "Waist Chain", "Two Paths Waist Chain", "50.00",
@@ -44,7 +44,7 @@ PRODUCTS = [
     ("product_starfish_hand_chain_shoot.jpg", "Hand Chain", "Starfish Hand Chain", "25.00",
      "Inspired by the starfish's resilience, this hand chain is delicately handcrafted in 18k gold coated chain, symbolizing renewal and strength.",
      ["Blushed", "Seafoam", "Oceanic"]),
-    ("product_dream_catcher_earrings_val.jpg", "Earring", "Dream Catcher Earring Set", "30.00",
+    ("product_dream_catcher_earrings_shoot2.jpg", "Earring", "Dream Catcher Earring Set", "30.00",
      "A luminous ode to protection and harmony, handcrafted in 18k gold coating — it filters away negativity while embracing serenity and elegance.",
      ["Seafoam", "Blushed"]),
 ]
