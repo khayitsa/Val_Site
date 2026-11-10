@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Verayah | Fine Jewellery</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=20">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=21">
 <style>
   /* Fixes based on annotations */
   /* Widen the borders of the website */
@@ -162,14 +162,18 @@
 
         {% for p in products %}
         {% set avail = p.variants|selectattr('stock_quantity','gt',0)|list %}
+        {% set urls = [] %}
+        {% for f in p.gallery() %}{% set _ = urls.append(url_for('static', filename='images/products/' + f)) %}{% endfor %}
         {% set vlist = [] %}
         {% for v in avail %}{% set _ = vlist.append({'id': v.id, 'label': v.shade ~ ' - ' ~ v.stock_quantity ~ ' left'}) %}{% endfor %}
         <article class="product-card" data-category="{{ p.category }}">
           <div class="product-media">
             <img src="{{ url_for('static', filename='images/products/' + p.image_filename) }}" alt="{{ p.name }}">
+            {% if p.extra_images %}<img class="alt-img" src="{{ url_for('static', filename='images/products/' + p.extra_images[0].filename) }}" alt="" loading="lazy">{% endif %}
             <div class="product-overlay">
               <a href="#" class="quick-view-trigger"
                  data-image="{{ url_for('static', filename='images/products/' + p.image_filename) }}"
+                 data-images='{{ urls|tojson }}'
                  data-name="{{ p.name }}"
                  data-category="{{ p.category }}"
                  data-price="{{ p.price_display() }}"
@@ -217,6 +221,7 @@
       <button type="button" class="quick-view-close" id="quickViewClose" aria-label="Close">&times;</button>
       <div class="quick-view-media">
         <img id="qvImage" src="" alt="">
+        <div class="qv-thumbs" id="qvThumbs"></div>
       </div>
       <div class="quick-view-info">
         <span class="product-category" id="qvCategory"></span>
@@ -323,6 +328,26 @@
   function openQuickView(trigger){
     qvImage.src = trigger.getAttribute('data-image');
     qvImage.alt = trigger.getAttribute('data-name');
+    /* Photo gallery: thumbnails appear only when the product has more than one photo */
+    var thumbs = document.getElementById('qvThumbs');
+    thumbs.innerHTML = '';
+    var pics = [];
+    try { pics = JSON.parse(trigger.getAttribute('data-images') || '[]'); } catch (err) {}
+    if (pics.length > 1){
+      pics.forEach(function(src, i){
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'qv-thumb' + (i === 0 ? ' on' : '');
+        b.setAttribute('aria-label', 'Show photo ' + (i + 1));
+        var im = document.createElement('img'); im.src = src; im.alt = '';
+        b.appendChild(im);
+        b.addEventListener('click', function(){
+          qvImage.src = src;
+          thumbs.querySelectorAll('.qv-thumb').forEach(function(t){ t.classList.remove('on'); });
+          b.classList.add('on');
+        });
+        thumbs.appendChild(b);
+      });
+    }
     qvCategory.textContent = trigger.getAttribute('data-category');
     qvName.textContent = trigger.getAttribute('data-name');
     qvPrice.textContent = trigger.getAttribute('data-price');

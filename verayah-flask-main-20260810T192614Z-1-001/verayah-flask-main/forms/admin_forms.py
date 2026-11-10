@@ -42,9 +42,11 @@ class ProductForm(FlaskForm):
     submit = SubmitField("Save product")
 
 
-def _check_image_signature(field):
-    """Check the real file signature (jpg/png/webp), not just the extension."""
-    f = field.data
+def check_upload(f):
+    """Check one uploaded photo: real file signature (jpg/png/webp), not just the
+    extension, and that it can actually be read. Raises ValidationError with a
+    plain-English message."""
+    from wtforms.validators import ValidationError
     if not f or not getattr(f, "stream", None):
         return
     head = f.stream.read(12)
@@ -52,7 +54,6 @@ def _check_image_signature(field):
     ok = (head.startswith(b"\xff\xd8\xff")
           or head.startswith(b"\x89PNG\r\n\x1a\n")
           or (head[:4] == b"RIFF" and head[8:12] == b"WEBP"))
-    from wtforms.validators import ValidationError
     if not ok:
         raise ValidationError("That file is not a real JPG, PNG or WEBP image. "
                               "(iPhone tip: share or export the photo as JPG.)")
@@ -61,6 +62,10 @@ def _check_image_signature(field):
         check(f.stream)
     except BadImage as exc:
         raise ValidationError(str(exc))
+
+
+def _check_image_signature(field):
+    check_upload(field.data)
 
 
 class JournalForm(FlaskForm):

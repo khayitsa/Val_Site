@@ -24,12 +24,12 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 
 from models import (
-    db, AdminUser, Product, ProductVariant, Order, OrderItem,
+    db, AdminUser, Product, ProductVariant, ProductImage, Order, OrderItem,
     Customer, Subscriber, ContactMessage, JournalPost
 )
 from services.journal import unique_slug
 from services.security import admin_login_throttle, client_ip
-from forms.admin_forms import LoginForm, ProductForm, OrderStatusForm, OrderForm, OrderCustomerForm, JournalForm
+from forms.admin_forms import check_upload, LoginForm, ProductForm, OrderStatusForm, OrderForm, OrderCustomerForm, JournalForm
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin", template_folder="../templates/admin")
 
@@ -53,6 +53,56 @@ def _save_product_image(file_storage, subdir="products"):
     with open(os.path.join(dest_dir, random_name), "wb") as fh:
         fh.write(data.read())
     return random_name
+
+
+MAX_EXTRA_PHOTOS = 7   # plus the main photo = 8 photos per product
+
+
+def _delete_product_file(filename):
+    """Remove an uploaded product photo from disk (ignore if it is already gone)."""
+    if not filename:
+        return
+    path = os.path.join(current_app.root_path, "static", "images", "products", os.path.basename(filename))
+    try:
+        os.remove(path)
+    except OSError:
+        pass
+
+
+def _extra_photo_problem(product):
+    """Look at the 'more photos' part of the submitted form BEFORE anything is saved.
+
+    Returns (new_files, ids_to_remove, error_message). If error_message is set,
+    nothing should be saved and the form should be shown again.
+    """
+    from wtforms.validators import ValidationError
+    files = [f for f in request.files.getlist("more_images") if f and f.filename]
+    remove_ids = set(request.form.getlist("remove_extra"))
+    keep = [i for i in (product.extra_images if product else []) if str(i.id) not in remove_ids]
+    if len(keep) + len(files) > MAX_EXTRA_PHOTOS:
+        return [], remove_ids, (f"A product can have up to {MAX_EXTRA_PHOTOS + 1} photos "
+                                f"(1 main + {MAX_EXTRA_PHOTOS} extra). Remove some first.")
+    for f in files:
+        if not _allowed_file(f.filename):
+            return [], remove_ids, (f'"{f.filename}": please use a JPG, PNG or WEBP photo. '
+                                    "(iPhone tip: if it is a HEIC photo, share or export it as JPG first.)")
+        try:
+            check_upload(f)
+        except ValidationError as exc:
+            return [], remove_ids, f'"{f.filename}": {exc}'
+    return files, remove_ids, None
+
+
+def _apply_extra_photos(product, files, remove_ids):
+    """Save the new extra photos and drop the ones that were ticked for removal."""
+    for img in list(product.extra_images):
+        if str(img.id) in remove_ids:
+            _delete_product_file(img.filename)
+            product.extra_images.remove(img)
+    next_order = max([i.sort_order for i in product.extra_images] + [0]) + 1
+    for f in files:
+        product.extra_images.append(ProductImage(filename=_save_product_image(f), sort_order=next_order))
+        next_order += 1
 
 
 def _sync_variants(product):
@@ -180,12 +230,17 @@ def product_new():
             is_active=form.is_active.data,
             sort_order=form.sort_order.data or 0,
         )
+        extra_files, remove_ids, problem = _extra_photo_problem(None)
+        if problem:
+            flash(problem, "error")
+            return render_template("admin/product_form.html", form=form, mode="new")
         if form.image.data:
             product.image_filename = _save_product_image(form.image.data)
         _sync_variants(product)
         if not product.variants:
             flash("Add at least one shade with a stock quantity.", "error")
             return render_template("admin/product_form.html", form=form, mode="new")
+        _apply_extra_photos(product, extra_files, remove_ids)
         db.session.add(product)
         db.session.commit()
         flash(f'"{product.name}" was added.', "success")
@@ -208,12 +263,18 @@ def product_edit(product_id):
         product.description = form.description.data.strip()
         product.is_active = form.is_active.data
         product.sort_order = form.sort_order.data or 0
+        extra_files, remove_ids, problem = _extra_photo_problem(product)
+        if problem:
+            db.session.rollback()
+            flash(problem, "error")
+            return render_template("admin/product_form.html", form=form, mode="edit", product=product)
         if form.image.data:
             product.image_filename = _save_product_image(form.image.data)
         _sync_variants(product)
         if not product.variants:
             flash("Add at least one shade with a stock quantity.", "error")
             return render_template("admin/product_form.html", form=form, mode="edit", product=product)
+        _apply_extra_photos(product, extra_files, remove_ids)
         product.updated_at = datetime.utcnow()
         db.session.commit()
         flash(f'"{product.name}" was updated.', "success")
@@ -227,8 +288,11 @@ def product_edit(product_id):
 def product_delete(product_id):
     product = Product.query.get_or_404(product_id)
     name = product.name
+    extra_files = [i.filename for i in product.extra_images]
     db.session.delete(product)
     db.session.commit()
+    for fn in extra_files:
+        _delete_product_file(fn)
     flash(f'"{name}" was deleted.', "success")
     return redirect(url_for("admin.products_list"))
 

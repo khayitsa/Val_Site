@@ -54,7 +54,7 @@ app.config["SESSION_COOKIE_SECURE"] = os.environ.get("FLASK_ENV") == "production
 # 25 MB cap on a single upload request, so a full-size phone photo is fine but
 # no one can fill the disk via the admin image upload field. Accepted photos
 # are shrunk before saving (see services/images.py).
-app.config["MAX_CONTENT_LENGTH"] = 25 * 1024 * 1024
+app.config["MAX_CONTENT_LENGTH"] = 60 * 1024 * 1024
 
 # --- Shop / business settings (all optional, set in .env) -------------
 # Nothing here is a secret. Anything left blank is shown to shoppers as
@@ -141,7 +141,7 @@ def not_found(_err):
 @app.errorhandler(413)
 def too_large(_err):
     """A photo bigger than the upload limit: explain it instead of showing a raw error page."""
-    flash("That file is too big (the limit is 25 MB). Please pick a smaller photo and try again.", "error")
+    flash("That file is too big (the limit is 60 MB per upload). Please pick fewer or smaller photos and try again.", "error")
     ref = request.referrer or ""
     if ref.startswith(request.host_url):       # only ever go back to a page on this site
         return redirect(ref)

@@ -56,6 +56,15 @@ class Product(db.Model):
 
     variants = db.relationship("ProductVariant", backref="product", cascade="all, delete-orphan",
                                 order_by="ProductVariant.shade")
+    # Extra photos (model shot, close-up, ...). The main photo stays in image_filename.
+    extra_images = db.relationship("ProductImage", backref="product", cascade="all, delete-orphan",
+                                    order_by="ProductImage.sort_order, ProductImage.id")
+
+    def gallery(self):
+        """All photo filenames for this product, main photo first."""
+        files = [self.image_filename] if self.image_filename else []
+        files += [i.filename for i in self.extra_images]
+        return files
 
     def price_display(self):
         return f"${self.price:,.2f}"
@@ -71,6 +80,16 @@ class Product(db.Model):
 
     def in_stock(self):
         return self.total_stock() > 0
+
+
+class ProductImage(db.Model):
+    """An extra photo for a product (the main photo lives on Product.image_filename)."""
+    __tablename__ = "product_images"
+
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey("products.id"), nullable=False, index=True)
+    filename = db.Column(db.String(255), nullable=False)
+    sort_order = db.Column(db.Integer, nullable=False, default=0)
 
 
 class ProductVariant(db.Model):

@@ -105,30 +105,12 @@ button { cursor: pointer; border: none; background: none; font-family: var(--bod
 
 .hero-bg {
   position: absolute; inset: 0;
-  background: linear-gradient(160deg,
-    #C5CBB8 0%, #A8B5A0 20%,
-    #8FA8A0 45%, #6B9490 65%,
-    #D4C9B5 85%, #E8E3DA 100%);
+  /* Ocean blue (chosen from Val's reference colours) */
+  background: linear-gradient(165deg, #3F5E72 0%, #547586 55%, #6B8CA0 100%);
 }
 
-/* Ocean wave layered texture */
-.hero-bg::before {
-  content: '';
-  position: absolute; inset: 0;
-  background:
-    radial-gradient(ellipse 120% 60% at 80% 30%, rgba(74,123,114,.25) 0%, transparent 60%),
-    radial-gradient(ellipse 80% 80% at 20% 80%, rgba(197,203,184,.4) 0%, transparent 55%);
-}
-
-.hero-bg::after {
-  content: '';
-  position: absolute; bottom: 0; left: 0; right: 0; height: 45%;
-  background: linear-gradient(to top, rgba(249,247,244,.9) 0%, transparent 100%);
-}
-
-.hero-img {
-  position: absolute; inset: 0; object-fit: cover; opacity: 0.35; mix-blend-mode: multiply;
-}
+/* The old textured beach layer is no longer used on the front page */
+.hero-img { display: none; }
 
 .hero .wrap { position: relative; z-index: 2; }
 
@@ -931,3 +913,28 @@ footer {
 .collection-card--all h3 { font-size: 2rem; color: #fff; }
 .collection-card--all:hover { filter: brightness(1.06); }
 @media (max-width: 960px) { .hero-visual { display: none; } .hero .hero-copy { max-width: 800px; } }
+
+
+/* ============================================
+   PRODUCT PHOTO GALLERY
+   ============================================ */
+/* Second photo fades in when you hover a product card (desktop) */
+.product-media .alt-img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; opacity: 0; transition: opacity 400ms var(--ease);
+}
+@media (hover: hover) {
+  .product-card:hover .product-media .alt-img { opacity: 1; }
+}
+
+/* Thumbnails under the big photo in Quick View */
+.quick-view-media { display: flex; flex-direction: column; }
+.quick-view-media > img { flex: 1 1 auto; min-height: 0; }
+.qv-thumbs { display: flex; gap: .5rem; padding: .6rem; background: var(--salt); flex-wrap: wrap; }
+.qv-thumbs:empty { display: none; }
+.qv-thumb {
+  width: 56px; height: 56px; padding: 0; border: 2px solid transparent;
+  background: var(--parchment); border-radius: 3px; overflow: hidden; cursor: pointer;
+}
+.qv-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.qv-thumb.on { border-color: var(--teal-deep); }

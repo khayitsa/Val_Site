@@ -66,6 +66,23 @@
     </div>
 
     <div class="field">
+      <label for="more_images">More photos (optional)</label>
+      <div class="hint" style="margin-top:-2px; margin-bottom:0.5rem;">E.g. a photo on a model and a close-up of the piece. The main photo above shows on the shop page; these appear in the pop-up when a customer taps Quick View. Up to 7 extra photos.</div>
+      {% if mode == "edit" and product.extra_images %}
+      <div style="display:flex; flex-wrap:wrap; gap:.75rem; margin-bottom:.75rem;">
+        {% for img in product.extra_images %}
+        <label style="display:block; text-align:center; font-size:12px; cursor:pointer;">
+          <img class="thumb" style="width:70px;height:70px;display:block;margin-bottom:4px;" src="{{ url_for('static', filename='images/products/' + img.filename) }}" alt="">
+          <input type="checkbox" name="remove_extra" value="{{ img.id }}"> Remove
+        </label>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <input type="file" id="more_images" name="more_images" multiple accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+      <div class="hint">Select several at once. JPG, PNG or WEBP; big phone photos are shrunk automatically.</div>
+    </div>
+
+    <div class="field">
       {{ form.sort_order.label }}
       {{ form.sort_order() }}
       <div class="hint">Lower numbers show first in the grid.</div>
