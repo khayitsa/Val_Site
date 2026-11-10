@@ -1,6 +1,6 @@
 import os
 import click
-from flask import Flask, render_template, session, request, abort
+from flask import Flask, render_template, session, request, abort, flash, redirect, url_for
 from flask_login import LoginManager, current_user
 from flask_wtf import CSRFProtect
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -37,8 +37,10 @@ if not os.environ.get("SECRET_KEY"):
     print("WARNING: SECRET_KEY is not set - using a temporary random key.", flush=True)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
-    "DATABASE_URL", f"sqlite:///{os.path.join(basedir, 'instance', 'verayah.db')}"
+# "or" (not a get-default) so a blank DATABASE_URL= line copied from
+# .env.example falls back to the local SQLite file instead of crashing.
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL") or (
+    f"sqlite:///{os.path.join(basedir, 'instance', 'verayah.db')}"
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -49,9 +51,10 @@ app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 # this must stay False or the login cookie will silently never be set.
 app.config["SESSION_COOKIE_SECURE"] = os.environ.get("FLASK_ENV") == "production"
 
-# 5 MB cap on uploads (product photos) so no one can DoS the disk via the
-# admin image upload field.
-app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
+# 25 MB cap on a single upload request, so a full-size phone photo is fine but
+# no one can fill the disk via the admin image upload field. Accepted photos
+# are shrunk before saving (see services/images.py).
+app.config["MAX_CONTENT_LENGTH"] = 25 * 1024 * 1024
 
 # --- Shop / business settings (all optional, set in .env) -------------
 # Nothing here is a secret. Anything left blank is shown to shoppers as
@@ -72,6 +75,24 @@ app.config["SITE"] = {
     "tiktok": os.environ.get("TIKTOK_URL", ""),
     # Show a "draft wording" banner on the policy pages until the final copy is in.
     "legal_draft": os.environ.get("LEGAL_DRAFT", "1") != "0",
+}
+
+# --- Email notifications (optional) -------------------------------------
+# Leave MAIL_* blank to send nothing. For Gmail use host smtp.gmail.com,
+# port 587, your address as the user, and an "app password" (not your login).
+try:
+    _mail_port = int(os.environ.get("MAIL_PORT") or 587)
+except ValueError:
+    _mail_port = 587
+_mail_user = os.environ.get("MAIL_USER", "").strip()
+app.config["MAIL"] = {
+    "host": os.environ.get("MAIL_HOST", "").strip(),
+    "port": _mail_port,
+    "user": _mail_user,
+    "password": os.environ.get("MAIL_PASSWORD", ""),
+    "from": os.environ.get("MAIL_FROM", "").strip() or _mail_user,
+    # Where new-order and contact-form alerts go (defaults to the business email).
+    "notify": (os.environ.get("NOTIFY_EMAIL", "") or os.environ.get("BUSINESS_EMAIL", "")).strip(),
 }
 
 db.init_app(app)
@@ -115,6 +136,16 @@ def inject_site():
 @app.errorhandler(404)
 def not_found(_err):
     return render_template("404.html"), 404
+
+
+@app.errorhandler(413)
+def too_large(_err):
+    """A photo bigger than the upload limit: explain it instead of showing a raw error page."""
+    flash("That file is too big (the limit is 25 MB). Please pick a smaller photo and try again.", "error")
+    ref = request.referrer or ""
+    if ref.startswith(request.host_url):       # only ever go back to a page on this site
+        return redirect(ref)
+    return redirect(url_for("admin.dashboard"))
 
 
 @app.after_request

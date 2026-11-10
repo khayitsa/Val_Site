@@ -41,7 +41,7 @@
       </div>
       {% endif %}
       {{ form.image() }}
-      <div class="hint">JPG, PNG or WEBP, up to 5 MB.{% if mode == "edit" and post.cover_image %} Leave blank to keep the current photo.{% endif %}</div>
+      <div class="hint">JPG, PNG or WEBP. Big phone photos are fine - they are shrunk automatically.{% if mode == "edit" and post.cover_image %} Leave blank to keep the current photo.{% endif %}</div>
       {% for e in form.image.errors %}<div class="errors">{{ e }}</div>{% endfor %}
       {% if mode == "edit" and post.cover_image %}
       <div class="field checkbox-row" style="margin-top:.5rem;">{{ form.remove_image() }} {{ form.remove_image.label }}</div>

@@ -31,21 +31,11 @@ class ProductForm(FlaskForm):
                          render_kw=DECIMAL_KW)
     description = TextAreaField("Description", validators=[DataRequired()])
     image = FileField("Product photo", validators=[
-        Optional(), FileAllowed(["jpg", "jpeg", "png", "webp"], "Images only (jpg, png, webp).")
+        Optional(), FileAllowed(["jpg", "jpeg", "png", "webp"], "Please use a JPG, PNG or WEBP photo. (iPhone tip: if it is a HEIC photo, share or export it as JPG first.)")
     ], render_kw={"accept": ".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"})
     def validate_image(self, field):
-        """Check the real file signature, not just the extension."""
-        f = field.data
-        if not f or not getattr(f, "stream", None):
-            return
-        head = f.stream.read(12)
-        f.stream.seek(0)
-        ok = (head.startswith(b"\xff\xd8\xff")                       # jpeg
-              or head.startswith(b"\x89PNG\r\n\x1a\n")               # png
-              or (head[:4] == b"RIFF" and head[8:12] == b"WEBP"))     # webp
-        if not ok:
-            from wtforms.validators import ValidationError
-            raise ValidationError("That file is not a real JPG, PNG or WEBP image.")
+        """Check the real file signature and that it decodes, not just the extension."""
+        _check_image_signature(field)
 
     is_active = BooleanField("Visible on the site", default=True)
     sort_order = IntegerField("Display order", validators=[Optional(), NumberRange(min=0)], default=0)
@@ -62,9 +52,15 @@ def _check_image_signature(field):
     ok = (head.startswith(b"\xff\xd8\xff")
           or head.startswith(b"\x89PNG\r\n\x1a\n")
           or (head[:4] == b"RIFF" and head[8:12] == b"WEBP"))
+    from wtforms.validators import ValidationError
     if not ok:
-        from wtforms.validators import ValidationError
-        raise ValidationError("That file is not a real JPG, PNG or WEBP image.")
+        raise ValidationError("That file is not a real JPG, PNG or WEBP image. "
+                              "(iPhone tip: share or export the photo as JPG.)")
+    from services.images import check, BadImage
+    try:
+        check(f.stream)
+    except BadImage as exc:
+        raise ValidationError(str(exc))
 
 
 class JournalForm(FlaskForm):
@@ -72,7 +68,7 @@ class JournalForm(FlaskForm):
     excerpt = TextAreaField("Short summary (shown on the Journal page)", validators=[Optional(), Length(max=300)])
     body = TextAreaField("Story", validators=[DataRequired(), Length(max=50000)])
     image = FileField("Cover photo", validators=[
-        Optional(), FileAllowed(["jpg", "jpeg", "png", "webp"], "Images only (jpg, png, webp).")
+        Optional(), FileAllowed(["jpg", "jpeg", "png", "webp"], "Please use a JPG, PNG or WEBP photo. (iPhone tip: if it is a HEIC photo, share or export it as JPG first.)")
     ], render_kw={"accept": ".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"})
     remove_image = BooleanField("Remove the current cover photo")
     is_published = BooleanField("Published (visible on the site)", default=False)

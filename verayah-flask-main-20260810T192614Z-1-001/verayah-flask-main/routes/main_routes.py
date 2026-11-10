@@ -1,7 +1,7 @@
 """Public pages that are not shopping: legal/policy pages, contact, newsletter."""
 from datetime import datetime
 
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 
 from models import db, ContactMessage, Subscriber
 from forms.public_forms import ContactForm, SubscribeForm
@@ -62,13 +62,19 @@ def contact():
         return _back("#contact")
     if form.validate_on_submit():
         signup_throttle.record("contact:" + key)
-        db.session.add(ContactMessage(
+        new_msg = ContactMessage(
             name=form.name.data.strip(),
             email=form.email.data.strip().lower(),
             inquiry_type=form.inquiry_type.data,
             message=form.message.data.strip(),
-        ))
+        )
+        db.session.add(new_msg)
         db.session.commit()
+        try:  # alert the owner; a mail problem must never lose the message
+            from services import mailer
+            mailer.notify_owner_new_message(new_msg)
+        except Exception:  # noqa: BLE001
+            current_app.logger.exception("Contact email step failed")
         first = form.name.data.strip().split(" ")[0]
         flash(f"Thank you, {first} - your message has been received and we will be in touch.", "success")
         return _back("#contact")

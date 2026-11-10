@@ -2,10 +2,30 @@
 {% block title %}Order received | Verayah{% endblock %}
 {% block content %}
 <section class="page-section"><div class="wrap narrow">
+  {% set paid = order.payment_status == 'paid' %}
+  {% set cancelled = order.status == 'cancelled' %}
+  {% set status_labels = {'pending': 'Order received', 'processing': 'Being prepared', 'shipped': 'On its way to you', 'delivered': 'Delivered', 'cancelled': 'Cancelled'} %}
   <span class="eyebrow">Thank you</span>
-  <h1>Order #{{ order.id }} received</h1>
+  <h1>Order #{{ order.id }}{% if not paid and not cancelled and order.status == 'pending' %} received{% endif %}</h1>
+  {% if cancelled %}
+  <p>This order has been cancelled. If you did not expect this, please contact us{% if site.whatsapp %} on <a href="https://wa.me/{{ site.whatsapp }}">WhatsApp</a>{% else %} on {{ site.phone }}{% endif %}.</p>
+  {% elif order.status == 'shipped' %}
+  <p>Hi {{ order.customer_name.split(' ')[0] }}, your order is on its way.</p>
+  {% elif order.status == 'delivered' %}
+  <p>Hi {{ order.customer_name.split(' ')[0] }}, your order has been delivered. We hope you love it.</p>
+  {% elif paid %}
+  <p>Thank you, {{ order.customer_name.split(' ')[0] }}. <strong>We have received your payment</strong> and are getting your order ready.</p>
+  {% else %}
   <p>Thank you, {{ order.customer_name.split(' ')[0] }}. Your pieces are reserved for you. <strong>Your order is confirmed once payment is received.</strong></p>
+  {% endif %}
 
+  <table class="legal-table">
+    <tr><td>Status</td><td><strong>{{ status_labels.get(order.status, order.status|capitalize) }}</strong></td></tr>
+    <tr><td>Payment</td><td>{% if paid %}Received{% elif cancelled %}-{% else %}Awaiting payment{% endif %}</td></tr>
+    {% if order.tracking_number and not cancelled %}<tr><td>Tracking number{% if order.delivery_method == 'courier' %} (Uno Express){% endif %}</td><td><strong>{{ order.tracking_number }}</strong></td></tr>{% endif %}
+  </table>
+
+  {% if not paid and not cancelled %}
   <h2>How to pay ({{ 'Yappy' if order.payment_method == 'yappy' else 'bank transfer' }})</h2>
   {% if order.payment_method == 'yappy' and site.yappy %}
     <p>Send <strong>${{ "%.2f"|format(order.total()) }}</strong> by Yappy to <strong>{{ site.yappy }}</strong>, using order #{{ order.id }} as the reference.</p>
@@ -16,6 +36,7 @@
     <p>We will send you the {{ 'Yappy' if order.payment_method == 'yappy' else 'bank transfer' }} details{% if order.customer_email %} at {{ order.customer_email }}{% endif %} and on WhatsApp ({{ order.customer_phone }}) shortly.</p>
   {% endif %}
   <p>Then send your payment proof to us{% if site.whatsapp %} on <a href="https://wa.me/{{ site.whatsapp }}">WhatsApp</a>{% else %} on {{ site.phone }}{% endif %}.</p>
+  {% endif %}
 
   <h2>Your order</h2>
   <table class="legal-table">
@@ -23,7 +44,7 @@
     <tr><td>Delivery{% if order.delivery_method == 'collection' %} (collection){% endif %}</td><td>{% if order.delivery_method == 'collection' %}$0.00{% elif order.delivery_fee and order.delivery_fee > 0 %}${{ "%.2f"|format(order.delivery_fee) }}{% else %}to be confirmed{% endif %}</td></tr>
     <tr><td><strong>Total</strong></td><td><strong>${{ "%.2f"|format(order.total()) }}</strong>{% if order.delivery_method == 'courier' and not (order.delivery_fee and order.delivery_fee > 0) %} + delivery{% endif %}</td></tr>
   </table>
-  <p class="muted">{% if order.delivery_method == 'collection' %}Collection{% else %}Delivering to {{ order.shipping_address }}, {{ order.shipping_city }}{% endif %}. Keep this page's link for your records.</p>
+  <p class="muted">{% if order.delivery_method == 'collection' %}Collection{% else %}Delivering to {{ order.shipping_address }}, {{ order.shipping_city }}{% endif %}. Keep this page's link: it always shows the latest status of your order.</p>
 
   {% if not customer %}
   <p>Want to save your details and a wishlist for next time? <a href="{{ url_for('account.register', email=order.customer_email, name=order.customer_name) }}">Create a free account</a> (optional).</p>

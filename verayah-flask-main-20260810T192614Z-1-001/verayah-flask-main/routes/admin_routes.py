@@ -44,12 +44,14 @@ def _allowed_file(filename):
 
 
 def _save_product_image(file_storage, subdir="products"):
-    """Save an uploaded photo under a random filename and return it."""
-    ext = secure_filename(file_storage.filename).rsplit(".", 1)[1].lower()
+    """Shrink an uploaded photo to web size, save it under a random filename and return it."""
+    from services.images import optimise
+    data, ext = optimise(file_storage.stream)
     random_name = f"{uuid.uuid4().hex}.{ext}"
     dest_dir = os.path.join(current_app.root_path, "static", "images", subdir)
     os.makedirs(dest_dir, exist_ok=True)
-    file_storage.save(os.path.join(dest_dir, random_name))
+    with open(os.path.join(dest_dir, random_name), "wb") as fh:
+        fh.write(data.read())
     return random_name
 
 

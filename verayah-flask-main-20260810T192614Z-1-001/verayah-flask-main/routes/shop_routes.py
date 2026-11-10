@@ -27,6 +27,20 @@ def _delivery_fee(method):
         return Decimal("0")
 
 
+def _send_order_emails(order):
+    """Alert the owner and confirm to the customer. Never lets an email problem break an order."""
+    try:
+        from services import mailer
+        if not mailer.is_configured():
+            return
+        order_url = url_for("shop.order_confirmation", token=order.public_token, _external=True)
+        admin_url = url_for("admin.order_detail", order_id=order.id, _external=True)
+        mailer.notify_owner_new_order(order, admin_url)
+        mailer.confirm_to_customer(order, order_url, current_app.config["SITE"])
+    except Exception:  # noqa: BLE001
+        current_app.logger.exception("Order email step failed for order %s", order.id)
+
+
 @shop_bp.route("/cart")
 def cart():
     return render_template("shop/cart.html", lines=bag.lines(), subtotal=bag.subtotal(bag.lines()))
@@ -162,6 +176,7 @@ def checkout():
         db.session.commit()
         order_throttle.record(okey)
         bag.clear()
+        _send_order_emails(order)
         return redirect(url_for("shop.order_confirmation", token=order.public_token))
 
     return render_template("shop/checkout.html", form=form, lines=lines,
