@@ -27,14 +27,23 @@ def _delivery_fee(method):
         return Decimal("0")
 
 
+def _email_link(endpoint, **values):
+    """Absolute link for an email. Uses PUBLIC_BASE_URL when it is set, so a
+    forged Host header can't point the links at another site."""
+    base = current_app.config.get("PUBLIC_BASE_URL")
+    if base:
+        return base + url_for(endpoint, **values)
+    return url_for(endpoint, _external=True, **values)
+
+
 def _send_order_emails(order):
     """Alert the owner and confirm to the customer. Never lets an email problem break an order."""
     try:
         from services import mailer
         if not mailer.is_configured():
             return
-        order_url = url_for("shop.order_confirmation", token=order.public_token, _external=True)
-        admin_url = url_for("admin.order_detail", order_id=order.id, _external=True)
+        order_url = _email_link("shop.order_confirmation", token=order.public_token)
+        admin_url = _email_link("admin.order_detail", order_id=order.id)
         mailer.notify_owner_new_order(order, admin_url)
         mailer.confirm_to_customer(order, order_url, current_app.config["SITE"])
     except Exception:  # noqa: BLE001
@@ -100,6 +109,12 @@ def checkout():
     if not lines:
         flash("Your bag is empty.", "info")
         return redirect(url_for("products"))
+
+    cap = current_app.config.get("MAX_UNITS_PER_ORDER", 6)
+    if sum(l["qty"] for l in lines) > cap:
+        flash(f"Website orders are limited to {cap} pieces at a time. Please remove a few from your bag, "
+              f"or contact us to place a larger order.", "error")
+        return redirect(url_for("shop.cart"))
 
     customer = current_customer()
     form = CheckoutForm()

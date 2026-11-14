@@ -1,0 +1,234 @@
+diff -ruN audit/verayah/.env.example fixsite/.env.example
+--- audit/verayah/.env.example	2026-11-14 17:33:47.649742908 +0200
++++ fixsite/.env.example	2026-11-14 17:58:13.821098662 +0200
+@@ -17,6 +17,12 @@
+ BUSINESS_OPERATOR=Valentina Garcia
+ BUSINESS_EMAIL=
+ BUSINESS_PHONE=+507 6904-0901
++# The shop's public address, e.g. https://yourname.pythonanywhere.com - used for the
++# links in order emails (so they always point at your real site). Leave blank until mail is on.
++PUBLIC_BASE_URL=
++# Most pieces allowed in one website order (stock is held from the moment an order is
++# placed, before payment). Blank = 6. Bigger orders: customers contact you.
++MAX_UNITS_PER_ORDER=
+ # Digits only, used for the WhatsApp link on the order confirmation, e.g. 50769040901
+ WHATSAPP_NUMBER=
+ BUSINESS_ADDRESS=Panama City, Panama
+diff -ruN audit/verayah/app.py fixsite/app.py
+--- audit/verayah/app.py	2026-11-14 17:33:47.654899754 +0200
++++ fixsite/app.py	2026-11-14 17:58:13.820465126 +0200
+@@ -59,6 +59,17 @@
+ # --- Shop / business settings (all optional, set in .env) -------------
+ # Nothing here is a secret. Anything left blank is shown to shoppers as
+ # "to be confirmed" rather than guessed.
++# Most pieces one website order may contain. Stock is reserved the moment an order
++# is placed (before payment), so this stops one order tying up the whole shop.
++# Larger orders are placed by contacting the shop. Blank/invalid = 6.
++try:
++    app.config["MAX_UNITS_PER_ORDER"] = max(1, int(os.environ.get("MAX_UNITS_PER_ORDER") or 6))
++except ValueError:
++    app.config["MAX_UNITS_PER_ORDER"] = 6
++# The public address of the shop, e.g. https://verayah.example. When set, links in
++# emails use it instead of whatever Host header the request arrived with.
++_base = (os.environ.get("PUBLIC_BASE_URL") or "").strip().rstrip("/")
++app.config["PUBLIC_BASE_URL"] = _base if _base.startswith(("http://", "https://")) else ""
+ app.config["DELIVERY_FEE"] = os.environ.get("DELIVERY_FEE", "")          # e.g. 5.00 - courier fee within Panama
+ app.config["SITE"] = {
+     "name": "Verayah",
+diff -ruN audit/verayah/routes/main_routes.py fixsite/routes/main_routes.py
+--- audit/verayah/routes/main_routes.py	2026-11-14 17:33:48.115056839 +0200
++++ fixsite/routes/main_routes.py	2026-11-14 17:58:13.820183956 +0200
+@@ -107,7 +107,7 @@
+                            form.newsletter.data, form.sneak_peek.data,
+                            source="footer" if from_footer else "subscribe_page")
+             db.session.commit()
+-            flash("You're on the list. You can unsubscribe at any time from any email we send.", "success")
++            flash("Thank you - your request has been received. You can unsubscribe at any time.", "success")
+             return redirect(url_for("main.subscribe_thanks"))
+         if from_footer:
+             flash("Please enter a valid email address.", "error")
+diff -ruN audit/verayah/routes/shop_routes.py fixsite/routes/shop_routes.py
+--- audit/verayah/routes/shop_routes.py	2026-11-14 17:33:48.119613212 +0200
++++ fixsite/routes/shop_routes.py	2026-11-14 17:58:13.821033813 +0200
+@@ -27,14 +27,23 @@
+         return Decimal("0")
+ 
+ 
++def _email_link(endpoint, **values):
++    """Absolute link for an email. Uses PUBLIC_BASE_URL when it is set, so a
++    forged Host header can't point the links at another site."""
++    base = current_app.config.get("PUBLIC_BASE_URL")
++    if base:
++        return base + url_for(endpoint, **values)
++    return url_for(endpoint, _external=True, **values)
++
++
+ def _send_order_emails(order):
+     """Alert the owner and confirm to the customer. Never lets an email problem break an order."""
+     try:
+         from services import mailer
+         if not mailer.is_configured():
+             return
+-        order_url = url_for("shop.order_confirmation", token=order.public_token, _external=True)
+-        admin_url = url_for("admin.order_detail", order_id=order.id, _external=True)
++        order_url = _email_link("shop.order_confirmation", token=order.public_token)
++        admin_url = _email_link("admin.order_detail", order_id=order.id)
+         mailer.notify_owner_new_order(order, admin_url)
+         mailer.confirm_to_customer(order, order_url, current_app.config["SITE"])
+     except Exception:  # noqa: BLE001
+@@ -101,6 +110,12 @@
+         flash("Your bag is empty.", "info")
+         return redirect(url_for("products"))
+ 
++    cap = current_app.config.get("MAX_UNITS_PER_ORDER", 6)
++    if sum(l["qty"] for l in lines) > cap:
++        flash(f"Website orders are limited to {cap} pieces at a time. Please remove a few from your bag, "
++              f"or contact us to place a larger order.", "error")
++        return redirect(url_for("shop.cart"))
++
+     customer = current_customer()
+     form = CheckoutForm()
+     if request.method == "GET" and customer:
+diff -ruN audit/verayah/services/customer_auth.py fixsite/services/customer_auth.py
+--- audit/verayah/services/customer_auth.py	2026-11-14 17:33:47.663993387 +0200
++++ fixsite/services/customer_auth.py	2026-11-14 17:58:40.749472100 +0200
+@@ -4,20 +4,44 @@
+ keeping shoppers on a separate session key means a shopper account can never
+ be mistaken for an admin one.
+ """
++import hashlib
++import hmac
+ from functools import wraps
++from urllib.parse import urlsplit
+ 
+-from flask import session, redirect, url_for, flash, request, g
++from flask import session, redirect, url_for, flash, request, g, current_app
+ 
+ from models import db, Customer
+ 
+ 
++def _stamp(customer):
++    """A signed fingerprint of one specific account.
++
++    The session stores the customer's id AND this stamp. SQLite can hand a
++    deleted account's id to a brand-new customer, so the id alone is not enough
++    to say "same account": the stamp (id + creation time + password hash,
++    keyed with the app secret) only matches the account it was issued for.
++    """
++    raw = f"{customer.id}|{customer.created_at}|{customer.password_hash}".encode()
++    key = current_app.secret_key or b""
++    if isinstance(key, str):
++        key = key.encode()
++    return hmac.new(key, raw, hashlib.sha256).hexdigest()[:32]
++
++
+ def current_customer():
+     if "customer" in g.__dict__:
+         return g.customer
+     cid = session.get("customer_id")
+-    g.customer = db.session.get(Customer, cid) if cid else None
+-    if cid and g.customer is None:
++    customer = db.session.get(Customer, cid) if cid else None
++    if customer is not None:
++        stamp = session.get("customer_stamp") or ""
++        if not hmac.compare_digest(stamp, _stamp(customer)):
++            customer = None  # id reused by a different account, or an old session
++    g.customer = customer
++    if cid and customer is None:
+         session.pop("customer_id", None)
++        session.pop("customer_stamp", None)
+     return g.customer
+ 
+ 
+@@ -29,11 +53,13 @@
+     if cart:
+         session["cart"] = cart
+     session["customer_id"] = customer.id
++    session["customer_stamp"] = _stamp(customer)
+     g.customer = customer
+ 
+ 
+ def logout_customer():
+     session.pop("customer_id", None)
++    session.pop("customer_stamp", None)
+     g.customer = None
+ 
+ 
+@@ -48,7 +74,19 @@
+ 
+ 
+ def safe_next(target):
+-    """Only allow redirects to paths on this site."""
+-    if target and target.startswith("/") and not target.startswith("//") and "\\" not in target:
+-        return target
+-    return None
++    """Only allow redirects to paths on this site.
++
++    Rejects anything with control characters, spaces or backslashes: browsers
++    and Werkzeug silently drop tabs/newlines from URLs, so "/<TAB>/evil.com"
++    would otherwise turn into the off-site address "//evil.com".
++    """
++    if not target or not isinstance(target, str):
++        return None
++    if any(ord(ch) < 0x21 or ord(ch) == 0x7F or ch == "\\" for ch in target):
++        return None
++    if not target.startswith("/") or target.startswith("//"):
++        return None
++    parts = urlsplit(target)
++    if parts.scheme or parts.netloc:
++        return None
++    return target
+diff -ruN audit/verayah/services/newsletter.py fixsite/services/newsletter.py
+--- audit/verayah/services/newsletter.py	2026-11-14 17:33:47.668192073 +0200
++++ fixsite/services/newsletter.py	2026-11-14 17:58:13.820103804 +0200
+@@ -5,7 +5,12 @@
+ 
+ def record_consent(email, name=None, newsletter=False, sneak_peek=False, source=None):
+     """Create or update a subscriber. Only called when the person actively
+-    chose at least one list; returns the Subscriber (or None if neither)."""
++    chose at least one list; returns the Subscriber (or None if neither).
++
++    Nobody can prove, from a web form alone, that the email address they typed
++    is theirs. So an anonymous form can ADD a new address, but it can never
++    undo someone's unsubscribe or rewrite the consent record of an existing
++    subscriber. (A person who unsubscribed and wants back in contacts the shop.)"""
+     if not (newsletter or sneak_peek):
+         return None
+     email = email.strip().lower()
+@@ -13,11 +18,14 @@
+     if sub is None:
+         sub = Subscriber(email=email)
+         db.session.add(sub)
++    elif sub.unsubscribed_at is not None:
++        return sub  # they opted out - leave that decision alone
+     if name and not sub.name:
+         sub.name = name.strip()
+-    sub.newsletter = bool(newsletter) or (sub.newsletter and sub.unsubscribed_at is None)
+-    sub.sneak_peek = bool(sneak_peek) or (sub.sneak_peek and sub.unsubscribed_at is None)
+-    sub.unsubscribed_at = None
+-    sub.consent_source = source
+-    sub.consented_at = datetime.utcnow()
++    already_consented = sub.consented_at is not None
++    sub.newsletter = bool(newsletter) or bool(sub.newsletter)
++    sub.sneak_peek = bool(sneak_peek) or bool(sub.sneak_peek)
++    if not already_consented:
++        sub.consent_source = source
++        sub.consented_at = datetime.utcnow()
+     return sub
+diff -ruN audit/verayah/templates/subscribe_thanks.html fixsite/templates/subscribe_thanks.html
+--- audit/verayah/templates/subscribe_thanks.html	2026-11-14 17:33:47.997927947 +0200
++++ fixsite/templates/subscribe_thanks.html	2026-11-14 17:58:13.820380314 +0200
+@@ -1,10 +1,10 @@
+ {% extends "base.html" %}
+-{% block title %}You're on the list | Verayah{% endblock %}
++{% block title %}Thank you | Verayah{% endblock %}
+ {% block content %}
+ <section class="page-section"><div class="wrap narrow">
+   <span class="eyebrow">Thank you</span>
+-  <h1>You're on the list</h1>
+-  <p>We'll be in touch with new pieces and early looks. Every email has an unsubscribe link.</p>
++  <h1>Thank you</h1>
++  <p>If this address hasn't unsubscribed before, it's now on the list and we'll be in touch with new pieces and early looks. Every email has an unsubscribe link. If you unsubscribed in the past and would like to rejoin, please contact us.</p>
+   <a href="{{ url_for('products') }}" class="btn-fill">Shop the collection</a>
+ </div></section>
+ {% endblock %}

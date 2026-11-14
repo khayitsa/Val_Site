@@ -59,6 +59,17 @@ app.config["MAX_CONTENT_LENGTH"] = 60 * 1024 * 1024
 # --- Shop / business settings (all optional, set in .env) -------------
 # Nothing here is a secret. Anything left blank is shown to shoppers as
 # "to be confirmed" rather than guessed.
+# Most pieces one website order may contain. Stock is reserved the moment an order
+# is placed (before payment), so this stops one order tying up the whole shop.
+# Larger orders are placed by contacting the shop. Blank/invalid = 6.
+try:
+    app.config["MAX_UNITS_PER_ORDER"] = max(1, int(os.environ.get("MAX_UNITS_PER_ORDER") or 6))
+except ValueError:
+    app.config["MAX_UNITS_PER_ORDER"] = 6
+# The public address of the shop, e.g. https://verayah.example. When set, links in
+# emails use it instead of whatever Host header the request arrived with.
+_base = (os.environ.get("PUBLIC_BASE_URL") or "").strip().rstrip("/")
+app.config["PUBLIC_BASE_URL"] = _base if _base.startswith(("http://", "https://")) else ""
 app.config["DELIVERY_FEE"] = os.environ.get("DELIVERY_FEE", "")          # e.g. 5.00 - courier fee within Panama
 app.config["SITE"] = {
     "name": "Verayah",

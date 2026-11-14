@@ -107,7 +107,7 @@ def subscribe():
                            form.newsletter.data, form.sneak_peek.data,
                            source="footer" if from_footer else "subscribe_page")
             db.session.commit()
-            flash("You're on the list. You can unsubscribe at any time from any email we send.", "success")
+            flash("Thank you - your request has been received. You can unsubscribe at any time.", "success")
             return redirect(url_for("main.subscribe_thanks"))
         if from_footer:
             flash("Please enter a valid email address.", "error")
