@@ -74,14 +74,14 @@ app.config["DELIVERY_FEE"] = os.environ.get("DELIVERY_FEE", "")          # e.g. 
 app.config["SITE"] = {
     "name": "Verayah",
     "operator": os.environ.get("BUSINESS_OPERATOR", "Valentina Garcia"),
-    "email": os.environ.get("BUSINESS_EMAIL", ""),
+    "email": os.environ.get("BUSINESS_EMAIL", "verayahpty@gmail.com"),
     "phone": os.environ.get("BUSINESS_PHONE", "+507 6904-0901"),
-    "whatsapp": os.environ.get("WHATSAPP_NUMBER", ""),                    # digits only, e.g. 50769040901
+    "whatsapp": os.environ.get("WHATSAPP_NUMBER", "50769040901"),                    # digits only, e.g. 50769040901
     "address": os.environ.get("BUSINESS_ADDRESS", "Panama City, Panama"),
     "returns_address": os.environ.get("RETURNS_ADDRESS", ""),
     "yappy": os.environ.get("YAPPY_NUMBER", ""),
     "bank_details": os.environ.get("BANK_DETAILS", ""),
-    "instagram": os.environ.get("INSTAGRAM_URL", ""),
+    "instagram": os.environ.get("INSTAGRAM_URL", "https://instagram.com"),
     "pinterest": os.environ.get("PINTEREST_URL", ""),
     "tiktok": os.environ.get("TIKTOK_URL", ""),
     # Show a "draft wording" banner on the policy pages until the final copy is in.

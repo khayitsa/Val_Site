@@ -16,7 +16,7 @@
   {% elif paid %}
   <p>Thank you, {{ order.customer_name.split(' ')[0] }}. <strong>We have received your payment</strong> and are getting your order ready.</p>
   {% else %}
-  <p>Thank you, {{ order.customer_name.split(' ')[0] }}. Your pieces are reserved for you. <strong>Your order is confirmed once payment is received.</strong></p>
+  <p>Thank you, {{ order.customer_name.split(' ')[0] }}. Please pay right away: we do not hold unpaid orders, and if payment does not arrive the order is cancelled and the pieces go back on sale. <strong>Your order is confirmed once payment is received.</strong></p>
   {% endif %}
 
   <table class="legal-table">
@@ -35,7 +35,7 @@
   {% else %}
     <p>We will send you the {{ 'Yappy' if order.payment_method == 'yappy' else 'bank transfer' }} details{% if order.customer_email %} at {{ order.customer_email }}{% endif %} and on WhatsApp ({{ order.customer_phone }}) shortly.</p>
   {% endif %}
-  <p>Then send your payment proof to us{% if site.whatsapp %} on <a href="https://wa.me/{{ site.whatsapp }}">WhatsApp</a>{% else %} on {{ site.phone }}{% endif %}.</p>
+  <p>Then send your payment proof to us{% if site.whatsapp %} on <a href="https://wa.me/{{ site.whatsapp }}">WhatsApp</a>{% else %} on {{ site.phone }}{% endif %}{% if site.instagram %} or by <a href="{{ site.instagram }}" rel="noopener" target="_blank">Instagram direct message</a>{% endif %}.</p>
   {% endif %}
 
   <h2>Your order</h2>

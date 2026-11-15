@@ -12,8 +12,9 @@ main_bp = Blueprint("main", __name__)
 
 
 # --- Policy pages ----------------------------------------------------------
-# Wording is supplied by Leah / the lawyers. Until it lands, the templates in
-# templates/legal/ carry clearly-marked DRAFT text built from the owner's answers.
+# Privacy, Cookies and Terms of Use carry the final supplied wording. Terms of Sale,
+# Shipping & Returns and Care are still DRAFT text built from the owner's answers
+# (see templates/legal/_draft_banner.html and the LEGAL_DRAFT setting).
 
 @main_bp.route("/privacy")
 def privacy():
@@ -23,6 +24,11 @@ def privacy():
 @main_bp.route("/terms")
 def terms():
     return render_template("legal/terms.html")
+
+
+@main_bp.route("/terms-of-sale")
+def terms_of_sale():
+    return render_template("legal/terms_of_sale.html")
 
 
 @main_bp.route("/shipping-returns")

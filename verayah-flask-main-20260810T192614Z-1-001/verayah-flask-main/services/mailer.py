@@ -119,16 +119,18 @@ def confirm_to_customer(order, order_url, site):
         pay = ("How to pay: we will send you the payment details shortly, "
                "by email and on WhatsApp.")
     contact = site.get("whatsapp") and f"WhatsApp https://wa.me/{site['whatsapp']}" or f"phone {site.get('phone', '')}"
+    insta = f" or by Instagram direct message {site['instagram']}" if site.get("instagram") else ""
     first = (order.customer_name or "").split(" ")[0] or "there"
     body = (
         f"Hi {first},\n\n"
-        f"Thank you for your order with Verayah. Your pieces are reserved for you; "
-        f"your order is confirmed once payment is received.\n\n"
+        f"Thank you for your order with Verayah. Please pay right away: we do not hold "
+        f"unpaid orders, and if payment does not arrive the order is cancelled and the "
+        f"pieces go back on sale. Your order is confirmed once payment is received.\n\n"
         f"Order #{order.id}\n{_item_lines(order)}\n\n"
         f"{_delivery_line(order)}\n"
         f"Total: {_money(order.total())}\n\n"
         f"{pay}\n"
-        f"Then send your payment proof to us on {contact}.\n\n"
+        f"Then send your payment proof to us on {contact}{insta}.\n\n"
         f"You can check the status of your order any time here:\n{order_url}\n\n"
         f"With love,\nVerayah\n"
     )
