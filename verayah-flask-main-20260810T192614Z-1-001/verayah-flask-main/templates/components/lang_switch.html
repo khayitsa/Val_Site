@@ -1,0 +1,5 @@
+<div class="lang-switch" role="group" aria-label="{{ _('Language') }}">
+  <a href="{{ switch_url('en') }}" lang="en" hreflang="en" class="{{ 'on' if lang == 'en' }}"{% if lang == 'en' %} aria-current="true"{% endif %} title="English">EN</a>
+  <span aria-hidden="true">/</span>
+  <a href="{{ switch_url('es') }}" lang="es" hreflang="es" class="{{ 'on' if lang == 'es' }}"{% if lang == 'es' %} aria-current="true"{% endif %} title="Español">ES</a>
+</div>

@@ -1,9 +1,9 @@
 {% extends "admin/base.html" %}
-{% block title %}{{ "Edit" if mode == "edit" else "New" }} Journal post{% endblock %}
+{% block title %}{{ _("Edit post") if mode == "edit" else _("Write a post") }}{% endblock %}
 {% block content %}
 <div class="admin-header">
-  <h1>{{ "Edit post" if mode == "edit" else "Write a post" }}</h1>
-  <a href="{{ url_for('admin.journal_list') }}" class="btn btn-outline">Back to journal</a>
+  <h1>{{ _("Edit post") if mode == "edit" else _("Write a post") }}</h1>
+  <a href="{{ url_for('admin.journal_list') }}" class="btn btn-outline">{{ _("Back to journal") }}</a>
 </div>
 
 <div class="card" style="max-width:760px;">
@@ -26,9 +26,7 @@
       {{ form.body.label }}
       {{ form.body(rows=20) }}
       <div class="hint">
-        Leave a blank line between paragraphs. Formatting: <code>## Heading</code>, <code>### Smaller heading</code>,
-        <code>**bold**</code>, <code>*italic*</code>, <code>- list item</code> (one per line),
-        <code>[link text](https://example.com)</code>.
+        {{ _h("Leave a blank line between paragraphs. Formatting: <code>## Heading</code>, <code>### Smaller heading</code>, <code>**bold**</code>, <code>*italic*</code>, <code>- list item</code> (one per line), <code>[link text](https://example.com)</code>.") }}
       </div>
       {% for e in form.body.errors %}<div class="errors">{{ e }}</div>{% endfor %}
     </div>
@@ -41,7 +39,7 @@
       </div>
       {% endif %}
       {{ form.image() }}
-      <div class="hint">JPG, PNG or WEBP. Big phone photos are fine - they are shrunk automatically.{% if mode == "edit" and post.cover_image %} Leave blank to keep the current photo.{% endif %}</div>
+      <div class="hint">{{ _("JPG, PNG or WEBP. Big phone photos are fine - they are shrunk automatically.") }}{% if mode == "edit" and post.cover_image %} {{ _("Leave blank to keep the current photo.") }}{% endif %}</div>
       {% for e in form.image.errors %}<div class="errors">{{ e }}</div>{% endfor %}
       {% if mode == "edit" and post.cover_image %}
       <div class="field checkbox-row" style="margin-top:.5rem;">{{ form.remove_image() }} {{ form.remove_image.label }}</div>
@@ -52,7 +50,20 @@
       {{ form.is_published() }}
       {{ form.is_published.label }}
     </div>
-    <div class="hint" style="margin-bottom:1rem;">Leave this unticked to keep it as a draft. You can preview drafts from the Journal list.</div>
+    <div class="hint" style="margin-bottom:1rem;">{{ _("Leave this unticked to keep it as a draft. You can preview drafts from the Journal list.") }}</div>
+
+    <h3 style="margin-top:2rem;">{{ _("Spanish version (optional)") }}</h3>
+    <div class="hint" style="margin-bottom:1rem;">{{ _("Shown instead of the English text when a visitor reads the site in Spanish. Leave empty to show the English text.") }}</div>
+    <div class="field">{{ form.title_es.label }}{{ form.title_es() }}
+      {% for e in form.title_es.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+    </div>
+    <div class="field">{{ form.excerpt_es.label }}{{ form.excerpt_es(rows=2, maxlength=300) }}
+      {% for e in form.excerpt_es.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+    </div>
+    <div class="field">{{ form.body_es.label }}{{ form.body_es(rows=14) }}
+      {% for e in form.body_es.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+    </div>
+
 
     {{ form.submit(class="btn btn-primary") }}
   </form>

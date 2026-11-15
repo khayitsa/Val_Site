@@ -29,6 +29,7 @@ from models import (
 )
 from services.journal import unique_slug
 from services.security import admin_login_throttle, client_ip
+from services.i18n import t
 from forms.admin_forms import check_upload, LoginForm, ProductForm, OrderStatusForm, OrderForm, OrderCustomerForm, JournalForm
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin", template_folder="../templates/admin")
@@ -80,12 +81,11 @@ def _extra_photo_problem(product):
     remove_ids = set(request.form.getlist("remove_extra"))
     keep = [i for i in (product.extra_images if product else []) if str(i.id) not in remove_ids]
     if len(keep) + len(files) > MAX_EXTRA_PHOTOS:
-        return [], remove_ids, (f"A product can have up to {MAX_EXTRA_PHOTOS + 1} photos "
-                                f"(1 main + {MAX_EXTRA_PHOTOS} extra). Remove some first.")
+        return [], remove_ids, t("A product can have up to {total} photos (1 main + {extra} extra). Remove some first.",
+                                 total=MAX_EXTRA_PHOTOS + 1, extra=MAX_EXTRA_PHOTOS)
     for f in files:
         if not _allowed_file(f.filename):
-            return [], remove_ids, (f'"{f.filename}": please use a JPG, PNG or WEBP photo. '
-                                    "(iPhone tip: if it is a HEIC photo, share or export it as JPG first.)")
+            return [], remove_ids, f'"{f.filename}": ' + t("Please use a JPG, PNG or WEBP photo. (iPhone tip: if it is a HEIC photo, share or export it as JPG first.)")
         try:
             check_upload(f)
         except ValidationError as exc:
@@ -165,7 +165,7 @@ def login():
 
         tkey = username.lower() + "|" + client_ip()
         if admin_login_throttle.blocked(tkey):
-            flash("Too many failed attempts. Please wait 15 minutes and try again.", "error")
+            flash(t("Too many failed attempts. Please wait 15 minutes and try again."), "error")
             return render_template("admin/login.html", form=form)
 
         user = AdminUser.query.filter_by(username=username).first()
@@ -175,7 +175,7 @@ def login():
             return redirect(url_for("admin.dashboard"))
 
         admin_login_throttle.record(tkey)
-        flash("Incorrect username or password.", "error")
+        flash(t("Incorrect username or password."), "error")
 
     return render_template("admin/login.html", form=form)
 
@@ -227,6 +227,7 @@ def product_new():
             category=form.category.data,
             price=form.price.data,
             description=form.description.data.strip(),
+            description_es=(form.description_es.data or "").strip() or None,
             is_active=form.is_active.data,
             sort_order=form.sort_order.data or 0,
         )
@@ -238,12 +239,12 @@ def product_new():
             product.image_filename = _save_product_image(form.image.data)
         _sync_variants(product)
         if not product.variants:
-            flash("Add at least one shade with a stock quantity.", "error")
+            flash(t("Add at least one shade with a stock quantity."), "error")
             return render_template("admin/product_form.html", form=form, mode="new")
         _apply_extra_photos(product, extra_files, remove_ids)
         db.session.add(product)
         db.session.commit()
-        flash(f'"{product.name}" was added.', "success")
+        flash(t('"{name}" was added.', name=product.name), "success")
         return redirect(url_for("admin.products_list"))
     return render_template("admin/product_form.html", form=form, mode="new")
 
@@ -261,6 +262,7 @@ def product_edit(product_id):
         product.category = form.category.data
         product.price = form.price.data
         product.description = form.description.data.strip()
+        product.description_es = (form.description_es.data or "").strip() or None
         product.is_active = form.is_active.data
         product.sort_order = form.sort_order.data or 0
         extra_files, remove_ids, problem = _extra_photo_problem(product)
@@ -272,12 +274,12 @@ def product_edit(product_id):
             product.image_filename = _save_product_image(form.image.data)
         _sync_variants(product)
         if not product.variants:
-            flash("Add at least one shade with a stock quantity.", "error")
+            flash(t("Add at least one shade with a stock quantity."), "error")
             return render_template("admin/product_form.html", form=form, mode="edit", product=product)
         _apply_extra_photos(product, extra_files, remove_ids)
         product.updated_at = datetime.utcnow()
         db.session.commit()
-        flash(f'"{product.name}" was updated.', "success")
+        flash(t('"{name}" was updated.', name=product.name), "success")
         return redirect(url_for("admin.products_list"))
 
     return render_template("admin/product_form.html", form=form, mode="edit", product=product)
@@ -293,7 +295,7 @@ def product_delete(product_id):
     db.session.commit()
     for fn in extra_files:
         _delete_product_file(fn)
-    flash(f'"{name}" was deleted.', "success")
+    flash(t('"{name}" was deleted.', name=name), "success")
     return redirect(url_for("admin.products_list"))
 
 
@@ -325,6 +327,9 @@ def journal_new():
             slug=unique_slug(form.title.data),
             excerpt=(form.excerpt.data or "").strip() or None,
             body=form.body.data.strip(),
+            title_es=(form.title_es.data or "").strip() or None,
+            excerpt_es=(form.excerpt_es.data or "").strip() or None,
+            body_es=(form.body_es.data or "").strip() or None,
             is_published=form.is_published.data,
         )
         if post.is_published:
@@ -333,7 +338,7 @@ def journal_new():
             post.cover_image = _save_product_image(form.image.data, "journal")
         db.session.add(post)
         db.session.commit()
-        flash(f'"{post.title}" was saved' + (" and published." if post.is_published else " as a draft."), "success")
+        flash(t('"{name}" was saved and published.', name=post.title) if post.is_published else t('"{name}" was saved as a draft.', name=post.title), "success")
         return redirect(url_for("admin.journal_list"))
     return render_template("admin/journal_form.html", form=form, mode="new")
 
@@ -347,6 +352,9 @@ def journal_edit(post_id):
         post.title = form.title.data.strip()
         post.excerpt = (form.excerpt.data or "").strip() or None
         post.body = form.body.data.strip()
+        post.title_es = (form.title_es.data or "").strip() or None
+        post.excerpt_es = (form.excerpt_es.data or "").strip() or None
+        post.body_es = (form.body_es.data or "").strip() or None
         if form.is_published.data and not post.is_published and not post.published_at:
             post.published_at = datetime.utcnow()
         post.is_published = form.is_published.data
@@ -358,7 +366,7 @@ def journal_edit(post_id):
             post.cover_image = None
         post.updated_at = datetime.utcnow()
         db.session.commit()
-        flash(f'"{post.title}" was updated.', "success")
+        flash(t('"{name}" was updated.', name=post.title), "success")
         return redirect(url_for("admin.journal_list"))
     return render_template("admin/journal_form.html", form=form, mode="edit", post=post)
 
@@ -371,7 +379,7 @@ def journal_delete(post_id):
     _delete_journal_image(post.cover_image)
     db.session.delete(post)
     db.session.commit()
-    flash(f'"{title}" was deleted.', "success")
+    flash(t('"{name}" was deleted.', name=title), "success")
     return redirect(url_for("admin.journal_list"))
 
 
@@ -437,10 +445,8 @@ def order_new():
                 continue
 
             if qty > variant.stock_quantity:
-                flash(
-                    f"Only {variant.stock_quantity} of {product.name} ({variant.shade}) left in stock — "
-                    f"reduce the quantity and try again.", "error"
-                )
+                flash(t("Only {n} of {item} left in stock - reduce the quantity and try again.",
+                        n=variant.stock_quantity, item=f"{product.name} ({variant.shade})"), "error")
                 return render_template("admin/order_form.html", form=form, products=products,
                                         variants_by_product=variants_by_product)
 
@@ -456,13 +462,13 @@ def order_new():
             added_any = True
 
         if not added_any:
-            flash("Add at least one product to the order.", "error")
+            flash(t("Add at least one product to the order."), "error")
             return render_template("admin/order_form.html", form=form, products=products,
                                     variants_by_product=variants_by_product)
 
         db.session.add(order)
         db.session.commit()
-        flash(f"Order #{order.id} for {order.customer_name} was created.", "success")
+        flash(t("Order #{id} for {name} was created.", id=order.id, name=order.customer_name), "success")
         return redirect(url_for("admin.order_detail", order_id=order.id))
 
     return render_template("admin/order_form.html", form=form, products=products,
@@ -495,7 +501,7 @@ def order_update(order_id):
                     variant = ProductVariant.query.get(item.variant_id)
                     if variant:
                         variant.stock_quantity += item.quantity
-            flash_extra = " Stock was returned for its items."
+            flash_extra = " " + t("Stock was returned for its items.")
         elif old_status == "cancelled" and new_status != "cancelled":
             short_items = []
             for item in order.items:
@@ -507,8 +513,7 @@ def order_update(order_id):
                         variant.stock_quantity -= item.quantity
             flash_extra = ""
             if short_items:
-                flash(f"Warning: reactivating this order pushed stock negative for: {', '.join(short_items)}. "
-                      f"Double check inventory.", "error")
+                flash(t("Warning: reactivating this order pushed stock negative for: {items}. Double check inventory.", items=", ".join(short_items)), "error")
         else:
             flash_extra = ""
 
@@ -520,9 +525,9 @@ def order_update(order_id):
         order.notes = (form.notes.data or "").strip() or None
         order.updated_at = datetime.utcnow()
         db.session.commit()
-        flash(f"Order #{order.id} updated.{flash_extra}", "success")
+        flash(t("Order #{id} updated.", id=order.id) + flash_extra, "success")
     else:
-        flash("Could not update order — please check the form.", "error")
+        flash(t("Could not update order - please check the form."), "error")
     return redirect(url_for("admin.order_detail", order_id=order.id))
 
 
@@ -540,9 +545,9 @@ def order_customer_update(order_id):
         order.shipping_country = form.shipping_country.data.strip()
         order.updated_at = datetime.utcnow()
         db.session.commit()
-        flash("Customer details updated.", "success")
+        flash(t("Customer details updated."), "success")
     else:
-        flash("Could not update customer details - please check the form.", "error")
+        flash(t("Could not update customer details - please check the form."), "error")
     return redirect(url_for("admin.order_detail", order_id=order.id))
 
 
@@ -561,7 +566,7 @@ def order_delete(order_id):
     number = order.id
     db.session.delete(order)
     db.session.commit()
-    flash(f"Order #{number} was permanently deleted.", "success")
+    flash(t("Order #{id} was permanently deleted.", id=number), "success")
     return redirect(url_for("admin.orders_list"))
 
 
@@ -584,7 +589,7 @@ def customer_delete(customer_id):
     email = customer.email
     db.session.delete(customer)
     db.session.commit()
-    flash(f"Account {email} was deleted. Its past orders were kept as records.", "success")
+    flash(t("Account {email} was deleted. Its past orders were kept as records.", email=email), "success")
     return redirect(url_for("admin.customers_list"))
 
 
@@ -624,7 +629,7 @@ def subscriber_delete(sub_id):
     sub = Subscriber.query.get_or_404(sub_id)
     db.session.delete(sub)
     db.session.commit()
-    flash("Subscriber removed.", "success")
+    flash(t("Subscriber removed."), "success")
     return redirect(url_for("admin.subscribers_list"))
 
 
@@ -643,7 +648,7 @@ def message_handled(msg_id):
     msg = ContactMessage.query.get_or_404(msg_id)
     msg.handled = not msg.handled
     db.session.commit()
-    flash("Message marked as handled." if msg.handled else "Message marked as new.", "success")
+    flash(t("Message marked as handled.") if msg.handled else t("Message marked as new."), "success")
     return redirect(url_for("admin.messages_list"))
 
 
@@ -653,5 +658,5 @@ def message_delete(msg_id):
     msg = ContactMessage.query.get_or_404(msg_id)
     db.session.delete(msg)
     db.session.commit()
-    flash("Message deleted.", "success")
+    flash(t("Message deleted."), "success")
     return redirect(url_for("admin.messages_list"))

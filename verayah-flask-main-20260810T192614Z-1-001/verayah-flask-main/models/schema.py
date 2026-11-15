@@ -22,7 +22,27 @@ ORDER_COLUMNS = {
 }
 
 
+# Optional Spanish copies of product / journal text (added for the EN/ES switch).
+EXTRA_COLUMNS = {
+    "products": {"description_es": "TEXT"},
+    "journal_posts": {"title_es": "VARCHAR(200)", "excerpt_es": "VARCHAR(300)", "body_es": "TEXT"},
+}
+
+
+def _add_missing(db, table, columns):
+    inspector = inspect(db.engine)
+    if table not in inspector.get_table_names():
+        return
+    existing = {c["name"] for c in inspector.get_columns(table)}
+    with db.engine.begin() as conn:
+        for name, ddl in columns.items():
+            if name not in existing:
+                conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {name} {ddl}"))
+
+
 def upgrade_schema(db):
+    for table, cols in EXTRA_COLUMNS.items():
+        _add_missing(db, table, cols)
     inspector = inspect(db.engine)
     if "orders" not in inspector.get_table_names():
         return  # fresh database: create_all() already built the final shape

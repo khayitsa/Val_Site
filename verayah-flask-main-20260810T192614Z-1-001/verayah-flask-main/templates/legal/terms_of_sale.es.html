@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Términos de venta | Verayah{% endblock %}
+{% block content %}
+<section class="page-section"><div class="wrap narrow legal">
+  <span class="eyebrow">Legal</span>
+  <h1>Términos de venta</h1>
+  {% include 'legal/_translation_notice.es.html' %}
+  {% include 'legal/_draft_banner.es.html' %}
+
+  <h2>Sobre estos términos</h2>
+  <p>Estos términos se aplican a los pedidos hechos a Verayah ({{ site.operator }}, {{ site.address }}). Al hacer un pedido confirmas que los has leído, así como la <a href="{{ url_for('main.privacy') }}">Política de privacidad</a>.</p>
+
+  <h2>Nuestras piezas</h2>
+  <p>Las piezas se hacen a mano con cadenas con baño de oro de 18k, perlas de río y cristales naturales. Como las perlas y los cristales son naturales, no hay dos piezas exactamente iguales, y los colores y las formas pueden diferir ligeramente de las fotos. Nuestra joyería es resistente al agua, pero no es sumergible; consulta la <a href="{{ url_for('main.care') }}">Guía de cuidado</a>.</p>
+  <p>Las piezas listas para entrega se venden en cantidades limitadas; las existencias que aparecen en el sitio están actualizadas al momento de tu pedido. Las cadenas para la cintura vienen en tallas S, M y L. Las piezas personalizadas se acuerdan directamente con la propietaria (ver más abajo).</p>
+
+  <h2>Pedido y pago</h2>
+  <p>Puedes comprar sin una cuenta. Después de hacer tu pedido recibes un número de pedido y los datos de pago por Yappy o transferencia bancaria. Por favor paga de inmediato: no reservamos pedidos sin pagar, y un pedido que no se paga se cancela y las piezas vuelven a estar a la venta. El pedido queda confirmado cuando recibimos el pago. Envía tu comprobante de pago por WhatsApp o por mensaje directo de Instagram. Recibes una confirmación del pedido con tu número de pedido; no emitimos recibos ni facturas por separado. Los precios se muestran en dólares estadounidenses. Si los precios incluyen o no los impuestos aplicables: <span class="tbc">por definir (a confirmar con el contador)</span>.</p>
+
+  <h2>Piezas personalizadas y hechas por encargo</h2>
+  <p>Las piezas personalizadas se acuerdan con la propietaria por mensaje. Se requiere un depósito de $20 para comenzar, que no es reembolsable. El saldo se paga completo el día de la entrega o antes. <span class="tbc">El momento del pago del saldo lo confirmará Val.</span></p>
+
+  <h2>Cancelar o cambiar un pedido</h2>
+  <p>Puedes cambiar o cancelar un pedido hasta que sea despachado. Si cancelas, recibes crédito en la tienda. Si somos nosotros quienes cancelamos o no podemos completar tu pedido (por ejemplo, porque está agotado, defectuoso o no es como se describió), recibes un reembolso en dinero, por Yappy o transferencia bancaria a la cuenta desde la que pagaste.</p>
+
+  <h2>Entrega, devoluciones y defectos</h2>
+  <p>Consulta <a href="{{ url_for('main.shipping_returns') }}">Envíos y devoluciones</a>.</p>
+
+  <h2>Tus derechos legales</h2>
+  <p>Nada de lo dispuesto en estos términos limita los derechos que tengas conforme a la ley panameña de protección al consumidor. <span class="tbc">Redacción por confirmar según los requisitos de protección al consumidor aplicables.</span></p>
+
+  <h2>Contacto</h2>
+  <p>{{ site.phone }}{% if site.email %} · {{ site.email }}{% endif %}</p>
+</div></section>
+{% endblock %}

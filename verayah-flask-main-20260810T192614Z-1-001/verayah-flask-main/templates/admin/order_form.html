@@ -1,11 +1,11 @@
 {% extends "admin/base.html" %}
-{% block title %}Log an order{% endblock %}
+{% block title %}{{ _("Log an order") }}{% endblock %}
 {% block content %}
 <div class="admin-header">
-  <h1>Log an order</h1>
-  <a href="{{ url_for('admin.orders_list') }}" class="btn btn-outline">Back to orders</a>
+  <h1>{{ _("Log an order") }}</h1>
+  <a href="{{ url_for('admin.orders_list') }}" class="btn btn-outline">{{ _("Back to orders") }}</a>
 </div>
-<p class="muted" style="margin-top:-0.5rem;">For orders taken via WhatsApp, DM, or in person.</p>
+<p class="muted" style="margin-top:-0.5rem;">{{ _("For orders taken via WhatsApp, DM, or in person.") }}</p>
 
 <div class="card" style="max-width:680px;">
   <form method="POST">
@@ -29,11 +29,11 @@
     </div>
     <div class="field">{{ form.notes.label }}{{ form.notes() }}</div>
 
-    <h3>Items</h3>
+    <h3>{{ _("Items") }}</h3>
     <table class="order-items-table" id="itemsTable">
-      <tr><th>Product</th><th>Shade</th><th>Qty</th><th></th></tr>
+      <tr><th>{{ _("Product") }}</th><th>{{ _("Shade") }}</th><th>{{ _("Qty") }}</th><th></th></tr>
     </table>
-    <button type="button" class="btn btn-outline btn-sm" id="addItemBtn" style="margin-top:0.5rem;">+ Add item</button>
+    <button type="button" class="btn btn-outline btn-sm" id="addItemBtn" style="margin-top:0.5rem;">+ {{ _("Add item") }}</button>
 
     <div style="margin-top:1.5rem;">
       {{ form.submit(class="btn btn-primary") }}
@@ -45,7 +45,7 @@
   <tr>
     <td>
       <select class="item-product">
-        <option value="">Select a product…</option>
+        <option value="">{{ _("Select a product…") }}</option>
         {% for p in products %}
         <option value="{{ p.id }}">{{ p.name }} ({{ p.price_display() }})</option>
         {% endfor %}
@@ -54,11 +54,11 @@
     </td>
     <td>
       <select class="item-shade" name="item_variant_id">
-        <option value="">Select a product first…</option>
+        <option value="">{{ _("Select a product first…") }}</option>
       </select>
     </td>
     <td><input type="number" class="item-quantity" name="item_quantity" value="1" min="1" style="width:70px;"></td>
-    <td><button type="button" class="btn btn-outline btn-sm remove-row">Remove</button></td>
+    <td><button type="button" class="btn btn-outline btn-sm remove-row">{{ _("Remove") }}</button></td>
   </tr>
 </template>
 
@@ -68,6 +68,11 @@
   var template = document.getElementById('itemRowTemplate');
   var addBtn = document.getElementById('addItemBtn');
   var variantsByProduct = {{ variants_by_product|tojson }};
+  var T = {
+    selectFirst: {{ _('Select a product first…')|string|tojson }},
+    noShades: {{ _('No shades in stock')|string|tojson }},
+    inStock: {{ _('{shade} ({n} in stock)', shade='%S%', n='%N%')|string|tojson }}
+  };
 
   function populateShades(row, productId){
     var shadeSelect = row.querySelector('.item-shade');
@@ -76,18 +81,20 @@
 
     var variants = variantsByProduct[productId] || [];
     if (!productId) {
-      shadeSelect.innerHTML = '<option value="">Select a product first…</option>';
+      shadeSelect.innerHTML = '';
+      var o1 = document.createElement('option'); o1.value = ''; o1.textContent = T.selectFirst; shadeSelect.appendChild(o1);
       return;
     }
     if (variants.length === 0) {
-      shadeSelect.innerHTML = '<option value="">No shades in stock</option>';
+      shadeSelect.innerHTML = '';
+      var o2 = document.createElement('option'); o2.value = ''; o2.textContent = T.noShades; shadeSelect.appendChild(o2);
       qtyInput.max = 0;
       return;
     }
     variants.forEach(function(v){
       var opt = document.createElement('option');
       opt.value = v.id;
-      opt.textContent = v.shade + ' (' + v.stock + ' in stock)';
+      opt.textContent = T.inStock.replace('%S%', v.shade).replace('%N%', v.stock);
       opt.setAttribute('data-stock', v.stock);
       shadeSelect.appendChild(opt);
     });

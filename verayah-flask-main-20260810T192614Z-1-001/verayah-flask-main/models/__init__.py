@@ -48,6 +48,7 @@ class Product(db.Model):
     category = db.Column(db.String(80), nullable=False)  # Body Chain, Hand Chain, Waist Chain, Anklet, Earring
     price = db.Column(db.Numeric(10, 2), nullable=False)
     description = db.Column(db.Text, nullable=False, default="")
+    description_es = db.Column(db.Text, nullable=True)   # optional Spanish copy of the description
     image_filename = db.Column(db.String(255), nullable=False, default="")
     is_active = db.Column(db.Boolean, nullable=False, default=True)  # soft-hide instead of hard delete by default
     sort_order = db.Column(db.Integer, nullable=False, default=0)
@@ -69,11 +70,11 @@ class Product(db.Model):
     def price_display(self):
         return f"${self.price:,.2f}"
 
-    def shades_display(self):
+    def shades_display(self, out_of_stock_text="Currently out of stock"):
         """e.g. 'Blushed, Seafoam, Oceanic' - only shades currently in stock,
         for the public product page."""
         in_stock = [v.shade for v in self.variants if v.stock_quantity > 0]
-        return ", ".join(in_stock) if in_stock else "Currently out of stock"
+        return ", ".join(in_stock) if in_stock else out_of_stock_text
 
     def total_stock(self):
         return sum(v.stock_quantity for v in self.variants)
@@ -249,6 +250,9 @@ class JournalPost(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
+    title_es = db.Column(db.String(200), nullable=True)      # optional Spanish copies
+    excerpt_es = db.Column(db.String(300), nullable=True)
+    body_es = db.Column(db.Text, nullable=True)
     slug = db.Column(db.String(220), unique=True, nullable=False, index=True)
     excerpt = db.Column(db.String(300), nullable=True)
     body = db.Column(db.Text, nullable=False)

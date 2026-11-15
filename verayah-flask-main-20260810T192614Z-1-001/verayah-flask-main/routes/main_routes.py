@@ -1,11 +1,12 @@
 """Public pages that are not shopping: legal/policy pages, contact, newsletter."""
 from datetime import datetime
 
-from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, make_response
 
 from models import db, ContactMessage, Subscriber
 from forms.public_forms import ContactForm, SubscribeForm
 from services.newsletter import record_consent
+from services.i18n import t, render_page, LANGS, COOKIE, ONE_YEAR
 from services.security import signup_throttle, client_ip
 
 main_bp = Blueprint("main", __name__)
@@ -18,32 +19,50 @@ main_bp = Blueprint("main", __name__)
 
 @main_bp.route("/privacy")
 def privacy():
-    return render_template("legal/privacy.html")
+    return render_page("legal/privacy.html")
 
 
 @main_bp.route("/terms")
 def terms():
-    return render_template("legal/terms.html")
+    return render_page("legal/terms.html")
 
 
 @main_bp.route("/terms-of-sale")
 def terms_of_sale():
-    return render_template("legal/terms_of_sale.html")
+    return render_page("legal/terms_of_sale.html")
 
 
 @main_bp.route("/shipping-returns")
 def shipping_returns():
-    return render_template("legal/shipping_returns.html")
+    return render_page("legal/shipping_returns.html")
 
 
 @main_bp.route("/cookies")
 def cookies():
-    return render_template("legal/cookies.html")
+    return render_page("legal/cookies.html")
 
 
 @main_bp.route("/care")
 def care():
-    return render_template("legal/care.html")
+    return render_page("legal/care.html")
+
+
+# --- Language switch ---------------------------------------------------------
+
+def _safe_local(target):
+    """Only ever send people back to a page on this site (no open redirect)."""
+    if target and target.startswith("/") and not target.startswith("//") and "\\" not in target:
+        return target
+    return url_for("home")
+
+
+@main_bp.route("/lang/<code>")
+def set_language(code):
+    resp = make_response(redirect(_safe_local(request.args.get("next"))))
+    if code in LANGS:
+        resp.set_cookie(COOKIE, code, max_age=ONE_YEAR, samesite="Lax",
+                        secure=request.is_secure, httponly=False)
+    return resp
 
 
 # --- Contact form ----------------------------------------------------------
@@ -64,7 +83,7 @@ def contact():
         return redirect(url_for("home") + "#contact")
     key = client_ip()
     if signup_throttle.blocked("contact:" + key):
-        flash("Too many messages in a short time. Please try again later.", "error")
+        flash(t("Too many messages in a short time. Please try again later."), "error")
         return _back("#contact")
     if form.validate_on_submit():
         signup_throttle.record("contact:" + key)
@@ -82,9 +101,9 @@ def contact():
         except Exception:  # noqa: BLE001
             current_app.logger.exception("Contact email step failed")
         first = form.name.data.strip().split(" ")[0]
-        flash(f"Thank you, {first} - your message has been received and we will be in touch.", "success")
+        flash(t("Thank you, {name} - your message has been received and we will be in touch.", name=first), "success")
         return _back("#contact")
-    flash("Please check your name, email and message and try again.", "error")
+    flash(t("Please check your name, email and message and try again."), "error")
     return _back("#contact")
 
 
@@ -102,21 +121,21 @@ def subscribe():
             form.sneak_peek.data = True
         key = client_ip()
         if signup_throttle.blocked("sub:" + key):
-            flash("Too many sign-ups in a short time. Please try again later.", "error")
+            flash(t("Too many sign-ups in a short time. Please try again later."), "error")
             return redirect(url_for("main.subscribe"))
         if form.validate_on_submit():
             if not (form.newsletter.data or form.sneak_peek.data):
-                flash("Please tick at least one list to join.", "error")
+                flash(t("Please tick at least one list to join."), "error")
                 return render_template("subscribe.html", form=form)
             signup_throttle.record("sub:" + key)
             record_consent(form.email.data, form.name.data,
                            form.newsletter.data, form.sneak_peek.data,
                            source="footer" if from_footer else "subscribe_page")
             db.session.commit()
-            flash("Thank you - your request has been received. You can unsubscribe at any time.", "success")
+            flash(t("Thank you - your request has been received. You can unsubscribe at any time."), "success")
             return redirect(url_for("main.subscribe_thanks"))
         if from_footer:
-            flash("Please enter a valid email address.", "error")
+            flash(t("Please enter a valid email address."), "error")
             return _back()
     return render_template("subscribe.html", form=form)
 

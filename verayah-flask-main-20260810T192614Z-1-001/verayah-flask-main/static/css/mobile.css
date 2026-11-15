@@ -200,3 +200,9 @@ body.nav-open { overflow: hidden; }
   .about-media { max-width: none; justify-self: stretch; }
   .collection-card--all { aspect-ratio: auto; min-height: 140px; }
 }
+
+/* Language switch in the small-screen header */
+@media (max-width: 900px) {
+  .nav-icons .lang-switch { margin-right: .2rem; font-size: 11px; }
+  .nav-icons .lang-switch a { width: auto; height: auto; min-width: 30px; min-height: 44px; align-items: center; justify-content: center; }
+}

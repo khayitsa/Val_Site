@@ -8,3 +8,11 @@
 @font-face{font-family:'Jost';font-style:normal;font-weight:300;font-display:swap;src:url('../fonts/jost-latin-300-normal.woff2') format('woff2');}
 @font-face{font-family:'Jost';font-style:normal;font-weight:400;font-display:swap;src:url('../fonts/jost-latin-400-normal.woff2') format('woff2');}
 @font-face{font-family:'Jost';font-style:normal;font-weight:500;font-display:swap;src:url('../fonts/jost-latin-500-normal.woff2') format('woff2');}
+
+/* Verayah brand-kit fonts (Title/Heading: Angel Bandit, Subtitle: Wiraile).
+   NOT ACTIVE YET: the font files below still have to be added to static/fonts/
+   (convert the licensed .ttf/.otf to .woff2), and style.css has to use these
+   families. Until then nothing references them and the site is unchanged.
+   Check each font's licence allows website (web embedding) use before uploading. */
+@font-face{font-family:'Angel Bandit';font-style:normal;font-weight:400;font-display:swap;src:url('../fonts/angel-bandit-regular.woff2') format('woff2');}
+@font-face{font-family:'Wiraile';font-style:normal;font-weight:400;font-display:swap;src:url('../fonts/wiraile-regular.woff2') format('woff2');}

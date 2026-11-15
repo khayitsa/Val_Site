@@ -1,9 +1,9 @@
 {% extends "admin/base.html" %}
-{% block title %}{{ "Edit" if mode == "edit" else "Add" }} Product{% endblock %}
+{% block title %}{{ _("Edit product") if mode == "edit" else _("Add product") }}{% endblock %}
 {% block content %}
 <div class="admin-header">
-  <h1>{{ "Edit product" if mode == "edit" else "Add product" }}</h1>
-  <a href="{{ url_for('admin.products_list') }}" class="btn btn-outline">Back to products</a>
+  <h1>{{ _("Edit product") if mode == "edit" else _("Add product") }}</h1>
+  <a href="{{ url_for('admin.products_list') }}" class="btn btn-outline">{{ _("Back to products") }}</a>
 </div>
 
 <div class="card" style="max-width:560px;">
@@ -33,24 +33,30 @@
     </div>
 
     <div class="field">
-      <label>Shades &amp; stock</label>
-      <div class="hint" style="margin-top:-2px; margin-bottom:0.5rem;">Add one row per shade you sell this in, with how many you currently have.</div>
+      {{ form.description_es.label }}
+      {{ form.description_es() }}
+      <div class="hint">{{ _("Shown instead of the English text when a visitor reads the site in Spanish. Leave empty to show the English text.") }}</div>
+    </div>
+
+    <div class="field">
+      <label>{{ _("Shades & stock") }}</label>
+      <div class="hint" style="margin-top:-2px; margin-bottom:0.5rem;">{{ _("Add one row per shade you sell this in, with how many you currently have.") }}</div>
       <table class="order-items-table" id="variantsTable">
-        <tr><th>Shade</th><th style="width:110px;">Stock</th><th></th></tr>
+        <tr><th>{{ _("Shade") }}</th><th style="width:110px;">{{ _("Stock") }}</th><th></th></tr>
         {% if mode == "edit" %}
           {% for v in product.variants %}
           <tr>
             <td>
               <input type="hidden" name="variant_id" value="{{ v.id }}">
-              <input type="text" name="variant_shade" value="{{ v.shade }}" placeholder="e.g. Seafoam">
+              <input type="text" name="variant_shade" value="{{ v.shade }}" placeholder="{{ _('e.g. Seafoam') }}">
             </td>
             <td><input type="number" name="variant_stock" value="{{ v.stock_quantity }}" min="0" style="width:90px;"></td>
-            <td><button type="button" class="btn btn-outline btn-sm remove-row">Remove</button></td>
+            <td><button type="button" class="btn btn-outline btn-sm remove-row">{{ _("Remove") }}</button></td>
           </tr>
           {% endfor %}
         {% endif %}
       </table>
-      <button type="button" class="btn btn-outline btn-sm" id="addVariantBtn" style="margin-top:0.5rem;">+ Add shade</button>
+      <button type="button" class="btn btn-outline btn-sm" id="addVariantBtn" style="margin-top:0.5rem;">+ {{ _("Add shade") }}</button>
     </div>
 
     <div class="field">
@@ -61,31 +67,31 @@
       </div>
       {% endif %}
       {{ form.image() }}
-      <div class="hint">JPG, PNG or WEBP. Big phone photos are fine - they are shrunk automatically.{% if mode == "edit" and product.image_filename %} Leave blank to keep the current photo.{% endif %}</div>
+      <div class="hint">{{ _("JPG, PNG or WEBP. Big phone photos are fine - they are shrunk automatically.") }}{% if mode == "edit" and product.image_filename %} {{ _("Leave blank to keep the current photo.") }}{% endif %}</div>
       {% for e in form.image.errors %}<div class="errors">{{ e }}</div>{% endfor %}
     </div>
 
     <div class="field">
-      <label for="more_images">More photos (optional)</label>
-      <div class="hint" style="margin-top:-2px; margin-bottom:0.5rem;">E.g. a photo on a model and a close-up of the piece. The main photo above shows on the shop page; these appear in the pop-up when a customer taps Quick View. Up to 7 extra photos.</div>
+      <label for="more_images">{{ _("More photos (optional)") }}</label>
+      <div class="hint" style="margin-top:-2px; margin-bottom:0.5rem;">{{ _("E.g. a photo on a model and a close-up of the piece. The main photo above shows on the shop page; these appear in the pop-up when a customer taps Quick View. Up to 7 extra photos.") }}</div>
       {% if mode == "edit" and product.extra_images %}
       <div style="display:flex; flex-wrap:wrap; gap:.75rem; margin-bottom:.75rem;">
         {% for img in product.extra_images %}
         <label style="display:block; text-align:center; font-size:12px; cursor:pointer;">
           <img class="thumb" style="width:70px;height:70px;display:block;margin-bottom:4px;" src="{{ url_for('static', filename='images/products/' + img.filename) }}" alt="">
-          <input type="checkbox" name="remove_extra" value="{{ img.id }}"> Remove
+          <input type="checkbox" name="remove_extra" value="{{ img.id }}"> {{ _("Remove") }}
         </label>
         {% endfor %}
       </div>
       {% endif %}
       <input type="file" id="more_images" name="more_images" multiple accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
-      <div class="hint">Select several at once. JPG, PNG or WEBP; big phone photos are shrunk automatically.</div>
+      <div class="hint">{{ _("Select several at once. JPG, PNG or WEBP; big phone photos are shrunk automatically.") }}</div>
     </div>
 
     <div class="field">
       {{ form.sort_order.label }}
       {{ form.sort_order() }}
-      <div class="hint">Lower numbers show first in the grid.</div>
+      <div class="hint">{{ _("Lower numbers show first in the grid.") }}</div>
     </div>
 
     <div class="field checkbox-row">
@@ -101,10 +107,10 @@
   <tr>
     <td>
       <input type="hidden" name="variant_id" value="">
-      <input type="text" name="variant_shade" placeholder="e.g. Seafoam">
+      <input type="text" name="variant_shade" placeholder="{{ _('e.g. Seafoam') }}">
     </td>
     <td><input type="number" name="variant_stock" value="0" min="0" style="width:90px;"></td>
-    <td><button type="button" class="btn btn-outline btn-sm remove-row">Remove</button></td>
+    <td><button type="button" class="btn btn-outline btn-sm remove-row">{{ _("Remove") }}</button></td>
   </tr>
 </template>
 

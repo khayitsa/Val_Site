@@ -938,3 +938,12 @@ footer {
 }
 .qv-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .qv-thumb.on { border-color: var(--teal-deep); }
+
+/* English / Spanish switch (public site) */
+.lang-switch { display: inline-flex; align-items: center; gap: .35rem; font-size: 12px; letter-spacing: .1em; color: var(--muted); }
+.lang-switch a { opacity: .6; text-decoration: none; padding: 2px 1px; }
+.lang-switch a:hover { opacity: 1; }
+.lang-switch a.on { opacity: 1; color: var(--charcoal); font-weight: 500; border-bottom: 1px solid currentColor; }
+.nav-icons .lang-switch { margin-right: .4rem; }
+.footer-lang { margin-top: .5rem; }
+.footer-lang .lang-switch, .footer-lang .lang-switch a.on { color: rgba(249,247,244,.75); }

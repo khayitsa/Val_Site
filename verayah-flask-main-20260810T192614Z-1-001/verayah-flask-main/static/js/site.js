@@ -42,7 +42,7 @@
     menu.classList.toggle('open', open);
     burger.classList.toggle('open', open);
     burger.setAttribute('aria-expanded', open ? 'true' : 'false');
-    burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    burger.setAttribute('aria-label', open ? (burger.dataset.labelClose || 'Close menu') : (burger.dataset.labelOpen || 'Open menu'));
     document.body.classList.toggle('nav-open', open);
   }
 

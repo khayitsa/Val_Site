@@ -109,3 +109,26 @@ On startup the app adds the new order columns to your existing SQLite database
 Password-reset emails, order/payment emails (no email service is connected, so the owner sees
 new orders in the admin), Instagram/WhatsApp marketing, saved sizes/birthdays, reviews.
 
+
+## English / Spanish
+
+The public site and the admin portal both have an **EN | ES** switch (top of the
+public site, bottom of the footer, and in the admin sidebar and login page). The
+visitor's choice is remembered in a small `lang` cookie. A first-time visitor
+sees the language of their browser (set `DEFAULT_LANG=en` or `es` in `.env` to
+force one).
+
+- **Spanish wording** for buttons, labels, messages and emails lives in
+  `services/translations_es.py` as `"English": "Español"` pairs. Edit a Spanish
+  phrase there and it changes everywhere. A phrase with no Spanish entry just
+  shows in English.
+- **Legal pages** (Privacy, Cookies, Terms of Use, Terms of Sale, Shipping &
+  Returns, Care) are written out in full in Spanish as `templates/legal/*.es.html`.
+- **Products and Journal posts** have optional Spanish fields in the admin
+  (product description; post title, summary and story). Leave them empty to show
+  the English text.
+- After changing any text in the code or templates, run
+  `python scripts/check_translations.py` to see which phrases still need Spanish.
+- When adding a new phrase, wrap it: `{{ _("Text") }}` in templates, `t("Text")`
+  in Python (use `{name}` placeholders, e.g. `t("Hi {name}", name=first)`), and
+  `L("Text")` (`from services.i18n import lazy as L`) for form labels.

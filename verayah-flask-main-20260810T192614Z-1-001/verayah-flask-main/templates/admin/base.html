@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ lang }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,20 +12,21 @@
   <aside class="admin-sidebar">
     <a class="brand" href="{{ url_for('admin.dashboard') }}">VERAYAH Admin</a>
     <nav>
-      <a href="{{ url_for('admin.dashboard') }}" class="{{ 'active' if request.endpoint == 'admin.dashboard' }}">Dashboard</a>
-      <a href="{{ url_for('admin.products_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('admin.product') }}">Products</a>
-      <a href="{{ url_for('admin.orders_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('admin.order') }}">Orders &amp; Shipping</a>
-      <a href="{{ url_for('admin.journal_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('admin.journal') }}">Journal</a>
-      <a href="{{ url_for('admin.customers_list') }}" class="{{ 'active' if request.endpoint == 'admin.customers_list' }}">Customer accounts</a>
-      <a href="{{ url_for('admin.subscribers_list') }}" class="{{ 'active' if request.endpoint == 'admin.subscribers_list' }}">Newsletter</a>
-      <a href="{{ url_for('admin.messages_list') }}" class="{{ 'active' if request.endpoint == 'admin.messages_list' }}">Messages</a>
-      <a href="{{ url_for('home') }}" target="_blank">View live site &#8599;</a>
+      <a href="{{ url_for('admin.dashboard') }}" class="{{ 'active' if request.endpoint == 'admin.dashboard' }}">{{ _("Dashboard") }}</a>
+      <a href="{{ url_for('admin.products_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('admin.product') }}">{{ _("Products") }}</a>
+      <a href="{{ url_for('admin.orders_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('admin.order') }}">{{ _("Orders & Shipping") }}</a>
+      <a href="{{ url_for('admin.journal_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('admin.journal') }}">{{ _("Journal") }}</a>
+      <a href="{{ url_for('admin.customers_list') }}" class="{{ 'active' if request.endpoint == 'admin.customers_list' }}">{{ _("Customer accounts") }}</a>
+      <a href="{{ url_for('admin.subscribers_list') }}" class="{{ 'active' if request.endpoint == 'admin.subscribers_list' }}">{{ _("Newsletter") }}</a>
+      <a href="{{ url_for('admin.messages_list') }}" class="{{ 'active' if request.endpoint == 'admin.messages_list' }}">{{ _("Messages") }}</a>
+      <a href="{{ url_for('home') }}" target="_blank">{{ _("View live site") }} &#8599;</a>
     </nav>
+    {% include 'components/lang_switch.html' %}
     <div class="logout">
-      <span class="muted" style="font-size:12px;">Logged in as {{ current_user.username }}</span><br>
+      <span class="muted" style="font-size:12px;">{{ _("Logged in as {name}", name=current_user.username) }}</span><br>
       <form method="POST" action="{{ url_for('admin.logout') }}" style="display:inline;">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button type="submit" class="linklike">Log out</button>
+        <button type="submit" class="linklike">{{ _("Log out") }}</button>
       </form>
     </div>
   </aside>
@@ -40,6 +41,6 @@
     {% block content %}{% endblock %}
   </main>
 </div>
-<script src="{{ url_for('static', filename='js/site.js') }}?v=2" defer></script>
+<script src="{{ url_for('static', filename='js/site.js') }}?v=3" defer></script>
 </body>
 </html>

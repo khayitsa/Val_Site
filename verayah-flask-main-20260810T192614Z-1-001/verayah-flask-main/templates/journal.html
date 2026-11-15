@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% block title %}Journal | Verayah{% endblock %}
+{% block title %}{{ _("Journal") }} | Verayah{% endblock %}
 {% block head %}
-<meta name="description" content="Stories from the shoreline: behind-the-scenes notes, care tips and the ocean moments that inspire Verayah.">
+<meta name="description" content="{{ _('Stories from the shoreline: behind-the-scenes notes, care tips and the ocean moments that inspire Verayah.') }}">
 <style>
   .journal-hero { text-align: center; padding: 8rem 1.5rem 3rem; }
   .journal-hero .eyebrow { display: block; margin-bottom: 1rem; }
@@ -21,14 +21,14 @@
 {% endblock %}
 {% block content %}
 <section class="journal-hero">
-  <span class="eyebrow">The Journal</span>
+  <span class="eyebrow">{{ _("The Journal") }}</span>
   {% if posts %}
-  <h1>Stories from the shoreline</h1>
-  <p>Behind-the-scenes notes on how each piece is made, care tips, and the ocean moments that inspire our collections.</p>
+  <h1>{{ _("Stories from the shoreline") }}</h1>
+  <p>{{ _("Behind-the-scenes notes on how each piece is made, care tips, and the ocean moments that inspire our collections.") }}</p>
   {% else %}
-  <h1>Stories from the shoreline, coming soon.</h1>
-  <p>We're putting together behind-the-scenes notes on how each piece is made, care tips, and the ocean moments that inspire our collections. Check back soon.</p>
-  <a href="{{ url_for('products') }}" class="btn-fill">Shop the Collection</a>
+  <h1>{{ _("Stories from the shoreline, coming soon.") }}</h1>
+  <p>{{ _("We're putting together behind-the-scenes notes on how each piece is made, care tips, and the ocean moments that inspire our collections. Check back soon.") }}</p>
+  <a href="{{ url_for('products') }}" class="btn-fill">{{ _("Shop the Collection") }}</a>
   {% endif %}
 </section>
 
@@ -38,11 +38,11 @@
     {% for p in posts %}
     <a class="journal-card" href="{{ url_for('journal_post', slug=p.slug) }}">
       <div class="jc-media">
-        {% if p.cover_image %}<img src="{{ url_for('static', filename='images/journal/' + p.cover_image) }}" alt="{{ p.title }}" loading="lazy">{% endif %}
+        {% if p.cover_image %}<img src="{{ url_for('static', filename='images/journal/' + p.cover_image) }}" alt="{{ loc(p, 'title') }}" loading="lazy">{% endif %}
       </div>
-      <span class="jc-date">{{ p.published_at.strftime('%d %B %Y') if p.published_at else '' }}</span>
-      <h3>{{ p.title }}</h3>
-      {% if p.excerpt %}<p>{{ p.excerpt }}</p>{% endif %}
+      <span class="jc-date">{{ p.published_at|fdate('%d %B %Y') if p.published_at else '' }}</span>
+      <h3>{{ loc(p, 'title') }}</h3>
+      {% if loc(p, 'excerpt') %}<p>{{ loc(p, 'excerpt') }}</p>{% endif %}
     </a>
     {% endfor %}
   </div>

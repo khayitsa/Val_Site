@@ -12,6 +12,7 @@ from services.customer_auth import (
 )
 from services.newsletter import record_consent
 from services.security import customer_login_throttle, signup_throttle, client_ip
+from services.i18n import t
 
 account_bp = Blueprint("account", __name__, url_prefix="/account")
 
@@ -27,14 +28,14 @@ def register():
     if form.validate_on_submit():
         key = "reg:" + client_ip()
         if signup_throttle.blocked(key):
-            flash("Too many sign-ups in a short time. Please try again later.", "error")
+            flash(t("Too many sign-ups in a short time. Please try again later."), "error")
             return render_template("account/register.html", form=form)
         signup_throttle.record(key)
         email = form.email.data.strip().lower()
         if Customer.query.filter_by(email=email).first():
             # Same message whether or not the email exists would need email
             # sending; for now be clear and helpful.
-            flash("An account with that email already exists. Please sign in instead.", "error")
+            flash(t("An account with that email already exists. Please sign in instead."), "error")
             return render_template("account/register.html", form=form)
         customer = Customer(email=email, name=form.name.data.strip(),
                             phone=(form.phone.data or "").strip() or None)
@@ -43,7 +44,7 @@ def register():
         record_consent(email, customer.name, form.marketing.data, form.marketing.data, source="account")
         db.session.commit()
         login_customer(customer)
-        flash("Your account is ready.", "success")
+        flash(t("Your account is ready."), "success")
         return redirect(url_for("account.dashboard"))
     return render_template("account/register.html", form=form)
 
@@ -58,7 +59,7 @@ def login():
         email = form.email.data.strip().lower()
         tkey = email + "|" + client_ip()
         if customer_login_throttle.blocked(tkey):
-            flash("Too many failed attempts. Please wait 15 minutes and try again.", "error")
+            flash(t("Too many failed attempts. Please wait 15 minutes and try again."), "error")
             return render_template("account/login.html", form=form, next=nxt)
         customer = Customer.query.filter_by(email=email).first()
         if customer and customer.check_password(form.password.data):
@@ -66,14 +67,14 @@ def login():
             login_customer(customer)
             return redirect(nxt or url_for("account.dashboard"))
         customer_login_throttle.record(tkey)
-        flash("Incorrect email or password.", "error")
+        flash(t("Incorrect email or password."), "error")
     return render_template("account/login.html", form=form, next=nxt)
 
 
 @account_bp.route("/logout", methods=["POST"])
 def logout():
     logout_customer()
-    flash("You have been signed out.", "info")
+    flash(t("You have been signed out."), "info")
     return redirect(url_for("home"))
 
 
@@ -88,7 +89,7 @@ def dashboard():
         customer.shipping_address = (form.shipping_address.data or "").strip() or None
         customer.shipping_city = (form.shipping_city.data or "").strip() or None
         db.session.commit()
-        flash("Your details were updated.", "success")
+        flash(t("Your details were updated."), "success")
         return redirect(url_for("account.dashboard"))
     orders = sorted(customer.orders, key=lambda o: o.created_at, reverse=True)
     return render_template("account/dashboard.html", form=form, customer=customer, orders=orders,
@@ -108,7 +109,7 @@ def wishlist():
 def wishlist_toggle(product_id):
     customer = current_customer()
     if not customer:
-        flash("Sign in or create a free account to save favourites. You can still buy without one.", "info")
+        flash(t("Sign in or create a free account to save favourites. You can still buy without one."), "info")
         return redirect(url_for("account.login", next=safe_next(request.form.get("next")) or url_for("products")))
     product = db.session.get(Product, product_id)
     if not product or not product.is_active:
@@ -116,10 +117,10 @@ def wishlist_toggle(product_id):
     existing = WishlistItem.query.filter_by(customer_id=customer.id, product_id=product_id).first()
     if existing:
         db.session.delete(existing)
-        flash(f"Removed {product.name} from your wishlist.", "info")
+        flash(t("Removed {name} from your wishlist.", name=product.name), "info")
     else:
         db.session.add(WishlistItem(customer_id=customer.id, product_id=product_id))
-        flash(f"Saved {product.name} to your wishlist.", "success")
+        flash(t("Saved {name} to your wishlist.", name=product.name), "success")
     db.session.commit()
     return redirect(safe_next(request.form.get("next")) or url_for("products"))
 
@@ -137,7 +138,7 @@ def delete_account():
         db.session.delete(customer)
         db.session.commit()
         logout_customer()
-        flash("Your account has been deleted.", "info")
+        flash(t("Your account has been deleted."), "info")
         return redirect(url_for("home"))
-    flash("Password was incorrect, so your account was not deleted.", "error")
+    flash(t("Password was incorrect, so your account was not deleted."), "error")
     return redirect(url_for("account.dashboard"))

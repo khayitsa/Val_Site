@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ lang }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Verayah | Fine Jewellery</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=21">
+<title>{{ _("Verayah | Fine Jewellery") }}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=22">
 <style>
   /* Fixes based on annotations */
   /* Widen the borders of the website */
@@ -109,15 +109,14 @@
   <div class="wrap">
     <div class="products-hero-inner">
       <div>
-        <span class="eyebrow">Ocean Whispers</span>
-        <h1>Delicate.<br>Organic.<br>Eternal.</h1>
+        <span class="eyebrow">{{ _("Ocean Whispers") }}</span>
+        <h1>{{ _h("Delicate.<br>Organic.<br>Eternal.") }}</h1>
         <p style="margin-top:1.2rem;">
-          Inspired by the ocean's quiet magic, this collection celebrates fluidity,
-          femininity, and the beauty found in nature's details.
+          {{ _("Inspired by the ocean's quiet magic, this collection celebrates fluidity, femininity, and the beauty found in nature's details.") }}
         </p>
       </div>
       <div class="hero-illustration">
-        <img src="{{ url_for('static', filename='images/shoot2/collection-hero.jpg') }}" alt="Ocean collection">
+        <img src="{{ url_for('static', filename='images/shoot2/collection-hero.jpg') }}" alt="{{ _('Ocean collection') }}">
       </div>
     </div>
   </div>
@@ -130,42 +129,42 @@
     <!-- Left Hand Side Vertical Nav (Originally CATEGORY NAV) -->
     <aside class="product-sidebar">
       <div class="section-head" style="margin-bottom: 2rem;">
-        <span class="eyebrow">Filter</span>
-        <h3 style="margin-top: 0.5rem; font-size: 1.5rem;">Categories</h3>
+        <span class="eyebrow">{{ _("Filter") }}</span>
+        <h3 style="margin-top: 0.5rem; font-size: 1.5rem;">{{ _("Categories") }}</h3>
       </div>
       <nav class="product-nav-vertical">
-        <a href="#" class="active" data-filter="all">All</a>
-        <a href="#" data-filter="Body Chain">Body Chains</a>
-        <a href="#" data-filter="Hand Chain">Hand Chains</a>
-        <a href="#" data-filter="Waist Chain">Waist Chains</a>
-        <a href="#" data-filter="Anklet">Anklets</a>
-        <a href="#" data-filter="Earring">Earrings</a>
-        <a href="#" data-filter="Necklace">Necklaces</a>
-        <a href="#" data-filter="Swimsuit Charm">Swimsuit Charms</a>
-        <a href="#" data-filter="Bag Charm">Bag Charms</a>
+        <a href="#" class="active" data-filter="all">{{ _("All") }}</a>
+        <a href="#" data-filter="Body Chain">{{ _("Body Chains") }}</a>
+        <a href="#" data-filter="Hand Chain">{{ _("Hand Chains") }}</a>
+        <a href="#" data-filter="Waist Chain">{{ _("Waist Chains") }}</a>
+        <a href="#" data-filter="Anklet">{{ _("Anklets") }}</a>
+        <a href="#" data-filter="Earring">{{ _("Earrings") }}</a>
+        <a href="#" data-filter="Necklace">{{ _("Necklaces") }}</a>
+        <a href="#" data-filter="Swimsuit Charm">{{ _("Swimsuit Charms") }}</a>
+        <a href="#" data-filter="Bag Charm">{{ _("Bag Charms") }}</a>
       </nav>
     </aside>
 
     <!-- Main Products Grid -->
     <div class="products-main">
       <div class="section-head">
-        <span class="eyebrow">Collection</span>
-        <h2>Signature Pieces</h2>
-        <p style="color:var(--muted);font-weight:300;font-size:15px;">Designed to become heirlooms.</p>
+        <span class="eyebrow">{{ _("Collection##section") }}</span>
+        <h2>{{ _("Signature Pieces") }}</h2>
+        <p style="color:var(--muted);font-weight:300;font-size:15px;">{{ _("Designed to become heirlooms.") }}</p>
       </div>
 
       <div id="categoryEmpty" style="display:none;text-align:center;padding:3rem 1rem;color:var(--muted);font-weight:300;">
-        <p style="font-size:1.1rem;">Our <strong></strong> are on their way.</p>
-        <p style="font-size:14px;">Follow along for the launch, or <a href="#" onclick="document.querySelector('.product-nav-vertical a[data-filter=all]').click();return false;" style="text-decoration:underline;">browse everything</a> in the meantime.</p>
+        <p style="font-size:1.1rem;">{{ _h("Our <strong></strong> are on their way.") }}</p>
+        <p style="font-size:14px;">{{ _h('Follow along for the launch, or <a href="#" id="browseAll" style="text-decoration:underline;">browse everything</a> in the meantime.') }}</p>
       </div>
       <div class="products-grid">
 
         {% for p in products %}
         {% set avail = p.variants|selectattr('stock_quantity','gt',0)|list %}
         {% set urls = [] %}
-        {% for f in p.gallery() %}{% set _ = urls.append(url_for('static', filename='images/products/' + f)) %}{% endfor %}
+        {% for f in p.gallery() %}{% set _x = urls.append(url_for('static', filename='images/products/' + f)) %}{% endfor %}
         {% set vlist = [] %}
-        {% for v in avail %}{% set _ = vlist.append({'id': v.id, 'label': v.shade ~ ' - ' ~ v.stock_quantity ~ ' left'}) %}{% endfor %}
+        {% for v in avail %}{% set _x = vlist.append({'id': v.id, 'label': t('{shade} - {n} left', shade=v.shade, n=v.stock_quantity)}) %}{% endfor %}
         <article class="product-card" data-category="{{ p.category }}">
           <div class="product-media">
             <img src="{{ url_for('static', filename='images/products/' + p.image_filename) }}" alt="{{ p.name }}">
@@ -175,36 +174,36 @@
                  data-image="{{ url_for('static', filename='images/products/' + p.image_filename) }}"
                  data-images='{{ urls|tojson }}'
                  data-name="{{ p.name }}"
-                 data-category="{{ p.category }}"
+                 data-category="{{ _(p.category) }}"
                  data-price="{{ p.price_display() }}"
-                 data-description="{{ p.description }}"
-                 data-shades="{{ p.shades_display() }}"
-                 data-variants='{{ vlist|tojson }}'>Quick View</a>
+                 data-description="{{ loc(p, 'description') }}"
+                 data-shades="{{ p.shades_display(_('Currently out of stock')) }}"
+                 data-variants='{{ vlist|tojson }}'>{{ _("Quick View") }}</a>
             </div>
           </div>
           <div class="product-details">
-            <span class="product-category">{{ p.category }}</span>
+            <span class="product-category">{{ _(p.category) }}</span>
             <h3>{{ p.name }}</h3>
             <div class="price">{{ p.price_display() }}</div>
-            <p class="product-desc">{{ p.description }}</p>
-            <div class="product-shades">{{ p.shades_display() }}</div>
+            <p class="product-desc">{{ loc(p, 'description') }}</p>
+            <div class="product-shades">{{ p.shades_display(_('Currently out of stock')) }}</div>
             <div class="card-actions">
               {% if avail %}
               <form method="POST" action="{{ url_for('shop.cart_add') }}" class="add-form">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="quantity" value="1">
-                <select name="variant_id" aria-label="Choose shade for {{ p.name }}">
-                  {% for v in avail %}<option value="{{ v.id }}">{{ v.shade }} - {{ v.stock_quantity }} left</option>{% endfor %}
+                <select name="variant_id" aria-label="{{ _('Choose shade for {name}', name=p.name) }}">
+                  {% for v in avail %}<option value="{{ v.id }}">{{ t('{shade} - {n} left', shade=v.shade, n=v.stock_quantity) }}</option>{% endfor %}
                 </select>
-                <button type="submit" class="btn-fill">Add to bag</button>
+                <button type="submit" class="btn-fill">{{ _("Add to bag") }}</button>
               </form>
               {% else %}
-              <span class="sold-out">Sold out</span>
+              <span class="sold-out">{{ _("Sold out") }}</span>
               {% endif %}
               <form method="POST" action="{{ url_for('account.wishlist_toggle', product_id=p.id) }}" class="wish-form">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="next" value="{{ url_for('products') }}">
-                <button type="submit" class="wish-btn {{ 'on' if p.id in wishlist_ids }}" aria-label="{{ 'Remove from' if p.id in wishlist_ids else 'Add to' }} wishlist" title="Wishlist (needs a free account)">&#9829;</button>
+                <button type="submit" class="wish-btn {{ 'on' if p.id in wishlist_ids }}" aria-label="{{ _('Remove from wishlist') if p.id in wishlist_ids else _('Add to wishlist') }}" title="{{ _('Wishlist (needs a free account)') }}">&#9829;</button>
               </form>
             </div>
           </div>
@@ -217,8 +216,8 @@
 
   <!-- Quick View modal -->
   <div class="quick-view-backdrop" id="quickViewBackdrop">
-    <div class="quick-view-modal" role="dialog" aria-modal="true" aria-label="Product quick view">
-      <button type="button" class="quick-view-close" id="quickViewClose" aria-label="Close">&times;</button>
+    <div class="quick-view-modal" role="dialog" aria-modal="true" aria-label="{{ _('Product quick view') }}">
+      <button type="button" class="quick-view-close" id="quickViewClose" aria-label="{{ _('Close') }}">&times;</button>
       <div class="quick-view-media">
         <img id="qvImage" src="" alt="">
         <div class="qv-thumbs" id="qvThumbs"></div>
@@ -232,10 +231,10 @@
         <form method="POST" action="{{ url_for('shop.cart_add') }}" class="add-form" id="qvForm" style="margin-top:1.5rem;">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <input type="hidden" name="quantity" value="1">
-          <select name="variant_id" id="qvVariant" aria-label="Choose shade"></select>
-          <button type="submit" class="btn-fill" id="qvAdd">Add to bag</button>
+          <select name="variant_id" id="qvVariant" aria-label="{{ _('Choose shade') }}"></select>
+          <button type="submit" class="btn-fill" id="qvAdd">{{ _("Add to bag") }}</button>
         </form>
-        <p class="sold-out" id="qvSoldOut" style="display:none;margin-top:1.5rem;">Sold out</p>
+        <p class="sold-out" id="qvSoldOut" style="display:none;margin-top:1.5rem;">{{ _("Sold out") }}</p>
       </div>
     </div>
   </div>
@@ -247,19 +246,19 @@
   <div class="wrap">
     <div class="trust-item">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      Handmade with Intention
+      {{ _("Handmade with Intention") }}
     </div>
     <div class="trust-item">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
-      Natural Pearls &amp; Stones
+      {{ _("Natural Pearls & Stones") }}
     </div>
     <div class="trust-item">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      Made to Last with Care
+      {{ _("Made to Last with Care") }}
     </div>
     <div class="trust-item">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20"/></svg>
-      Pay by Yappy or Bank Transfer
+      {{ _("Pay by Yappy or Bank Transfer") }}
     </div>
   </div>
 </div>
@@ -270,6 +269,7 @@
 
 <script>
 (function(){
+  var I18N = {showPhoto: {{ t('Show photo {n}', n='%N%')|tojson }}};
   /* Category filter for the products grid */
   var navLinks = document.querySelectorAll('.product-nav-vertical a');
   var emptyMsg = document.getElementById('categoryEmpty');
@@ -316,6 +316,12 @@
     });
   }
 
+  var browseAll = document.getElementById('browseAll');
+  if (browseAll) browseAll.addEventListener('click', function(e){
+    e.preventDefault();
+    document.querySelector('.product-nav-vertical a[data-filter=all]').click();
+  });
+
   /* Quick View modal */
   var backdrop = document.getElementById('quickViewBackdrop');
   var qvImage = document.getElementById('qvImage');
@@ -337,7 +343,7 @@
       pics.forEach(function(src, i){
         var b = document.createElement('button');
         b.type = 'button'; b.className = 'qv-thumb' + (i === 0 ? ' on' : '');
-        b.setAttribute('aria-label', 'Show photo ' + (i + 1));
+        b.setAttribute('aria-label', I18N.showPhoto.replace('%N%', i + 1));
         var im = document.createElement('img'); im.src = src; im.alt = '';
         b.appendChild(im);
         b.addEventListener('click', function(){

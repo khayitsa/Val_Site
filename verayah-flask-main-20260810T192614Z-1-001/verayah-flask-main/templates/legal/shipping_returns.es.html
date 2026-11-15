@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Envíos y devoluciones | Verayah{% endblock %}
+{% block content %}
+<section class="page-section"><div class="wrap narrow legal">
+  <span class="eyebrow">Ayuda</span>
+  <h1>Envíos y devoluciones</h1>
+  {% include 'legal/_translation_notice.es.html' %}
+  {% include 'legal/_draft_banner.es.html' %}
+
+  <p>Verayah es administrada por {{ site.operator }}, {{ site.address }}. Contacto: {{ site.phone }}{% if site.email %} · {{ site.email }}{% endif %}. RUC / aviso de operación: <span class="tbc">por añadir</span>.</p>
+
+  <h2 id="shipping">Envíos y entregas</h2>
+  <ul>
+    <li><strong>Dónde:</strong> por ahora solo dentro de Panamá, mediante la mensajería Uno Express. De momento no hacemos envíos internacionales. Si Uno Express lleva tu paquete hasta tu puerta o a la sucursal de Uno más cercana para que lo recojas: <span class="tbc">por confirmar con Uno Express</span>. Te avisamos cuál es antes de que pagues.</li>
+    <li><strong>Retiro:</strong> disponible; elígelo al finalizar la compra.</li>
+    <li><strong>Tiempo de entrega:</strong> calcula de 4 a 5 días en total desde el día en que confirmamos tu pago; la entrega por mensajería normalmente toma de 2 a 3 días. Te damos una fecha estimada de entrega cuando confirmamos tu pedido. Las piezas personalizadas toman más tiempo, y acordamos la fecha contigo antes de comenzar la producción.</li>
+    <li><strong>Costo de entrega:</strong> {% if delivery_fee %}${{ "%.2f"|format(delivery_fee|float) }}{% else %}<span class="tbc">por definir</span>, se confirma antes de que pagues{% endif %}. Se muestra en una línea aparte y siempre se confirma antes de que pagues.</li>
+    <li><strong>Pago:</strong> Yappy o transferencia bancaria. Los precios están en dólares estadounidenses (balboas). Por favor paga de inmediato: no reservamos pedidos sin pagar. Recibes una confirmación del pedido con tu número de pedido.</li>
+    <li><strong>Seguimiento:</strong> recibes los datos de seguimiento de Uno Express cuando tu paquete sea despachado.</li>
+    <li><strong>Pedidos con retraso:</strong> si tu pedido no ha llegado dentro de los 7 días posteriores a la fecha estimada de entrega, puedes cancelarlo y te reembolsamos todo lo que pagaste, incluido el costo de entrega.</li>
+    <li><strong>Pérdida o daño en tránsito:</strong> tu paquete es responsabilidad nuestra hasta que te sea entregado. Si se pierde o llega dañado, lo reemplazamos o te reembolsamos por completo, a tu elección. Si el daño es visible, por favor escríbenos dentro de los 5 días posteriores a la entrega, con fotos del paquete y de la pieza. Nosotros nos encargamos de gestionarlo con la mensajería.</li>
+  </ul>
+
+  <h2 id="returns">Devoluciones, cambios y garantía</h2>
+
+  <h3>Garantía legal</h3>
+  <ul>
+    <li><strong>Cubre:</strong> todas las piezas tienen una <strong>garantía de 3 meses desde el día de la entrega</strong> contra defectos de fabricación, como un broche o eslabón roto, un engaste flojo, una piedra o perla que se suelta, o un baño que falla antes de tiempo con un uso normal.</li>
+    <li><strong>Qué hacemos:</strong> reparamos la pieza sin costo. Si no se puede reparar, la reemplazamos, y si no podemos reemplazarla, te reembolsamos lo que pagaste. Lo completamos dentro de los 30 días posteriores a tu reclamo.</li>
+    <li><strong>Envío:</strong> Verayah paga el envío de ida y vuelta en los reclamos de garantía, y la pieza no tiene que estar sin usar.</li>
+    <li><strong>No cubre:</strong> daños por no seguir la <a href="{{ url_for('main.care') }}">Guía de cuidado</a> (por ejemplo, agua, perfume, cloro o golpes), el desgaste normal y la pérdida.</li>
+    <li><strong>Ten en cuenta:</strong> nuestras cadenas tienen <em>baño</em> de oro de 18k; no son de oro macizo. Nuestra joyería es resistente al agua, pero no es sumergible.</li>
+    <li><strong>Nada más de esta página puede reducir esta garantía.</strong> Se aplica también a los artículos en oferta y a las piezas personalizadas.</li>
+  </ul>
+  <p><strong>Garantía:</strong> todas las piezas tienen una garantía legal de <strong>3 meses desde la entrega</strong> contra defectos de fabricación. Reparamos la pieza sin costo; si no es posible, la reemplazamos o devolvemos el dinero pagado. Nosotros pagamos el envío en reclamos de garantía. Para reclamar, escríbenos a {{ site.phone }}{% if site.email %} o {{ site.email }}{% endif %} con tu número de pedido y fotos.</p>
+
+  <h3>No es como se describió</h3>
+  <ul>
+    <li>Si la pieza que recibes es claramente distinta en calidad o apariencia de su descripción o de las fotos, contáctanos dentro de los <strong>7 días posteriores a la entrega</strong>.</li>
+    <li>Coordinamos la devolución por nuestra cuenta y te reembolsamos por completo cuando la recibamos. La variación natural de las perlas y los cristales (no hay dos idénticos) es normal y no es un defecto.</li>
+  </ul>
+
+  <h3>Cambio de opinión</h3>
+  <ul>
+    <li>Cada pieza es única, por lo que no ofrecemos devoluciones ni reembolsos por cambio de opinión. Por favor revisa las tallas y los detalles antes de hacer tu pedido. Esto no afecta tu garantía ni tus derechos si una pieza es defectuosa o no es como se describió.</li>
+    <li><strong>Tallas:</strong> si una cadena para la cintura u otra pieza se hizo en una talla equivocada, la ajustamos como cortesía.</li>
+    <li><strong>Piezas personalizadas:</strong> se hacen para ti, por lo que no ofrecemos devoluciones por cambio de opinión en ellas. Solo comenzamos cuando has aprobado por escrito (WhatsApp o correo) el diseño, las medidas y los materiales. Si una pieza personalizada no coincide con lo que aprobaste, la rehacemos o te reembolsamos.</li>
+  </ul>
+
+  <h3>Reembolsos</h3>
+  <ul>
+    <li>Cuando te debemos un reembolso, lo pagamos <strong>en dinero, nunca forzado a crédito en la tienda</strong>, dentro de los 10 días posteriores a recibir la pieza devuelta (o a aprobar tu reclamo cuando no haga falta devolución). Lo enviamos por Yappy o transferencia bancaria a la cuenta desde la que pagaste.</li>
+    <li>Si prefieres un reemplazo o crédito en la tienda, solo dínoslo. Esa siempre es tu elección.</li>
+  </ul>
+
+  <h3>Cómo hacer un reclamo</h3>
+  <ul>
+    <li>Contáctanos al {{ site.phone }}{% if site.email %} o a {{ site.email }}{% endif %} con tu número de pedido y fotos. Respondemos dentro de 2 días hábiles.</li>
+    <li><strong>Dirección para devoluciones:</strong> {% if site.returns_address %}{{ site.returns_address }}{% else %}<span class="tbc">por definir</span>{% endif %}. Por favor envía las piezas en su empaque, y te confirmaremos cómo enviarlas antes de que mandes nada.</li>
+    <li>Los <strong>artículos en oferta</strong> mantienen la misma garantía que las piezas a precio completo.</li>
+  </ul>
+
+  <h2 id="complaints">¿No estás conforme con nuestra respuesta?</h2>
+  <p>Puedes contactar a la ACODECO (Autoridad de Protección al Consumidor y Defensa de la Competencia): línea <strong>311</strong>, 510-1300, <a href="mailto:info@acodeco.gob.pa">info@acodeco.gob.pa</a>, <a href="https://www.acodeco.gob.pa" rel="noopener" target="_blank">acodeco.gob.pa</a>. Nada de lo dispuesto en esta página limita tus derechos conforme a la ley panameña de protección al consumidor.</p>
+</div></section>
+{% endblock %}

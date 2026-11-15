@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Thank you | Verayah{% endblock %}
+{% block title %}{{ _("Thank you") }} | Verayah{% endblock %}
 {% block content %}
 <section class="page-section"><div class="wrap narrow">
-  <span class="eyebrow">Thank you</span>
-  <h1>Thank you</h1>
-  <p>If this address hasn't unsubscribed before, it's now on the list and we'll be in touch with new pieces and early looks. Every email has an unsubscribe link. If you unsubscribed in the past and would like to rejoin, please contact us.</p>
-  <a href="{{ url_for('products') }}" class="btn-fill">Shop the collection</a>
+  <span class="eyebrow">{{ _("Thank you") }}</span>
+  <h1>{{ _("Thank you") }}</h1>
+  <p>{{ _("If this address hasn't unsubscribed before, it's now on the list and we'll be in touch with new pieces and early looks. Every email has an unsubscribe link. If you unsubscribed in the past and would like to rejoin, please contact us.") }}</p>
+  <a href="{{ url_for('products') }}" class="btn-fill">{{ _("Shop the collection") }}</a>
 </div></section>
 {% endblock %}

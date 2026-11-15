@@ -1,13 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Checkout | Verayah{% endblock %}
+{% block title %}{{ _("Checkout") }} | Verayah{% endblock %}
 {% macro err(field) %}{% for e in field.errors %}<span class="field-error">{{ e }}</span>{% endfor %}{% endmacro %}
 {% block content %}
 <section class="page-section"><div class="wrap checkout-layout">
   <div>
-    <span class="eyebrow">Checkout</span>
-    <h1>Your details</h1>
+    <span class="eyebrow">{{ _("Checkout") }}</span>
+    <h1>{{ _("Your details") }}</h1>
     {% if not customer %}
-    <p class="muted" style="margin-bottom:1.25rem;">You don't need an account. <a href="{{ url_for('account.login', next=url_for('shop.checkout')) }}">Sign in</a> if you have one to fill this in faster.</p>
+    <p class="muted" style="margin-bottom:1.25rem;">{{ _h("You don't need an account. <a href=\"{url}\">Sign in</a> if you have one to fill this in faster.", url=url_for('account.login', next=url_for('shop.checkout'))) }}</p>
     {% endif %}
     <form method="POST" class="contact-form" novalidate>
       {{ form.hidden_tag() }}
@@ -18,17 +18,17 @@
       <div class="field">{{ form.phone.label }}{{ form.phone(autocomplete="tel") }}{{ err(form.phone) }}</div>
 
       <fieldset class="choice-group">
-        <legend>Delivery (Panama only)</legend>
+        <legend>{{ _("Delivery (Panama only)") }}</legend>
         {% for sub in form.delivery_method %}<label class="choice">{{ sub }} {{ sub.label.text }}</label>{% endfor %}
-        <p class="muted small">{% if delivery_fee %}Courier fee: ${{ "%.2f"|format(delivery_fee|float) }}.{% else %}The delivery fee is confirmed with your payment details.{% endif %} Usually 4-5 days in total.</p>
+        <p class="muted small">{% if delivery_fee %}{{ _("Courier fee: ${fee}.", fee="%.2f"|format(delivery_fee|float)) }}{% else %}{{ _("The delivery fee is confirmed with your payment details.") }}{% endif %} {{ _("Usually 4-5 days in total.") }}</p>
       </fieldset>
       <div class="field">{{ form.shipping_address.label }}{{ form.shipping_address(autocomplete="street-address") }}{{ err(form.shipping_address) }}</div>
       <div class="field">{{ form.shipping_city.label }}{{ form.shipping_city(autocomplete="address-level2") }}{{ err(form.shipping_city) }}</div>
 
       <fieldset class="choice-group">
-        <legend>Payment</legend>
+        <legend>{{ _("Payment") }}</legend>
         {% for sub in form.payment_method %}<label class="choice">{{ sub }} {{ sub.label.text }}</label>{% endfor %}
-        <p class="muted small">You won't be charged on the website. After ordering you'll see how to pay by Yappy or bank transfer.</p>
+        <p class="muted small">{{ _("You won't be charged on the website. After ordering you'll see how to pay by Yappy or bank transfer.") }}</p>
       </fieldset>
 
       <div class="field">{{ form.notes.label }}{{ form.notes(rows=3) }}{{ err(form.notes) }}</div>
@@ -36,25 +36,25 @@
       {% if customer %}<label class="choice">{{ form.save_details() }} {{ form.save_details.label.text }}</label>{% endif %}
 
       <fieldset class="choice-group">
-        <legend>Stay in touch (optional)</legend>
+        <legend>{{ _("Stay in touch (optional)") }}</legend>
         <label class="choice">{{ form.newsletter() }} {{ form.newsletter.label.text }}</label>
         <label class="choice">{{ form.sneak_peek() }} {{ form.sneak_peek.label.text }}</label>
-        <p class="muted small">Not required to order. Unsubscribe any time.</p>
+        <p class="muted small">{{ _("Not required to order. Unsubscribe any time.") }}</p>
       </fieldset>
 
-      <label class="choice">{{ form.accept() }} <span>I have read and accept the <a href="{{ url_for('main.terms_of_sale') }}" target="_blank">Terms of Sale</a>, <a href="{{ url_for('main.terms') }}" target="_blank">Terms of Use</a>, <a href="{{ url_for('main.shipping_returns') }}" target="_blank">Shipping &amp; Returns</a> and <a href="{{ url_for('main.privacy') }}" target="_blank">Privacy Policy</a></span></label>
+      <label class="choice">{{ form.accept() }} <span>{{ _h('I have read and accept the <a href="{sale}" target="_blank">Terms of Sale</a>, <a href="{use}" target="_blank">Terms of Use</a>, <a href="{ship}" target="_blank">Shipping &amp; Returns</a> and <a href="{priv}" target="_blank">Privacy Policy</a>', sale=url_for('main.terms_of_sale'), use=url_for('main.terms'), ship=url_for('main.shipping_returns'), priv=url_for('main.privacy')) }}</span></label>
       {{ err(form.accept) }}
-      <button type="submit" class="btn-fill">Place order</button>
+      <button type="submit" class="btn-fill">{{ _("Place order") }}</button>
     </form>
   </div>
   <aside class="order-summary">
-    <h3>Order summary</h3>
+    <h3>{{ _("Order summary") }}</h3>
     {% for l in lines %}
     <div class="sum-row"><span>{{ l.product.name }} ({{ l.variant.shade }}) × {{ l.qty }}</span><span>${{ "%.2f"|format(l.line_total) }}</span></div>
     {% endfor %}
-    <div class="sum-row sum-total"><span>Subtotal</span><span>${{ "%.2f"|format(subtotal) }}</span></div>
-    <div class="sum-row"><span>Delivery</span><span>{% if delivery_fee %}${{ "%.2f"|format(delivery_fee|float) }} if delivered{% else %}confirmed with payment details{% endif %}</span></div>
-    <a href="{{ url_for('shop.cart') }}" class="muted small">Edit bag</a>
+    <div class="sum-row sum-total"><span>{{ _("Subtotal") }}</span><span>${{ "%.2f"|format(subtotal) }}</span></div>
+    <div class="sum-row"><span>{{ _("Delivery") }}</span><span>{% if delivery_fee %}{{ _("${fee} if delivered", fee="%.2f"|format(delivery_fee|float)) }}{% else %}{{ _("confirmed with payment details") }}{% endif %}</span></div>
+    <a href="{{ url_for('shop.cart') }}" class="muted small">{{ _("Edit bag") }}</a>
   </aside>
 </div></section>
 {% endblock %}

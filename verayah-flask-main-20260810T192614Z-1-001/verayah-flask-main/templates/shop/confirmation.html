@@ -1,54 +1,64 @@
 {% extends "base.html" %}
-{% block title %}Order received | Verayah{% endblock %}
+{% block title %}{{ _("Order received") }} | Verayah{% endblock %}
 {% block content %}
 <section class="page-section"><div class="wrap narrow">
   {% set paid = order.payment_status == 'paid' %}
   {% set cancelled = order.status == 'cancelled' %}
-  {% set status_labels = {'pending': 'Order received', 'processing': 'Being prepared', 'shipped': 'On its way to you', 'delivered': 'Delivered', 'cancelled': 'Cancelled'} %}
-  <span class="eyebrow">Thank you</span>
-  <h1>Order #{{ order.id }}{% if not paid and not cancelled and order.status == 'pending' %} received{% endif %}</h1>
+  {% set status_labels = {'pending': _('Order received'), 'processing': _('Being prepared'), 'shipped': _('On its way to you'), 'delivered': _('Delivered'), 'cancelled': _('Cancelled')} %}
+  {% set first_name = order.customer_name.split(' ')[0] %}
+  {% set method_label = _('Yappy') if order.payment_method == 'yappy' else _('bank transfer') %}
+  {% set whatsapp_or_phone %}{% if site.whatsapp %}<a href="https://wa.me/{{ site.whatsapp }}">WhatsApp</a>{% else %}{{ site.phone }}{% endif %}{% endset %}
+  <span class="eyebrow">{{ _("Thank you") }}</span>
+  <h1>{% if not paid and not cancelled and order.status == 'pending' %}{{ _("Order #{id} received", id=order.id) }}{% else %}{{ _("Order #{id}", id=order.id) }}{% endif %}</h1>
   {% if cancelled %}
-  <p>This order has been cancelled. If you did not expect this, please contact us{% if site.whatsapp %} on <a href="https://wa.me/{{ site.whatsapp }}">WhatsApp</a>{% else %} on {{ site.phone }}{% endif %}.</p>
+  <p>{{ _h("This order has been cancelled. If you did not expect this, please contact us on {contact}.", contact=whatsapp_or_phone) }}</p>
   {% elif order.status == 'shipped' %}
-  <p>Hi {{ order.customer_name.split(' ')[0] }}, your order is on its way.</p>
+  <p>{{ _("Hi {name}, your order is on its way.", name=first_name) }}</p>
   {% elif order.status == 'delivered' %}
-  <p>Hi {{ order.customer_name.split(' ')[0] }}, your order has been delivered. We hope you love it.</p>
+  <p>{{ _("Hi {name}, your order has been delivered. We hope you love it.", name=first_name) }}</p>
   {% elif paid %}
-  <p>Thank you, {{ order.customer_name.split(' ')[0] }}. <strong>We have received your payment</strong> and are getting your order ready.</p>
+  <p>{{ _h("Thank you, {name}. <strong>We have received your payment</strong> and are getting your order ready.", name=first_name) }}</p>
   {% else %}
-  <p>Thank you, {{ order.customer_name.split(' ')[0] }}. Please pay right away: we do not hold unpaid orders, and if payment does not arrive the order is cancelled and the pieces go back on sale. <strong>Your order is confirmed once payment is received.</strong></p>
+  <p>{{ _h("Thank you, {name}. Please pay right away: we do not hold unpaid orders, and if payment does not arrive the order is cancelled and the pieces go back on sale. <strong>Your order is confirmed once payment is received.</strong>", name=first_name) }}</p>
   {% endif %}
 
   <table class="legal-table">
-    <tr><td>Status</td><td><strong>{{ status_labels.get(order.status, order.status|capitalize) }}</strong></td></tr>
-    <tr><td>Payment</td><td>{% if paid %}Received{% elif cancelled %}-{% else %}Awaiting payment{% endif %}</td></tr>
-    {% if order.tracking_number and not cancelled %}<tr><td>Tracking number{% if order.delivery_method == 'courier' %} (Uno Express){% endif %}</td><td><strong>{{ order.tracking_number }}</strong></td></tr>{% endif %}
+    <tr><td>{{ _("Status") }}</td><td><strong>{{ status_labels.get(order.status, order.status|capitalize) }}</strong></td></tr>
+    <tr><td>{{ _("Payment") }}</td><td>{% if paid %}{{ _("Received") }}{% elif cancelled %}-{% else %}{{ _("Awaiting payment") }}{% endif %}</td></tr>
+    {% if order.tracking_number and not cancelled %}<tr><td>{{ _("Tracking number") }}{% if order.delivery_method == 'courier' %} (Uno Express){% endif %}</td><td><strong>{{ order.tracking_number }}</strong></td></tr>{% endif %}
   </table>
 
   {% if not paid and not cancelled %}
-  <h2>How to pay ({{ 'Yappy' if order.payment_method == 'yappy' else 'bank transfer' }})</h2>
+  <h2>{{ _("How to pay ({method})", method=method_label) }}</h2>
   {% if order.payment_method == 'yappy' and site.yappy %}
-    <p>Send <strong>${{ "%.2f"|format(order.total()) }}</strong> by Yappy to <strong>{{ site.yappy }}</strong>, using order #{{ order.id }} as the reference.</p>
+    <p>{{ _h("Send <strong>${amount}</strong> by Yappy to <strong>{number}</strong>, using order #{id} as the reference.", amount="%.2f"|format(order.total()), number=site.yappy, id=order.id) }}</p>
   {% elif order.payment_method == 'bank_transfer' and site.bank_details %}
-    <p>Transfer <strong>${{ "%.2f"|format(order.total()) }}</strong> with reference order #{{ order.id }}:</p>
+    <p>{{ _h("Transfer <strong>${amount}</strong> with reference order #{id}:", amount="%.2f"|format(order.total()), id=order.id) }}</p>
     <pre class="bank-details">{{ site.bank_details }}</pre>
+  {% elif order.customer_email %}
+    <p>{{ _("We will send you the {method} details at {email} and on WhatsApp ({phone}) shortly.", method=method_label, email=order.customer_email, phone=order.customer_phone) }}</p>
   {% else %}
-    <p>We will send you the {{ 'Yappy' if order.payment_method == 'yappy' else 'bank transfer' }} details{% if order.customer_email %} at {{ order.customer_email }}{% endif %} and on WhatsApp ({{ order.customer_phone }}) shortly.</p>
+    <p>{{ _("We will send you the {method} details on WhatsApp ({phone}) shortly.", method=method_label, phone=order.customer_phone) }}</p>
   {% endif %}
-  <p>Then send your payment proof to us{% if site.whatsapp %} on <a href="https://wa.me/{{ site.whatsapp }}">WhatsApp</a>{% else %} on {{ site.phone }}{% endif %}{% if site.instagram %} or by <a href="{{ site.instagram }}" rel="noopener" target="_blank">Instagram direct message</a>{% endif %}.</p>
+  {% if site.instagram %}
+  {% set insta_link %}<a href="{{ site.instagram }}" rel="noopener" target="_blank">{{ _("Instagram direct message") }}</a>{% endset %}
+  <p>{{ _h("Then send your payment proof to us on {whatsapp} or by {instagram}.", whatsapp=whatsapp_or_phone, instagram=insta_link) }}</p>
+  {% else %}
+  <p>{{ _h("Then send your payment proof to us on {whatsapp}.", whatsapp=whatsapp_or_phone) }}</p>
+  {% endif %}
   {% endif %}
 
-  <h2>Your order</h2>
+  <h2>{{ _("Your order") }}</h2>
   <table class="legal-table">
     {% for item in order.items %}<tr><td>{{ item.product_name }} ({{ item.shade }}) × {{ item.quantity }}</td><td>${{ "%.2f"|format(item.unit_price * item.quantity) }}</td></tr>{% endfor %}
-    <tr><td>Delivery{% if order.delivery_method == 'collection' %} (collection){% endif %}</td><td>{% if order.delivery_method == 'collection' %}$0.00{% elif order.delivery_fee and order.delivery_fee > 0 %}${{ "%.2f"|format(order.delivery_fee) }}{% else %}to be confirmed{% endif %}</td></tr>
-    <tr><td><strong>Total</strong></td><td><strong>${{ "%.2f"|format(order.total()) }}</strong>{% if order.delivery_method == 'courier' and not (order.delivery_fee and order.delivery_fee > 0) %} + delivery{% endif %}</td></tr>
+    <tr><td>{{ _("Delivery") }}{% if order.delivery_method == 'collection' %} ({{ _("collection") }}){% endif %}</td><td>{% if order.delivery_method == 'collection' %}$0.00{% elif order.delivery_fee and order.delivery_fee > 0 %}${{ "%.2f"|format(order.delivery_fee) }}{% else %}{{ _("to be confirmed") }}{% endif %}</td></tr>
+    <tr><td><strong>{{ _("Total") }}</strong></td><td><strong>${{ "%.2f"|format(order.total()) }}</strong>{% if order.delivery_method == 'courier' and not (order.delivery_fee and order.delivery_fee > 0) %} {{ _("+ delivery") }}{% endif %}</td></tr>
   </table>
-  <p class="muted">{% if order.delivery_method == 'collection' %}Collection{% else %}Delivering to {{ order.shipping_address }}, {{ order.shipping_city }}{% endif %}. Keep this page's link: it always shows the latest status of your order.</p>
+  <p class="muted">{% if order.delivery_method == 'collection' %}{{ _("Collection") }}{% else %}{{ _("Delivering to {address}, {city}", address=order.shipping_address, city=order.shipping_city) }}{% endif %}. {{ _("Keep this page's link: it always shows the latest status of your order.") }}</p>
 
   {% if not customer %}
-  <p>Want to save your details and a wishlist for next time? <a href="{{ url_for('account.register', email=order.customer_email, name=order.customer_name) }}">Create a free account</a> (optional).</p>
+  <p>{{ _h('Want to save your details and a wishlist for next time? <a href="{url}">Create a free account</a> (optional).', url=url_for('account.register', email=order.customer_email, name=order.customer_name)) }}</p>
   {% endif %}
-  <a href="{{ url_for('products') }}" class="btn-outline">Continue shopping</a>
+  <a href="{{ url_for('products') }}" class="btn-outline">{{ _("Continue shopping") }}</a>
 </div></section>
 {% endblock %}

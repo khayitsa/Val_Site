@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ lang }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>Admin Login — Verayah</title>
+<title>{{ _("Admin Login") }} — Verayah</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
 </head>
 <body>
@@ -30,6 +30,7 @@
       </div>
       {{ form.submit(class="btn btn-primary", style="width:100%;") }}
     </form>
+    {% include 'components/lang_switch.html' %}
   </div>
 </div>
 </body>

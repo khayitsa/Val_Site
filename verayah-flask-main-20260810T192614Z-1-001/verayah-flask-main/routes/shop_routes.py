@@ -12,6 +12,7 @@ from services import cart as bag
 from services.customer_auth import current_customer
 from services.newsletter import record_consent
 from services.security import order_throttle, client_ip
+from services.i18n import t
 
 shop_bp = Blueprint("shop", __name__)
 
@@ -61,20 +62,20 @@ def cart_add():
         variant_id = int(request.form.get("variant_id", ""))
         qty = max(1, min(int(request.form.get("quantity", "1") or 1), bag.MAX_QTY_PER_LINE))
     except ValueError:
-        flash("Please choose a shade.", "error")
+        flash(t("Please choose a shade."), "error")
         return redirect(request.referrer or url_for("products"))
     variant = db.session.get(ProductVariant, variant_id)
     if not variant or not variant.product.is_active:
-        flash("That piece is no longer available.", "error")
+        flash(t("That piece is no longer available."), "error")
         return redirect(url_for("products"))
     in_bag = int((bag._raw().get(str(variant_id)) or 0))
     if variant.stock_quantity <= 0:
-        flash(f"{variant.product.name} ({variant.shade}) is out of stock.", "error")
+        flash(t("{item} is out of stock.", item=f"{variant.product.name} ({variant.shade})"), "error")
     elif in_bag + qty > variant.stock_quantity:
-        flash(f"Only {variant.stock_quantity} of {variant.product.name} ({variant.shade}) available.", "error")
+        flash(t("Only {n} of {item} available.", n=variant.stock_quantity, item=f"{variant.product.name} ({variant.shade})"), "error")
     else:
         bag.add(variant_id, qty)
-        flash(f"Added {variant.product.name} ({variant.shade}) to your bag.", "success")
+        flash(t("Added {item} to your bag.", item=f"{variant.product.name} ({variant.shade})"), "success")
         return redirect(url_for("shop.cart"))
     return redirect(request.referrer or url_for("products"))
 
@@ -89,7 +90,7 @@ def cart_update():
     variant = db.session.get(ProductVariant, variant_id)
     if variant and qty > variant.stock_quantity:
         qty = variant.stock_quantity
-        flash(f"Only {variant.stock_quantity} available - quantity adjusted.", "info")
+        flash(t("Only {n} available - quantity adjusted.", n=variant.stock_quantity), "info")
     bag.set_qty(variant_id, qty)
     return redirect(url_for("shop.cart"))
 
@@ -107,13 +108,12 @@ def cart_remove():
 def checkout():
     lines = bag.lines()
     if not lines:
-        flash("Your bag is empty.", "info")
+        flash(t("Your bag is empty."), "info")
         return redirect(url_for("products"))
 
     cap = current_app.config.get("MAX_UNITS_PER_ORDER", 6)
     if sum(l["qty"] for l in lines) > cap:
-        flash(f"Website orders are limited to {cap} pieces at a time. Please remove a few from your bag, "
-              f"or contact us to place a larger order.", "error")
+        flash(t("Website orders are limited to {n} pieces at a time. Please remove a few from your bag, or contact us to place a larger order.", n=cap), "error")
         return redirect(url_for("shop.cart"))
 
     customer = current_customer()
@@ -128,15 +128,13 @@ def checkout():
     if form.validate_on_submit():
         okey = "order:" + client_ip()
         if order_throttle.blocked(okey):
-            flash("Too many orders from this connection in a short time. Please try again later "
-                  "or contact us to place your order.", "error")
+            flash(t("Too many orders from this connection in a short time. Please try again later or contact us to place your order."), "error")
             return redirect(url_for("shop.cart"))
         # Re-check stock at the moment of ordering.
-        problems = [f"{l['product'].name} ({l['variant'].shade}): only {l['variant'].stock_quantity} left"
+        problems = [t("{item}: only {n} left", item=f"{l['product'].name} ({l['variant'].shade})", n=l['variant'].stock_quantity)
                     for l in lines if l["qty"] > l["variant"].stock_quantity]
         if problems:
-            flash("Some items changed while you were shopping - " + "; ".join(problems) +
-                  ". Please update your bag.", "error")
+            flash(t("Some items changed while you were shopping - {problems}. Please update your bag.", problems="; ".join(problems)), "error")
             return redirect(url_for("shop.cart"))
 
         method = form.delivery_method.data
@@ -174,8 +172,7 @@ def checkout():
             )
             if res.rowcount != 1:
                 db.session.rollback()
-                flash(f"Sorry - {l['product'].name} ({l['variant'].shade}) just sold out or changed. "
-                      f"Please update your bag.", "error")
+                flash(t("Sorry - {item} just sold out or changed. Please update your bag.", item=f"{l['product'].name} ({l['variant'].shade})"), "error")
                 return redirect(url_for("shop.cart"))
         db.session.add(order)
 

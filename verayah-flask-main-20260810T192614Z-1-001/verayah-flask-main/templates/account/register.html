@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Create account | Verayah{% endblock %}
+{% block title %}{{ _("Create account") }} | Verayah{% endblock %}
 {% macro err(field) %}{% for e in field.errors %}<span class="field-error">{{ e }}</span>{% endfor %}{% endmacro %}
 {% block content %}
 <section class="page-section"><div class="wrap narrow form-narrow">
-  <span class="eyebrow">My account</span>
-  <h1>Create an account</h1>
-  <p class="muted">Optional. Save your delivery details and a wishlist. You never need an account to buy.</p>
+  <span class="eyebrow">{{ _("My account") }}</span>
+  <h1>{{ _("Create an account") }}</h1>
+  <p class="muted">{{ _("Optional. Save your delivery details and a wishlist. You never need an account to buy.") }}</p>
   <form method="POST" class="contact-form" novalidate>
     {{ form.hidden_tag() }}
     <div class="field">{{ form.name.label }}{{ form.name(autocomplete="name") }}{{ err(form.name) }}</div>
@@ -14,10 +14,10 @@
     <div class="field">{{ form.password.label }}{{ form.password(autocomplete="new-password") }}{{ err(form.password) }}</div>
     <div class="field">{{ form.confirm.label }}{{ form.confirm(autocomplete="new-password") }}{{ err(form.confirm) }}</div>
     <label class="choice">{{ form.marketing() }} {{ form.marketing.label.text }}</label>
-    <label class="choice">{{ form.accept() }} <span>I have read the <a href="{{ url_for('main.privacy') }}" target="_blank">Privacy Policy</a> and <a href="{{ url_for('main.terms') }}" target="_blank">Terms of Use</a></span></label>
+    <label class="choice">{{ form.accept() }} <span>{{ _h('I have read the <a href="{priv}" target="_blank">Privacy Policy</a> and <a href="{use}" target="_blank">Terms of Use</a>', priv=url_for('main.privacy'), use=url_for('main.terms')) }}</span></label>
     {{ err(form.accept) }}
-    <button class="btn-fill" type="submit">Create account</button>
+    <button class="btn-fill" type="submit">{{ _("Create account") }}</button>
   </form>
-  <p>Already have one? <a href="{{ url_for('account.login') }}">Sign in</a></p>
+  <p>{{ _("Already have one?") }} <a href="{{ url_for('account.login') }}">{{ _("Sign in") }}</a></p>
 </div></section>
 {% endblock %}

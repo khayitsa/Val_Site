@@ -4,22 +4,23 @@
       <img src="{{ url_for('static', filename='logos/Verayah-logo.png') }}" alt="Verayah">
     </a>
     <div class="nav-center" id="navlinks">
-      <a href="{{ url_for('products') }}">Shop</a>
-      <a href="{{ url_for('home') }}#collections">Collections</a>
-      <a href="{{ url_for('home') }}#about">About</a>
-      <a href="{{ url_for('home') }}#custom">Custom</a>
-      <a href="{{ url_for('journal') }}">Journal</a>
+      <a href="{{ url_for('products') }}">{{ _("Shop") }}</a>
+      <a href="{{ url_for('home') }}#collections">{{ _("Collections") }}</a>
+      <a href="{{ url_for('home') }}#about">{{ _("About") }}</a>
+      <a href="{{ url_for('home') }}#custom">{{ _("Custom") }}</a>
+      <a href="{{ url_for('journal') }}">{{ _("Journal") }}</a>
     </div>
     <div class="nav-icons">
-      <a href="{{ url_for('account.dashboard') }}" aria-label="{{ 'My account' if customer else 'Sign in' }}" title="{{ 'My account' if customer else 'Sign in (optional)' }}">
+      {% include 'components/lang_switch.html' %}
+      <a href="{{ url_for('account.dashboard') }}" aria-label="{{ _('My account') if customer else _('Sign in') }}" title="{{ _('My account') if customer else _('Sign in (optional)') }}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
       </a>
-      <a href="{{ url_for('shop.cart') }}" class="bag-link" aria-label="Shopping bag ({{ cart_count }})">
+      <a href="{{ url_for('shop.cart') }}" class="bag-link" aria-label="{{ _('Shopping bag ({n})', n=cart_count) }}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
         {% if cart_count %}<span class="bag-count">{{ cart_count }}</span>{% endif %}
       </a>
     </div>
-    <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false">
+    <button class="burger" id="burger" aria-label="{{ _('Open menu') }}" data-label-open="{{ _('Open menu') }}" data-label-close="{{ _('Close menu') }}" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
   </nav>

@@ -133,3 +133,10 @@ button[disabled] { opacity: .6; cursor: wait; }
 }
 
 .logout button.linklike { background:none; border:0; padding:0; color:inherit; font:inherit; text-decoration:underline; cursor:pointer; }
+
+/* English / Spanish switch (admin) */
+.lang-switch { display: inline-flex; gap: .35rem; align-items: center; font-size: 12px; letter-spacing: .08em; }
+.lang-switch a { color: inherit; opacity: .6; text-decoration: none; }
+.lang-switch a.on { opacity: 1; font-weight: 600; text-decoration: underline; }
+.admin-sidebar .lang-switch { margin: 1.25rem 0 0; }
+.login-card .lang-switch { justify-content: center; width: 100%; margin-top: 1.25rem; color: var(--muted, #666); }

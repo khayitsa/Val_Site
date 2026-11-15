@@ -12,6 +12,7 @@ from urllib.parse import urlsplit
 from flask import session, redirect, url_for, flash, request, g, current_app
 
 from models import db, Customer
+from services.i18n import t
 
 
 def _stamp(customer):
@@ -67,7 +68,7 @@ def customer_required(view):
     @wraps(view)
     def wrapped(*args, **kwargs):
         if not current_customer():
-            flash("Please sign in to use your account. You never need an account to buy.", "info")
+            flash(t("Please sign in to use your account. You never need an account to buy."), "info")
             return redirect(url_for("account.login", next=request.path))
         return view(*args, **kwargs)
     return wrapped

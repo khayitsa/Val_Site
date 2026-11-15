@@ -1,18 +1,18 @@
 {% extends "base.html" %}
-{% block title %}Sign in | Verayah{% endblock %}
+{% block title %}{{ _("Sign in") }} | Verayah{% endblock %}
 {% block content %}
 <section class="page-section"><div class="wrap narrow form-narrow">
-  <span class="eyebrow">My account</span>
-  <h1>Sign in</h1>
-  <p class="muted">An account is optional. It lets you save delivery details and a wishlist. You can always <a href="{{ url_for('products') }}">shop as a guest</a>.</p>
+  <span class="eyebrow">{{ _("My account") }}</span>
+  <h1>{{ _("Sign in") }}</h1>
+  <p class="muted">{{ _h('An account is optional. It lets you save delivery details and a wishlist. You can always <a href="{url}">shop as a guest</a>.', url=url_for('products')) }}</p>
   <form method="POST" class="contact-form">
     {{ form.hidden_tag() }}
     {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
     <div class="field">{{ form.email.label }}{{ form.email(autocomplete="email") }}{% for e in form.email.errors %}<span class="field-error">{{ e }}</span>{% endfor %}</div>
     <div class="field">{{ form.password.label }}{{ form.password(autocomplete="current-password") }}</div>
-    <button class="btn-fill" type="submit">Sign in</button>
+    <button class="btn-fill" type="submit">{{ _("Sign in") }}</button>
   </form>
-  <p class="muted small">Forgot your password? Contact us and we'll help you get back in.</p>
-  <p>New here? <a href="{{ url_for('account.register') }}">Create a free account</a></p>
+  <p class="muted small">{{ _("Forgot your password? Contact us and we'll help you get back in.") }}</p>
+  <p>{{ _("New here?") }} <a href="{{ url_for('account.register') }}">{{ _("Create a free account") }}</a></p>
 </div></section>
 {% endblock %}

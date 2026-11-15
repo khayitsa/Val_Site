@@ -1,15 +1,15 @@
 {% extends "admin/base.html" %}
-{% block title %}Journal{% endblock %}
+{% block title %}{{ _("Journal") }}{% endblock %}
 {% block content %}
 <div class="admin-header">
-  <h1>Journal</h1>
-  <a href="{{ url_for('admin.journal_new') }}" class="btn btn-primary">+ Write a post</a>
+  <h1>{{ _("Journal") }}</h1>
+  <a href="{{ url_for('admin.journal_new') }}" class="btn btn-primary">+ {{ _("Write a post") }}</a>
 </div>
 
 <div class="card">
   {% if posts %}
   <table>
-    <tr><th></th><th>Title</th><th>Status</th><th>Date</th><th></th></tr>
+    <tr><th></th><th>{{ _("Title") }}</th><th>{{ _("Status") }}</th><th>{{ _("Date") }}</th><th></th></tr>
     {% for p in posts %}
     <tr>
       <td>
@@ -18,22 +18,22 @@
         {% endif %}
       </td>
       <td>{{ p.title }}<br><span class="muted" style="font-size:12px;">/journal/{{ p.slug }}</span></td>
-      <td>{{ "Published" if p.is_published else "Draft" }}</td>
-      <td>{% if p.published_at %}{{ p.published_at.strftime('%d %b %Y') }}{% else %}<span class="muted">{{ p.created_at.strftime('%d %b %Y') }}</span>{% endif %}</td>
+      <td>{{ _("Published") if p.is_published else _("Draft") }}</td>
+      <td>{% if p.published_at %}{{ p.published_at|fdate }}{% else %}<span class="muted">{{ p.created_at|fdate }}</span>{% endif %}</td>
       <td>
-        <a href="{{ url_for('journal_post', slug=p.slug) }}" target="_blank" class="btn btn-outline btn-sm">{{ "View" if p.is_published else "Preview" }}</a>
-        <a href="{{ url_for('admin.journal_edit', post_id=p.id) }}" class="btn btn-outline btn-sm">Edit</a>
+        <a href="{{ url_for('journal_post', slug=p.slug) }}" target="_blank" class="btn btn-outline btn-sm">{{ _("View") if p.is_published else _("Preview") }}</a>
+        <a href="{{ url_for('admin.journal_edit', post_id=p.id) }}" class="btn btn-outline btn-sm">{{ _("Edit") }}</a>
         <form method="POST" action="{{ url_for('admin.journal_delete', post_id=p.id) }}" style="display:inline;"
-              onsubmit='return confirm({{ ("Delete " ~ p.title ~ "? This cannot be undone.")|tojson }});'>
+              onsubmit='return confirm({{ _("Delete {name}? This cannot be undone.", name=p.title)|string|tojson }});'>
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+          <button type="submit" class="btn btn-danger btn-sm">{{ _("Delete") }}</button>
         </form>
       </td>
     </tr>
     {% endfor %}
   </table>
   {% else %}
-  <p class="muted">No posts yet. <a href="{{ url_for('admin.journal_new') }}">Write your first one</a>.</p>
+  <p class="muted">{{ _h('No posts yet. <a href="{url}">Write your first one</a>.', url=url_for('admin.journal_new')) }}</p>
   {% endif %}
 </div>
 {% endblock %}

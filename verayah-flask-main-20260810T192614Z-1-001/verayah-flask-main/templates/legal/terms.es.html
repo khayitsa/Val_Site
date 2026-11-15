@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block title %}Términos de uso | Verayah{% endblock %}
+{% block content %}
+<section class="page-section"><div class="wrap narrow legal">
+  <span class="eyebrow">Legal</span>
+  <h1>Términos de uso</h1>
+  {% include 'legal/_translation_notice.es.html' %}
+
+  <h2>1. Introducción y aceptación de estos Términos</h2>
+
+  <p>Te damos la bienvenida a Verayah.</p>
+
+  <p>Estos Términos de uso del sitio web («Términos») regulan tu acceso y uso del sitio web de Verayah, incluyendo la exploración de nuestras colecciones de joyería, la consulta de información de los productos, el envío de consultas y la comunicación con nosotros a través del sitio web.</p>
+
+  <p>Verayah («nosotros» o «nuestro») es una marca de joyería con sede en la Ciudad de Panamá, República de Panamá, propiedad de Valentina Garcia y operada por ella.</p>
+
+  <p>Al acceder o usar este sitio web, aceptas cumplir estos Términos. Si no estás de acuerdo con ellos, debes dejar de usar el sitio web.</p>
+
+  <p>Estos Términos deben leerse junto con nuestra <a href="{{ url_for('main.privacy') }}">Política de privacidad</a> y nuestra <a href="{{ url_for('main.cookies') }}">Política de cookies</a>, que explican cómo recopilamos y tratamos la información personal y cómo usamos las cookies cuando visitas nuestro sitio web.</p>
+
+  <h2>2. Elegibilidad y uso permitido</h2>
+
+  <p>Puedes usar este sitio web para fines personales y no comerciales que sean lícitos, siempre que tu uso cumpla estos Términos y la legislación aplicable.</p>
+
+  <p>Al usar el sitio web, confirmas que tienes capacidad legal para aceptar estos Términos y que toda la información que proporciones a Verayah es exacta, completa y no engañosa.</p>
+
+  <p>Si tienes menos de 18 años, debes usar el sitio web con la participación y supervisión de uno de tus padres o de tu tutor legal.</p>
+
+  <p>Aceptas no usar el sitio web con fines fraudulentos, ilícitos o no autorizados. No debes usar el sitio web de ninguna forma que pueda dañar, inhabilitar, sobrecargar o afectar su funcionamiento, ni interferir con el uso que otra persona haga de él.</p>
+
+  <p>No debes intentar obtener acceso no autorizado al sitio web, a su entorno de alojamiento, a los servidores o a los sistemas relacionados. No debes introducir virus, programas maliciosos ni código dañino, interferir con la seguridad del sitio web ni intentar eludir las medidas técnicas que lo protegen.</p>
+
+  <p>No puedes usar sistemas automatizados, bots, herramientas de extracción de datos («scraping») ni tecnología similar para extraer, copiar o recopilar el contenido del sitio web sin nuestro permiso previo por escrito.</p>
+
+  <p>Nos reservamos el derecho de restringir o suspender el acceso al sitio web cuando sea razonablemente necesario para proteger nuestro negocio, el sitio web, los sistemas o los usuarios, sujeto a la ley aplicable.</p>
+
+  <h2>3. Información del sitio web y presentación de los productos</h2>
+
+  <p>Verayah se especializa en joyería hecha a mano e inspirada en el océano y en el entorno natural. Nuestras colecciones pueden incorporar materiales como cadenas con baño de oro de 18k, perlas de río, cristales naturales y otros materiales seleccionados.</p>
+
+  <p>Hacemos esfuerzos razonables para asegurar que la información, las fotografías, las descripciones y demás contenido que se muestra en el sitio web sea exacto y esté actualizado.</p>
+
+  <p>Sin embargo, las fotografías y descripciones de los productos se ofrecen con fines de información general y de presentación. La apariencia de la joyería puede variar ligeramente según la pantalla o el dispositivo con el que se vea el sitio web. Los artículos hechos a mano y los productos que incorporan materiales naturales también pueden presentar variaciones de forma, color, textura y aspecto.</p>
+
+  <p>Podemos actualizar, corregir o retirar el contenido del sitio web en cualquier momento y sin previo aviso.</p>
+
+  <p>Nada de lo que aparece en este sitio web debe interpretarse como una garantía de que un producto, diseño o material determinado seguirá disponible indefinidamente. La disponibilidad de los productos y las condiciones de compra se rigen por los términos independientes aplicables a las compras.</p>
+
+  <h2>4. Derechos de propiedad intelectual</h2>
+
+  <p>Toda la propiedad intelectual que se muestra en el sitio web de Verayah, o que forma parte de él, pertenece a Verayah o se usa con el permiso del titular de los derechos correspondiente.</p>
+
+  <p>Esto incluye, sin limitación, el nombre Verayah, la identidad de marca, los logotipos, las marcas registradas, los diseños de joyería, los conceptos creativos originales, las fotografías de los productos, las imágenes, los textos del sitio web, las descripciones, los gráficos, los materiales visuales, el diseño del sitio web y demás contenido original.</p>
+
+  <p>Puedes ver y acceder al contenido del sitio web para tu uso personal y no comercial. Sin embargo, no puedes reproducir, copiar, distribuir, modificar, publicar, transmitir, mostrar, explotar comercialmente ni usar de otra forma ningún contenido del sitio web sin nuestro permiso previo por escrito, salvo que la ley aplicable permita dicho uso.</p>
+
+  <p>El acceso al sitio web no te transfiere ni te otorga la propiedad de ninguna propiedad intelectual de Verayah.</p>
+
+  <p>Queda prohibida la copia, reproducción o explotación comercial no autorizada de los diseños originales, la marca o el contenido de Verayah, y ello puede dar lugar a las acciones legales que correspondan.</p>
+
+  <h2>5. Contenido generado por los usuarios y comunicaciones</h2>
+
+  <p>Puedes enviar voluntariamente a Verayah consultas, comentarios, reseñas, testimonios, fotografías u otro material a través del sitio web o de nuestros canales de comunicación.</p>
+
+  <p>Sigues siendo responsable de asegurar que cualquier material que envíes sea lícito, exacto y no infrinja la propiedad intelectual, la privacidad ni otros derechos de otra persona.</p>
+
+  <p>No debes enviar contenido que sea ilícito, difamatorio, engañoso, abusivo, discriminatorio, amenazante o inapropiado por cualquier otro motivo.</p>
+
+  <p>Cuando envíes fotografías, testimonios u otro contenido personal, Verayah no publicará con fines promocionales fotografías ni testimonios de clientes que permitan identificarlos sin una base legal adecuada y, cuando se requiera, sin tu consentimiento.</p>
+
+  <p>Nos reservamos el derecho de rechazar, retirar o abstenernos de usar contenido que no cumpla estos Términos o la ley aplicable.</p>
+
+  <h2>6. Sitios web y servicios de terceros</h2>
+
+  <p>El sitio web puede contener enlaces a sitios web, plataformas o servicios de terceros, por tu comodidad o información.</p>
+
+  <p>Estos sitios web y servicios de terceros funcionan de forma independiente de Verayah y pueden regirse por sus propios términos de uso, políticas de privacidad y otras condiciones.</p>
+
+  <p>No controlamos ni somos responsables del contenido, la disponibilidad, la seguridad, la exactitud o las prácticas de privacidad de sitios web independientes de terceros.</p>
+
+  <p>La inclusión de un enlace a un tercero no constituye necesariamente un respaldo ni una recomendación de Verayah.</p>
+
+  <p>Accedes a sitios web y servicios de terceros bajo tu propia responsabilidad y te recomendamos revisar sus términos aplicables y avisos de privacidad antes de usarlos.</p>
+
+  <p>Nada de lo dispuesto en esta sección excluye la responsabilidad que Verayah pueda tener respecto de los proveedores de servicios que contrate para prestar servicios en su nombre.</p>
+
+  <h2>7. Privacidad e información personal</h2>
+
+  <p>Respetamos tu privacidad y tomamos medidas razonables para proteger la información personal recopilada a través del sitio web.</p>
+
+  <p>Cualquier información personal que proporciones al navegar por el sitio web, enviar una consulta o comunicarte con nosotros se manejará de acuerdo con nuestra <a href="{{ url_for('main.privacy') }}">Política de privacidad</a> y los requisitos aplicables de protección de datos.</p>
+
+  <p>Nuestra <a href="{{ url_for('main.privacy') }}">Política de privacidad</a> explica los tipos de información personal que podemos recopilar, los fines para los que se usa, cómo puede compartirse y los derechos de que disponen las personas.</p>
+
+  <p>Nuestra <a href="{{ url_for('main.cookies') }}">Política de cookies</a> ofrece más información sobre el uso de cookies y tecnologías similares en el sitio web.</p>
+
+  <p>Al usar el sitio web, reconoces que has tenido la oportunidad de revisar estas políticas.</p>
+
+  <h2>8. Disponibilidad y seguridad del sitio web</h2>
+
+  <p>Procuramos que el sitio web esté accesible y funcione correctamente. Sin embargo, no garantizamos que el sitio web esté siempre disponible, funcione sin interrupciones, sea seguro o esté libre de errores.</p>
+
+  <p>El acceso puede restringirse o interrumpirse ocasionalmente por mantenimiento, problemas técnicos, actualizaciones de sistemas, problemas de alojamiento o circunstancias fuera de nuestro control razonable.</p>
+
+  <p>Podemos modificar, suspender o descontinuar cualquier parte del sitio web o de sus funciones cuando sea razonablemente necesario.</p>
+
+  <p>Eres responsable de tomar precauciones razonables para proteger tus propios dispositivos, sistemas e información cuando accedes a internet y usas el sitio web.</p>
+
+  <h2>9. Descargo de responsabilidad y limitación de responsabilidad</h2>
+
+  <p>El sitio web y su contenido se ofrecen con fines de información general y de presentación. Aunque hacemos esfuerzos razonables por mantener información exacta y confiable, no garantizamos que todo el contenido del sitio web esté siempre completo, actualizado o libre de errores.</p>
+
+  <p>En la medida permitida por la ley aplicable, Verayah no será responsable de pérdidas o daños derivados de tu imposibilidad de acceder al sitio web o de usarlo, de interrupciones temporales del sitio web, de errores técnicos, de interferencias no autorizadas de terceros o de que confíes en información incompleta o desactualizada.</p>
+
+  <p>Aceptas usar el sitio web bajo tu propia responsabilidad y tomar medidas razonables para proteger tus dispositivos y tu información personal.</p>
+
+  <p>Nada de lo dispuesto en estos Términos excluye o limita una responsabilidad que, conforme a la ley aplicable, no pueda excluirse ni limitarse legalmente, incluida la responsabilidad derivada de fraude o de declaraciones fraudulentas.</p>
+
+  <h2>10. Suspensión o restricción del acceso</h2>
+
+  <p>Nos reservamos el derecho de restringir, suspender o terminar tu acceso al sitio web cuando sea razonablemente necesario si tenemos motivos para creer que has incumplido estos Términos, que has realizado actividades ilícitas o fraudulentas, que has intentado vulnerar la seguridad del sitio web o que has interferido con su funcionamiento adecuado.</p>
+
+  <p>Cualquier restricción o suspensión será proporcional a las circunstancias y estará sujeta a la ley aplicable.</p>
+
+  <h2>11. Hechos fuera de nuestro control razonable</h2>
+
+  <p>Verayah no será responsable de ningún retraso, interrupción o falla en la disponibilidad del sitio web cuando se deba a circunstancias fuera de nuestro control razonable.</p>
+
+  <p>Estas circunstancias pueden incluir desastres naturales, condiciones climáticas severas, disturbios civiles, huelgas, interrupciones de servicios esenciales, fallas de telecomunicaciones, interrupciones del alojamiento u otros hechos que razonablemente no pudieron evitarse.</p>
+
+  <p>Tomaremos medidas razonables para resolver cualquier interrupción de este tipo cuando sea posible.</p>
+
+  <h2>12. Ley aplicable y resolución de disputas</h2>
+
+  <p>Estos Términos se rigen por las leyes de la República de Panamá.</p>
+
+  <p>Te animamos a contactarnos directamente si tienes alguna inquietud o queja relacionada con tu uso del sitio web, para que podamos intentar resolver el asunto de forma amistosa.</p>
+
+  <p>Cuando una disputa no pueda resolverse directamente, podrá remitirse a las autoridades o tribunales competentes de conformidad con la ley aplicable.</p>
+
+  <p>Nada de lo dispuesto en estos Términos te impide ejercer los derechos que puedas tener ante un tribunal, juzgado o autoridad reguladora competente.</p>
+
+  <h2>13. Modificaciones a estos Términos</h2>
+
+  <p>Podemos actualizar o modificar estos Términos de vez en cuando para reflejar cambios en nuestro negocio, en las funciones del sitio web, en los servicios o en los requisitos legales aplicables.</p>
+
+  <p>Cualquier versión actualizada se publicará en el sitio web junto con una fecha de vigencia revisada.</p>
+
+  <p>Si sigues usando el sitio web después de que se publiquen los Términos actualizados, se entenderá que aceptas los Términos revisados, en la medida permitida por la ley aplicable.</p>
+
+  <p>Te recomendamos revisar estos Términos periódicamente.</p>
+
+  <h2>14. Divisibilidad</h2>
+
+  <p>Si alguna disposición de estos Términos se considera ilícita, inválida o inaplicable, dicha disposición se interpretará o modificará en la mínima medida necesaria para que sea válida y aplicable, cuando la ley lo permita.</p>
+
+  <p>Las demás disposiciones seguirán aplicándose en la medida en que sigan siendo válidas y aplicables.</p>
+
+  <h2>15. Acuerdo completo</h2>
+
+  <p>Estos Términos, junto con nuestra <a href="{{ url_for('main.privacy') }}">Política de privacidad</a> y nuestra <a href="{{ url_for('main.cookies') }}">Política de cookies</a>, constituyen el acuerdo que regula tu acceso y uso del sitio web de Verayah.</p>
+
+  <p>Cualquier acuerdo independiente relativo a la compra de productos o a servicios de joyería personalizada se regirá por los términos y políticas aplicables que Verayah comunique para ese fin.</p>
+
+  <h2>16. Información de contacto</h2>
+
+  <p>Si tienes preguntas, inquietudes o consultas sobre estos Términos o sobre tu uso del sitio web, contáctanos:</p>
+
+  <p>Negocio: Verayah<br>Ubicación: Ciudad de Panamá, República de Panamá<br>Teléfono / WhatsApp: {{ site.phone }}{% if site.email %}<br>Correo electrónico: {{ site.email }}{% endif %}</p>
+</div></section>
+{% endblock %}

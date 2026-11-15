@@ -14,6 +14,7 @@ except ImportError:
 from models import db, AdminUser, Product, WishlistItem, JournalPost
 from models.schema import upgrade_schema
 from services import cart as bag
+from services import i18n
 from services.journal import render_body
 from services.customer_auth import current_customer
 
@@ -96,6 +97,10 @@ try:
 except ValueError:
     _mail_port = 587
 _mail_user = os.environ.get("MAIL_USER", "").strip()
+# Language: "auto" follows the visitor's browser the first time; "en" or "es" forces one.
+app.config["DEFAULT_LANG"] = os.environ.get("DEFAULT_LANG", "auto").strip().lower() or "auto"
+# Language of the emails that go to the shop owner (new order / new message).
+app.config["OWNER_LANG"] = os.environ.get("OWNER_LANG", "en").strip().lower() or "en"
 app.config["MAIL"] = {
     "host": os.environ.get("MAIL_HOST", "").strip(),
     "port": _mail_port,
@@ -129,6 +134,9 @@ app.register_blueprint(shop_bp)
 app.register_blueprint(account_bp)
 
 
+i18n.init_app(app)
+
+
 @app.context_processor
 def inject_site():
     customer = current_customer()
@@ -152,7 +160,7 @@ def not_found(_err):
 @app.errorhandler(413)
 def too_large(_err):
     """A photo bigger than the upload limit: explain it instead of showing a raw error page."""
-    flash("That file is too big (the limit is 60 MB per upload). Please pick fewer or smaller photos and try again.", "error")
+    flash(i18n.t("That file is too big (the limit is 60 MB per upload). Please pick fewer or smaller photos and try again."), "error")
     ref = request.referrer or ""
     if ref.startswith(request.host_url):       # only ever go back to a page on this site
         return redirect(ref)
@@ -164,6 +172,8 @@ def security_headers(resp):
     resp.headers.setdefault("X-Content-Type-Options", "nosniff")
     resp.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
     resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    resp.vary.add("Cookie")            # the page language follows the language cookie
+    resp.vary.add("Accept-Language")   # ...or the browser language on a first visit
     if request.is_secure:
         resp.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
     # Pages with a personal bag/account/order must never be cached by shared proxies.
