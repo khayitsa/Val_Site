@@ -3,7 +3,7 @@
    Matching Ocean Whispers template aesthetic
    ============================================ */
 
-@import url('fonts.css');
+@import url('fonts.css?v=2');
 
 :root {
   --salt:        #F9F7F4;
@@ -22,8 +22,8 @@
   --border:      #DDD9D0;
   --border-light:#EDEBE6;
 
-  --display: 'Cormorant Garamond', Georgia, serif;
-  --body:    'Jost', -apple-system, sans-serif;
+  --display: 'Marcellus', Georgia, serif;
+  --body:    'Tenor Sans', -apple-system, sans-serif;
 
   --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --fast: 250ms;
@@ -676,6 +676,10 @@ footer {
   gap: 2rem;
 }
 .why-card { text-align: center; }
+.why-section .section-head h2 {
+  font-family: var(--display); font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 400; letter-spacing: 0.02em; color: var(--charcoal);
+}
 .why-icon {
   width: 56px; height: 56px; margin: 0 auto 1.2rem;
   color: var(--teal);
@@ -730,7 +734,7 @@ footer {
    FOOTER TAGLINE
    ============================================ */
 .footer-tagline {
-  font-family: var(--display); font-style: italic;
+  font-family: var(--display); font-style: normal;
   font-size: 1rem; color: rgba(249,247,244,.4);
   margin: 0.5rem 0 1.2rem; font-weight: 300;
 }
@@ -947,3 +951,11 @@ footer {
 .nav-icons .lang-switch { margin-right: .4rem; }
 .footer-lang { margin-top: .5rem; }
 .footer-lang .lang-switch, .footer-lang .lang-switch a.on { color: rgba(249,247,244,.75); }
+
+/* ============================================
+   SINGLE-WEIGHT FONTS (Marcellus, Tenor Sans)
+   They have no bold or italic, so keep bare headings plain instead of letting
+   the browser fake bold, and give <strong> in page text a clear emphasis.
+   ============================================ */
+h1, h2, h3, h4, h5, h6 { font-weight: 400; }
+.page-section strong { font-weight: 700; }
