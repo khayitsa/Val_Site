@@ -181,6 +181,11 @@ body.nav-open { overflow: hidden; }
   .hero-copy h1 { font-size: clamp(2rem, 11vw, 2.8rem); }
   .page-section h1 { font-size: 1.75rem; }
   .trust-item { white-space: nowrap; }
+  /* Keep every collection card the same size: titles stay on one line */
+  .collection-card-overlay { padding: 1rem; }
+  .collection-card-overlay h3 { font-size: 1.15rem; line-height: 1.2; }
+  .collection-card--all .collection-card-overlay { padding: 1rem; }
+  .collection-card--all h3 { font-size: 1.5rem; }
 }
 
 @media (max-width: 360px) {
@@ -198,7 +203,7 @@ body.nav-open { overflow: hidden; }
 @media (max-width: 768px) {
   .hero { padding-top: 5rem; }
   .about-media { max-width: none; justify-self: stretch; }
-  .collection-card--all { aspect-ratio: auto; min-height: 140px; }
+  .collection-card--all { aspect-ratio: 3 / 4; min-height: 0; }
 }
 
 /* Language switch in the small-screen header */

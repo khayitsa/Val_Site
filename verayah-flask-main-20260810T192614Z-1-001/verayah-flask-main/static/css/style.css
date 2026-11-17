@@ -3,7 +3,7 @@
    Matching Ocean Whispers template aesthetic
    ============================================ */
 
-@import url('fonts.css?v=2');
+@import url('fonts.css?v=3');
 
 :root {
   --salt:        #F9F7F4;
@@ -23,7 +23,7 @@
   --border-light:#EDEBE6;
 
   --display: 'Marcellus', Georgia, serif;
-  --body:    'Tenor Sans', -apple-system, sans-serif;
+  --body:    'FogtwoNo5', Georgia, serif;
 
   --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --fast: 250ms;
@@ -953,7 +953,7 @@ footer {
 .footer-lang .lang-switch, .footer-lang .lang-switch a.on { color: rgba(249,247,244,.75); }
 
 /* ============================================
-   SINGLE-WEIGHT FONTS (Marcellus, Tenor Sans)
+   SINGLE-WEIGHT FONTS (Marcellus, FogtwoNo5)
    They have no bold or italic, so keep bare headings plain instead of letting
    the browser fake bold, and give <strong> in page text a clear emphasis.
    ============================================ */

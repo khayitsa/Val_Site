@@ -9,8 +9,9 @@
 @font-face{font-family:'Jost';font-style:normal;font-weight:400;font-display:swap;src:url('../fonts/jost-latin-400-normal.woff2') format('woff2');}
 @font-face{font-family:'Jost';font-style:normal;font-weight:500;font-display:swap;src:url('../fonts/jost-latin-500-normal.woff2') format('woff2');}
 
-/* Verayah brand fonts: free look-alikes (SIL Open Font License) for Val's picks.
-   Marcellus (headings) echoes Majesty; Tenor Sans (body, labels) echoes Sweet Sans Pro.
-   Both come in a single weight (400). Licences: static/fonts/licences/. */
+/* Verayah brand fonts (SIL Open Font License). Marcellus (headings) echoes Majesty.
+   FogtwoNo5 (body, labels) is the brand-kit body font, by gluk.
+   All three come in a single weight (400). Licences: static/fonts/licences/.
+   size-adjust makes FogtwoNo5 (small capitals) match the visual size of the other fonts. */
 @font-face{font-family:'Marcellus';font-style:normal;font-weight:400;font-display:swap;src:url('../fonts/marcellus-latin-400-normal.woff2') format('woff2');}
-@font-face{font-family:'Tenor Sans';font-style:normal;font-weight:400;font-display:swap;src:url('../fonts/tenor-sans-latin-400-normal.woff2') format('woff2');}
+@font-face{font-family:'FogtwoNo5';font-style:normal;font-weight:400;font-display:swap;size-adjust:115%;src:url('../fonts/fogtwono5-400.woff2') format('woff2');}
