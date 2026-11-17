@@ -23,7 +23,7 @@
   --border-light:#EDEBE6;
 
   --display: 'Marcellus', Georgia, serif;
-  --body:    'FogtwoNo5', Georgia, serif;
+  --body:    'Jost', -apple-system, sans-serif;
 
   --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --fast: 250ms;
@@ -117,9 +117,9 @@ button { cursor: pointer; border: none; background: none; font-family: var(--bod
 .hero-copy { max-width: 640px; }
 
 .hero-copy .eyebrow {
-  display: block; font-family: var(--body);
-  font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
-  color: var(--teal-deep); margin-bottom: 1rem; font-weight: 500;
+  display: block; font-family: var(--display);
+  font-size: 12.5px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--teal-deep); margin-bottom: 1rem; font-weight: 400;
 }
 
 .hero-copy h1 {
@@ -198,9 +198,9 @@ button { cursor: pointer; border: none; background: none; font-family: var(--bod
 
 .eyebrow {
   display: inline-block;
-  font-family: var(--body); font-size: 10.5px;
-  letter-spacing: 0.2em; text-transform: uppercase;
-  color: var(--teal); font-weight: 500; margin-bottom: 1rem;
+  font-family: var(--display); font-size: 12.5px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--teal); font-weight: 400; margin-bottom: 1rem;
 }
 
 /* ============================================
@@ -953,7 +953,7 @@ footer {
 .footer-lang .lang-switch, .footer-lang .lang-switch a.on { color: rgba(249,247,244,.75); }
 
 /* ============================================
-   SINGLE-WEIGHT FONTS (Marcellus, FogtwoNo5)
+   SINGLE-WEIGHT FONTS (Marcellus)
    They have no bold or italic, so keep bare headings plain instead of letting
    the browser fake bold, and give <strong> in page text a clear emphasis.
    ============================================ */
