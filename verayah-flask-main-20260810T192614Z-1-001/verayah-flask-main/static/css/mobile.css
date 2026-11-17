@@ -211,3 +211,18 @@ body.nav-open { overflow: hidden; }
   .nav-icons .lang-switch { margin-right: .2rem; font-size: 11px; }
   .nav-icons .lang-switch a { width: auto; height: auto; min-width: 30px; min-height: 44px; align-items: center; justify-content: center; }
 }
+
+/* "Why Verayah" on phones and small tablets (two columns): the text under every title
+   starts at the same height in each row, and the odd fifth point sits centred below. */
+@media (min-width: 361px) and (max-width: 768px) {
+  .why-grid { row-gap: 0; column-gap: 1.25rem; }
+  .why-card { display: grid; grid-template-rows: subgrid; grid-row: span 3; align-content: start; }
+  .why-card p { margin-bottom: 2.5rem; }
+  .why-grid .why-card:nth-child(5) { grid-column: 1 / -1; }
+}
+@supports not (grid-template-rows: subgrid) {
+  @media (min-width: 361px) and (max-width: 768px) {
+    .why-card { display: block; }
+    .why-card h3 { min-height: 3.4em; }
+  }
+}
