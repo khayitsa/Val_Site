@@ -23,15 +23,24 @@ class Throttle:
     def _recent(self, key):
         now = time.time()
         hits = [t for t in self._hits.get(key, []) if now - t < self.window]
-        self._hits[key] = hits
+        if hits:
+            self._hits[key] = hits
+        else:
+            self._hits.pop(key, None)   # don't keep a key for someone with no recent hits
         return hits
+
+    def _sweep(self):
+        """Forget everyone whose hits have all expired (keeps memory bounded)."""
+        for key in list(self._hits):
+            self._recent(key)
 
     def blocked(self, key):
         return len(self._recent(key)) >= self.max_attempts
 
     def record(self, key):
-        self._recent(key)
-        self._hits[key].append(time.time())
+        if len(self._hits) > 5000:
+            self._sweep()
+        self._hits[key] = self._recent(key) + [time.time()]
 
     def clear(self, key):
         self._hits.pop(key, None)

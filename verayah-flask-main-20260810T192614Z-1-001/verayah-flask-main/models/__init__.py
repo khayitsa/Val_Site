@@ -13,8 +13,12 @@ Database models for Verayah.
              marketing consent is stored separately per list)
 - ContactMessage: messages sent through the website contact form
 """
+import hashlib
+import hmac
 import secrets
 from datetime import datetime
+
+from flask import current_app
 
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
@@ -30,6 +34,25 @@ class AdminUser(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # Bumped on every logout. Part of the login cookie's signature, so a copied
+    # cookie stops working once the admin logs out.
+    session_epoch = db.Column(db.Integer, nullable=False, default=0, server_default="0")
+
+    def get_id(self):
+        """What Flask-Login keeps in the login cookie: the id plus a signature
+        tied to this account's password and logout counter. Changing the password
+        (flask create-admin) or logging out makes every older cookie invalid."""
+        return f"{self.id}:{self._session_stamp()}"
+
+    def _session_stamp(self):
+        raw = f"{self.id}|{self.password_hash}|{self.session_epoch or 0}".encode()
+        key = current_app.secret_key or b""
+        if isinstance(key, str):
+            key = key.encode()
+        return hmac.new(key, raw, hashlib.sha256).hexdigest()[:32]
+
+    def session_matches(self, stamp):
+        return hmac.compare_digest(str(stamp), self._session_stamp())
 
     def set_password(self, raw_password):
         # scrypt (werkzeug's default) - slow-by-design hashing, good against

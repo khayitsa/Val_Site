@@ -50,7 +50,7 @@
               <input type="hidden" name="variant_id" value="{{ v.id }}">
               <input type="text" name="variant_shade" value="{{ v.shade }}" placeholder="{{ _('e.g. Seafoam') }}">
             </td>
-            <td><input type="number" name="variant_stock" value="{{ v.stock_quantity }}" min="0" style="width:90px;"></td>
+            <td><input type="hidden" name="variant_stock_seen" value="{{ v.stock_quantity }}"><input type="number" name="variant_stock" value="{{ v.stock_quantity }}" min="0" style="width:90px;"></td>
             <td><button type="button" class="btn btn-outline btn-sm remove-row">{{ _("Remove") }}</button></td>
           </tr>
           {% endfor %}
@@ -109,7 +109,7 @@
       <input type="hidden" name="variant_id" value="">
       <input type="text" name="variant_shade" placeholder="{{ _('e.g. Seafoam') }}">
     </td>
-    <td><input type="number" name="variant_stock" value="0" min="0" style="width:90px;"></td>
+    <td><input type="hidden" name="variant_stock_seen" value=""><input type="number" name="variant_stock" value="0" min="0" style="width:90px;"></td>
     <td><button type="button" class="btn btn-outline btn-sm remove-row">{{ _("Remove") }}</button></td>
   </tr>
 </template>

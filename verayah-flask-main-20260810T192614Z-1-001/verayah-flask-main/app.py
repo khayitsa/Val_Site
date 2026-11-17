@@ -1,4 +1,5 @@
 import os
+import time
 import click
 from flask import Flask, render_template, session, request, abort, flash, redirect, url_for
 from flask_login import LoginManager, current_user
@@ -71,6 +72,12 @@ except ValueError:
 # emails use it instead of whatever Host header the request arrived with.
 _base = (os.environ.get("PUBLIC_BASE_URL") or "").strip().rstrip("/")
 app.config["PUBLIC_BASE_URL"] = _base if _base.startswith(("http://", "https://")) else ""
+# Unpaid website orders hold their pieces. After this many hours without payment the
+# order is cancelled and the pieces go back on sale (as the Terms of Sale say). 0 = never.
+try:
+    app.config["UNPAID_HOLD_HOURS"] = max(0.0, float(os.environ.get("UNPAID_HOLD_HOURS") or 4))
+except ValueError:
+    app.config["UNPAID_HOLD_HOURS"] = 4.0
 app.config["DELIVERY_FEE"] = os.environ.get("DELIVERY_FEE", "")          # e.g. 5.00 - courier fee within Panama
 app.config["SITE"] = {
     "name": "Verayah",
@@ -121,7 +128,16 @@ login_manager.login_message = "Please log in to access the admin portal."
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.session.get(AdminUser, int(user_id))
+    """The login cookie holds "<id>:<signature>" (see AdminUser.get_id). Without a
+    matching signature - old cookie, password changed, logged out - nobody is logged in."""
+    try:
+        raw_id, stamp = str(user_id).split(":", 1)
+        user = db.session.get(AdminUser, int(raw_id))
+    except (ValueError, TypeError):
+        return None
+    if user is None or not user.session_matches(stamp):
+        return None
+    return user
 
 
 from routes.admin_routes import admin_bp
@@ -150,6 +166,27 @@ def inject_site():
         "wishlist_ids": wishlist_ids,
         "delivery_fee": app.config["DELIVERY_FEE"],
     }
+
+
+_last_hold_sweep = [0.0]
+
+
+@app.before_request
+def release_stale_holds():
+    """At most every 5 minutes, hand back the pieces held by long-unpaid orders.
+    Runs on ordinary page visits (no scheduler needed) and never breaks a page."""
+    if request.endpoint in (None, "static"):
+        return
+    now = time.time()
+    if now - _last_hold_sweep[0] < 300:
+        return
+    _last_hold_sweep[0] = now
+    try:
+        from services.stock import release_expired_unpaid
+        release_expired_unpaid(app.config["UNPAID_HOLD_HOURS"])
+    except Exception:  # noqa: BLE001
+        db.session.rollback()
+        app.logger.exception("Releasing unpaid-order holds failed")
 
 
 @app.errorhandler(404)

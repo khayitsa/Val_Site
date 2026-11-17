@@ -25,6 +25,7 @@ ORDER_COLUMNS = {
 # Optional Spanish copies of product / journal text (added for the EN/ES switch).
 EXTRA_COLUMNS = {
     "products": {"description_es": "TEXT"},
+    "admin_users": {"session_epoch": "INTEGER NOT NULL DEFAULT 0"},
     "journal_posts": {"title_es": "VARCHAR(200)", "excerpt_es": "VARCHAR(300)", "body_es": "TEXT"},
 }
 

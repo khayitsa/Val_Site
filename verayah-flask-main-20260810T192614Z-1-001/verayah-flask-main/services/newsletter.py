@@ -15,17 +15,12 @@ def record_consent(email, name=None, newsletter=False, sneak_peek=False, source=
         return None
     email = email.strip().lower()
     sub = Subscriber.query.filter_by(email=email).first()
-    if sub is None:
-        sub = Subscriber(email=email)
-        db.session.add(sub)
-    elif sub.unsubscribed_at is not None:
-        return sub  # they opted out - leave that decision alone
-    if name and not sub.name:
-        sub.name = name.strip()
-    already_consented = sub.consented_at is not None
-    sub.newsletter = bool(newsletter) or bool(sub.newsletter)
-    sub.sneak_peek = bool(sneak_peek) or bool(sub.sneak_peek)
-    if not already_consented:
-        sub.consent_source = source
-        sub.consented_at = datetime.utcnow()
+    if sub is not None:
+        # Already on file (subscribed, or opted out): an anonymous form changes nothing,
+        # not even to add a second list - anyone could type someone else's address.
+        return sub
+    sub = Subscriber(email=email, name=(name or "").strip() or None,
+                     newsletter=bool(newsletter), sneak_peek=bool(sneak_peek),
+                     consent_source=source, consented_at=datetime.utcnow())
+    db.session.add(sub)
     return sub

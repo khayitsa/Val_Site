@@ -130,7 +130,12 @@ def wishlist_toggle(product_id):
 def delete_account():
     customer = current_customer()
     form = DeleteAccountForm()
+    dkey = f"delete:{customer.id}"
+    if customer_login_throttle.blocked(dkey):
+        flash(t("Too many failed attempts. Please wait 15 minutes and try again."), "error")
+        return redirect(url_for("account.dashboard"))
     if form.validate_on_submit() and customer.check_password(form.password.data):
+        customer_login_throttle.clear(dkey)
         # The account, saved details and wishlist are erased. Past orders are
         # kept as business records but are unlinked from the account.
         for order in customer.orders:
@@ -140,5 +145,7 @@ def delete_account():
         logout_customer()
         flash(t("Your account has been deleted."), "info")
         return redirect(url_for("home"))
+    if form.validate_on_submit():      # a real attempt with a wrong password
+        customer_login_throttle.record(dkey)
     flash(t("Password was incorrect, so your account was not deleted."), "error")
     return redirect(url_for("account.dashboard"))

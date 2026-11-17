@@ -25,9 +25,10 @@ from werkzeug.utils import secure_filename
 
 from models import (
     db, AdminUser, Product, ProductVariant, ProductImage, Order, OrderItem,
-    Customer, Subscriber, ContactMessage, JournalPost
+    Customer, Subscriber, ContactMessage, JournalPost, WishlistItem
 )
 from services.journal import unique_slug
+from services import stock
 from services.security import admin_login_throttle, client_ip
 from services.i18n import t
 from forms.admin_forms import check_upload, LoginForm, ProductForm, OrderStatusForm, OrderForm, OrderCustomerForm, JournalForm
@@ -109,7 +110,8 @@ def _sync_variants(product):
     """Rebuild a product's shade/stock rows from the submitted form.
 
     Rows arrive as parallel arrays: variant_id[] (blank for new rows),
-    variant_shade[], variant_stock[]. Existing variants not present in the
+    variant_shade[], variant_stock[], variant_stock_seen[] (the number the form
+    showed when it was opened). Existing variants not present in the
     submission are removed - unless they're referenced by a past order, in
     which case we keep the row but zero its stock instead, so order history
     never breaks.
@@ -117,11 +119,14 @@ def _sync_variants(product):
     ids = request.form.getlist("variant_id")
     shade_names = request.form.getlist("variant_shade")
     stocks = request.form.getlist("variant_stock")
+    seen = request.form.getlist("variant_stock_seen")
+    seen += [""] * (len(ids) - len(seen))
 
     existing_by_id = {str(v.id): v for v in product.variants}
     seen_ids = set()
+    stock_changes = []
 
-    for vid, shade, stock in zip(ids, shade_names, stocks):
+    for vid, shade, stock, was in zip(ids, shade_names, stocks, seen):
         shade = (shade or "").strip()
         if not shade:
             continue
@@ -133,8 +138,18 @@ def _sync_variants(product):
         if vid and vid in existing_by_id:
             variant = existing_by_id[vid]
             variant.shade = shade
-            variant.stock_quantity = stock
             seen_ids.add(vid)
+            # Change stock by what the owner changed (new minus what the form showed),
+            # as one database step. Saving the number outright would erase any sale
+            # made while the form was open.
+            try:
+                was = int(was)
+            except (TypeError, ValueError):
+                was = None
+            if was is None:
+                variant.stock_quantity = stock          # older form without the hidden field
+            else:
+                stock_changes.append((variant.id, stock - max(0, was)))
         else:
             variant = ProductVariant(shade=shade, stock_quantity=stock)
             product.variants.append(variant)
@@ -150,6 +165,14 @@ def _sync_variants(product):
             variant.stock_quantity = 0
         else:
             db.session.delete(variant)
+
+    # Applied by the caller once the product itself is saved.
+    return stock_changes
+
+
+def _apply_stock_changes(changes):
+    for variant_id, delta in changes:
+        stock.adjust(variant_id, delta)
 
 
 # --- Auth ----------------------------------------------------------------
@@ -183,6 +206,9 @@ def login():
 @admin_bp.route("/logout", methods=["POST"])
 @login_required
 def logout():
+    # Bump the counter so a copy of the login cookie stops working too.
+    current_user.session_epoch = (current_user.session_epoch or 0) + 1
+    db.session.commit()
     logout_user()
     return redirect(url_for("admin.login"))
 
@@ -272,12 +298,14 @@ def product_edit(product_id):
             return render_template("admin/product_form.html", form=form, mode="edit", product=product)
         if form.image.data:
             product.image_filename = _save_product_image(form.image.data)
-        _sync_variants(product)
+        stock_changes = _sync_variants(product)
         if not product.variants:
             flash(t("Add at least one shade with a stock quantity."), "error")
             return render_template("admin/product_form.html", form=form, mode="edit", product=product)
         _apply_extra_photos(product, extra_files, remove_ids)
         product.updated_at = datetime.utcnow()
+        db.session.flush()
+        _apply_stock_changes(stock_changes)
         db.session.commit()
         flash(t('"{name}" was updated.', name=product.name), "success")
         return redirect(url_for("admin.products_list"))
@@ -290,7 +318,18 @@ def product_edit(product_id):
 def product_delete(product_id):
     product = Product.query.get_or_404(product_id)
     name = product.name
+    # A piece that appears on any order is hidden, not erased: the order history
+    # (and any cancel / stock return) must keep pointing at the right product.
+    on_orders = OrderItem.query.filter(
+        (OrderItem.product_id == product.id) |
+        OrderItem.variant_id.in_([v.id for v in product.variants] or [-1])).first()
+    if on_orders is not None:
+        product.is_active = False
+        db.session.commit()
+        flash(t('"{name}" is on past orders, so it was hidden from the shop instead of deleted.', name=name), "success")
+        return redirect(url_for("admin.products_list"))
     extra_files = [i.filename for i in product.extra_images]
+    WishlistItem.query.filter_by(product_id=product.id).delete()
     db.session.delete(product)
     db.session.commit()
     for fn in extra_files:
@@ -444,7 +483,9 @@ def order_new():
             if not product or not variant or variant.product_id != product.id:
                 continue
 
-            if qty > variant.stock_quantity:
+            if not stock.take(variant.id, qty):
+                db.session.rollback()
+                db.session.refresh(variant)
                 flash(t("Only {n} of {item} left in stock - reduce the quantity and try again.",
                         n=variant.stock_quantity, item=f"{product.name} ({variant.shade})"), "error")
                 return render_template("admin/order_form.html", form=form, products=products,
@@ -458,7 +499,6 @@ def order_new():
                 quantity=qty,
                 unit_price=product.price,
             ))
-            variant.stock_quantity -= qty
             added_any = True
 
         if not added_any:
@@ -495,29 +535,30 @@ def order_update(order_id):
         old_status = order.status
         new_status = form.status.data
 
+        flash_extra = ""
+        if new_status != old_status:
+            # Claim the change first: if someone else already moved this order (another
+            # tab, the automatic unpaid clean-up) we stop instead of moving stock twice.
+            if not stock.claim_status(order, (old_status,), new_status):
+                db.session.rollback()
+                flash(t("This order was changed by someone else just now. Please check it and try again."), "error")
+                return redirect(url_for("admin.order_detail", order_id=order.id))
         if old_status != "cancelled" and new_status == "cancelled":
             for item in order.items:
                 if item.variant_id:
-                    variant = ProductVariant.query.get(item.variant_id)
-                    if variant:
-                        variant.stock_quantity += item.quantity
+                    stock.put_back(item.variant_id, item.quantity)
             flash_extra = " " + t("Stock was returned for its items.")
         elif old_status == "cancelled" and new_status != "cancelled":
             short_items = []
             for item in order.items:
-                if item.variant_id:
-                    variant = ProductVariant.query.get(item.variant_id)
-                    if variant:
-                        if variant.stock_quantity < item.quantity:
-                            short_items.append(f"{item.product_name} ({item.shade})")
-                        variant.stock_quantity -= item.quantity
-            flash_extra = ""
+                if item.variant_id and db.session.get(ProductVariant, item.variant_id):
+                    if not stock.take_allow_negative(item.variant_id, item.quantity):
+                        short_items.append(f"{item.product_name} ({item.shade})")
             if short_items:
                 flash(t("Warning: reactivating this order pushed stock negative for: {items}. Double check inventory.", items=", ".join(short_items)), "error")
         else:
             flash_extra = ""
 
-        order.status = new_status
         order.payment_status = form.payment_status.data
         if form.delivery_fee.data is not None:
             order.delivery_fee = form.delivery_fee.data
@@ -557,12 +598,12 @@ def order_delete(order_id):
     """Permanently erase an order (e.g. an order made in error, or a data-deletion request).
     Stock is returned only for orders that were still open."""
     order = Order.query.get_or_404(order_id)
-    if order.status in ("pending", "processing"):
+    # Claim the order first so stock goes back exactly once, even if it is being
+    # cancelled somewhere else at the same moment.
+    if stock.claim_status(order, ("pending", "processing"), "cancelled"):
         for item in order.items:
             if item.variant_id:
-                variant = db.session.get(ProductVariant, item.variant_id)
-                if variant:
-                    variant.stock_quantity += item.quantity
+                stock.put_back(item.variant_id, item.quantity)
     number = order.id
     db.session.delete(order)
     db.session.commit()
@@ -627,6 +668,14 @@ def subscribers_export():
 @login_required
 def subscriber_delete(sub_id):
     sub = Subscriber.query.get_or_404(sub_id)
+    if sub.unsubscribed_at is not None:
+        # Keep the address on the do-not-contact list so nobody can sign them up again
+        # by typing it into a form. Everything else about them is erased.
+        sub.name = None
+        sub.newsletter = sub.sneak_peek = False
+        db.session.commit()
+        flash(t("Subscriber removed. Their address stays on the unsubscribed list so they are not signed up again."), "success")
+        return redirect(url_for("admin.subscribers_list"))
     db.session.delete(sub)
     db.session.commit()
     flash(t("Subscriber removed."), "success")

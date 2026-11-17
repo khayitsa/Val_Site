@@ -1,12 +1,13 @@
 """Bag and checkout. Guests can always buy; an account is never required."""
 from decimal import Decimal, InvalidOperation
 
-from sqlalchemy import update
+from sqlalchemy import func
 from flask import (
     Blueprint, render_template, redirect, url_for, flash, request, abort, current_app
 )
 
 from models import db, Order, OrderItem, ProductVariant
+from services import stock
 from forms.public_forms import CheckoutForm
 from services import cart as bag
 from services.customer_auth import current_customer
@@ -130,6 +131,18 @@ def checkout():
         if order_throttle.blocked(okey):
             flash(t("Too many orders from this connection in a short time. Please try again later or contact us to place your order."), "error")
             return redirect(url_for("shop.cart"))
+        # Unpaid orders hold their pieces, so one email address may only have a
+        # limited number of pieces waiting for payment at a time. Counted from the
+        # database, so it holds across restarts and several workers.
+        email = form.email.data.strip().lower()
+        waiting = (db.session.query(func.coalesce(func.sum(OrderItem.quantity), 0))
+                   .join(Order, Order.id == OrderItem.order_id)
+                   .filter(Order.source == "website", Order.status == "pending",
+                           Order.payment_status == "unpaid",
+                           func.lower(Order.customer_email) == email).scalar()) or 0
+        if waiting + sum(l["qty"] for l in lines) > cap:
+            flash(t("You already have orders waiting for payment. Please pay for those first, or contact us to place a larger order."), "error")
+            return redirect(url_for("shop.cart"))
         # Re-check stock at the moment of ordering.
         problems = [t("{item}: only {n} left", item=f"{l['product'].name} ({l['variant'].shade})", n=l['variant'].stock_quantity)
                     for l in lines if l["qty"] > l["variant"].stock_quantity]
@@ -141,7 +154,7 @@ def checkout():
         order = Order(
             customer_id=customer.id if customer else None,
             customer_name=form.name.data.strip(),
-            customer_email=form.email.data.strip().lower(),
+            customer_email=email,
             customer_phone=form.phone.data.strip(),
             shipping_address=(form.shipping_address.data or "").strip() if method == "courier" else "Collection",
             shipping_city=(form.shipping_city.data or "").strip() if method == "courier" else "-",
@@ -164,13 +177,7 @@ def checkout():
             ))
             # Atomic decrement: only succeeds while enough stock remains, so two
             # shoppers buying the last piece at once cannot both get it.
-            res = db.session.execute(
-                update(ProductVariant)
-                .where(ProductVariant.id == l["variant"].id,
-                       ProductVariant.stock_quantity >= l["qty"])
-                .values(stock_quantity=ProductVariant.stock_quantity - l["qty"])
-            )
-            if res.rowcount != 1:
+            if not stock.take(l["variant"].id, l["qty"]):
                 db.session.rollback()
                 flash(t("Sorry - {item} just sold out or changed. Please update your bag.", item=f"{l['product'].name} ({l['variant'].shade})"), "error")
                 return redirect(url_for("shop.cart"))

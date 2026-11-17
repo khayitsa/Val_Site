@@ -5,6 +5,7 @@ site behaves exactly as before. A failure to send is logged and swallowed -
 an email problem must never stop a customer from placing an order.
 """
 import logging
+import re
 import smtplib
 import ssl
 from email.message import EmailMessage
@@ -68,6 +69,17 @@ def send(to, subject, body, reply_to=None):
 # Customer emails follow the language the customer was browsing in. Emails to the
 # shop owner use OWNER_LANG (English by default). Spanish wording lives in
 # services/translations_es.py like the rest of the site.
+
+def _first_name(full_name, fallback):
+    """The word used in "Hi <name>,". The name was typed by whoever placed the order,
+    who may not be the person the email goes to, so keep it to plain letters: no links,
+    line breaks or long text can ride along in a message that comes from Verayah."""
+    for word in (full_name or "").split():
+        word = re.sub(r"[^\w'\u2019-]|_", "", word)[:30]
+        if word:
+            return word
+    return fallback
+
 
 def _money(value):
     return f"${float(value):,.2f}"
@@ -133,7 +145,7 @@ def confirm_to_customer(order, order_url, site):
                else translate("phone {phone}", L, phone=site.get("phone", "")))
     insta = (translate(" or by Instagram direct message {url}", L, url=site["instagram"])
              if site.get("instagram") else "")
-    first = (order.customer_name or "").split(" ")[0] or translate("there", L)
+    first = _first_name(order.customer_name, translate("there", L))
     body = (
         translate("Hi {name},", L, name=first) + "\n\n"
         + translate("Thank you for your order with Verayah. Please pay right away: we do not hold unpaid orders, and if payment does not arrive the order is cancelled and the pieces go back on sale. Your order is confirmed once payment is received.", L) + "\n\n"

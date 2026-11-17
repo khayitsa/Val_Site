@@ -6,6 +6,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from models import db, ContactMessage, Subscriber
 from forms.public_forms import ContactForm, SubscribeForm
 from services.newsletter import record_consent
+from services.customer_auth import safe_next
 from services.i18n import t, render_page, LANGS, COOKIE, ONE_YEAR
 from services.security import signup_throttle, client_ip
 
@@ -50,10 +51,11 @@ def care():
 # --- Language switch ---------------------------------------------------------
 
 def _safe_local(target):
-    """Only ever send people back to a page on this site (no open redirect)."""
-    if target and target.startswith("/") and not target.startswith("//") and "\\" not in target:
-        return target
-    return url_for("home")
+    """Only ever send people back to a page on this site (no open redirect).
+    safe_next also rejects tabs, line breaks and other hidden characters, which
+    browsers silently drop and which could turn "/<tab>/evil.example" into an
+    off-site address."""
+    return safe_next(target) or url_for("home")
 
 
 @main_bp.route("/lang/<code>")
