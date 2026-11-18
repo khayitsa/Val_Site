@@ -1,0 +1,483 @@
+--- a/.env.example
++++ b/.env.example
+@@ -3,10 +3,20 @@
+ # Generate with: python -c "import secrets; print(secrets.token_hex(32))"
+ SECRET_KEY=
+ 
+-# Set to "production" once the site is served over HTTPS, so login cookies
+-# are marked Secure. Leave blank for local development over http://.
++# LOCAL development only: set to "development" on your own computer (plain http://,
++# debug pages, throw-away SECRET_KEY allowed). On a live site leave this BLANK or set
++# "production": login cookies become HTTPS-only and the app refuses to start without a SECRET_KEY.
+ FLASK_ENV=
+ 
++# Your real domain(s), comma separated. Requests for any other Host are rejected.
++# e.g. ALLOWED_HOSTS=verayah.example,www.verayah.example
++ALLOWED_HOSTS=
++
++# 1 (default) when the site sits behind a hosting proxy / load balancer (almost every host).
++# Set 0 if visitors reach gunicorn directly with no proxy in front, otherwise anyone can fake
++# their IP address and slip past the login lock-out.
++TRUST_PROXY=1
++
+ # Optional: point at a different database (Postgres, etc). Defaults to a
+ # local SQLite file at instance/verayah.db if left unset.
+ DATABASE_URL=
+--- a/.gitignore
++++ b/.gitignore
+@@ -1,6 +1,11 @@
+ # Secrets & environment
+ .env
+ instance/
++*.db
++*.sqlite3
++# Bundles / backups that must never be committed or deployed
++*.zip
++.venv/
+ 
+ # Python
+ __pycache__/
+--- a/README.md
++++ b/README.md
+@@ -52,12 +52,13 @@
+ ## Security notes — read before deploying
+ 
+ - **SECRET_KEY**: set a real, random `SECRET_KEY` environment variable in
+-  production. Without one, the app falls back to a random key that changes
+-  every restart (safe, but logs everyone out each time you redeploy).
++  production. Without one the app refuses to start (outside `FLASK_ENV=development`), because a
++  random per-process key breaks every form as soon as there is more than one worker.
+   Generate one with: `python -c "import secrets; print(secrets.token_hex(32))"`
+-- **HTTPS**: set `FLASK_ENV=production` once the site is served over HTTPS.
+-  This flips the session cookie to `Secure` (HTTPS-only). Leave it unset for
+-  local development over plain `http://`, or login cookies won't be set.
++- **HTTPS / local development**: login cookies are HTTPS-only by default. On your
++  own computer set `FLASK_ENV=development` in `.env` (plain `http://`, debug pages and a
++  throw-away `SECRET_KEY` are then allowed). On a live site leave it blank. Also set
++  `ALLOWED_HOSTS` to your domain(s) and `TRUST_PROXY=0` if there is no proxy in front.
+ - **`instance/` and `.env` are gitignored** — the database (real customer
+   names, addresses, order history) and secrets must never be committed.
+   Back up `instance/verayah.db` separately and securely instead.
+@@ -65,9 +66,11 @@
+   username). This resets on restart and only works correctly with a single
+   process. If you ever deploy with multiple worker processes, replace it
+   with Flask-Limiter + Redis.
+-- **Uploads**: product photos are capped at 5 MB, validated to actual image
+-  files (not just their filename extension), and saved under a random
+-  filename — the browser's original filename is never trusted or reused.
++- **Uploads**: a request may carry up to 60 MB; every photo is checked to be a real
++  JPG/PNG/WEBP, shrunk and re-saved as a JPEG under a random filename — the browser's
++  original filename is never trusted or reused. Uploads and `instance/verayah.db` live on
++  disk: pick a host with a persistent disk/volume (or switch `DATABASE_URL` to Postgres and
++  keep photos on persistent storage), or they vanish on every redeploy.
+ - **Run behind a real WSGI server** (gunicorn/waitress) and HTTPS in
+   production — `python app.py` uses Flask's development server, which is
+   not designed for production traffic.
+--- a/app.py
++++ b/app.py
+@@ -12,6 +12,8 @@
+ except ImportError:
+     pass
+ 
++from flask_wtf.csrf import CSRFError
++
+ from models import db, AdminUser, Product, WishlistItem, JournalPost
+ from models.schema import upgrade_schema
+ from services import cart as bag
+@@ -21,6 +23,12 @@
+ 
+ app = Flask(__name__)
+ 
++# Development mode is opt-in: set FLASK_ENV=development in .env on your own computer.
++# Anything else (including blank) is treated as a live site, which is the safe default:
++# login cookies are HTTPS-only and a missing SECRET_KEY stops the app instead of
++# silently running with a throw-away key.
++IS_DEV = os.environ.get("FLASK_ENV", "").strip().lower() in ("development", "dev")
++
+ # Behind a hosting proxy (PythonAnywhere etc.) trust ONE proxy hop for the real
+ # visitor IP and https scheme. Set TRUST_PROXY=0 if you run without a proxy.
+ if os.environ.get("TRUST_PROXY", "1") != "0":
+@@ -32,28 +40,45 @@
+ # the app doesn't crash locally; that fallback changes every restart, which
+ # means it can never be used to forge a session, but it also logs everyone
+ # out on restart - set a real SECRET_KEY env var for real deployments.
+-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or os.urandom(32).hex()
+-if not os.environ.get("SECRET_KEY"):
+-    # A random per-process key logs everyone out on restart and breaks CSRF
+-    # tokens when several workers run. Set SECRET_KEY in the host's environment.
+-    print("WARNING: SECRET_KEY is not set - using a temporary random key.", flush=True)
++_secret = (os.environ.get("SECRET_KEY") or "").strip()
++if not _secret:
++    if not IS_DEV:
++        # A random per-process key logs everyone out on every restart and makes forms fail
++        # (CSRF errors) as soon as the host runs more than one worker. Refuse to start.
++        raise RuntimeError(
++            "SECRET_KEY is not set. Generate one with: python -c \"import secrets; "
++            "print(secrets.token_hex(32))\" and set it in the host's environment "
++            "(or FLASK_ENV=development for local work).")
++    print("WARNING: SECRET_KEY is not set - using a temporary random key (development only).", flush=True)
++    _secret = os.urandom(32).hex()
++app.config["SECRET_KEY"] = _secret
++
++# Only answer to your own domain(s), e.g. ALLOWED_HOSTS=verayah.example,www.verayah.example
++# A forged Host header is rejected, so it can't be used to poison links in emails.
++_hosts = [h.strip() for h in (os.environ.get("ALLOWED_HOSTS") or "").split(",") if h.strip()]
++if _hosts:
++    app.config["TRUSTED_HOSTS"] = _hosts
+ 
+ basedir = os.path.abspath(os.path.dirname(__file__))
+ # "or" (not a get-default) so a blank DATABASE_URL= line copied from
+ # .env.example falls back to the local SQLite file instead of crashing.
+-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL") or (
+-    f"sqlite:///{os.path.join(basedir, 'instance', 'verayah.db')}"
+-)
++_db_url = (os.environ.get("DATABASE_URL") or "").strip()
++if _db_url.startswith("postgres://"):      # some hosts hand out the old scheme; SQLAlchemy needs postgresql://
++    _db_url = "postgresql://" + _db_url[len("postgres://"):]
++app.config["SQLALCHEMY_DATABASE_URI"] = _db_url or f"sqlite:///{os.path.join(basedir, 'instance', 'verayah.db')}"
+ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
++app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}   # survive a database that dropped an idle connection
+ 
+ # Cookie hardening
+ app.config["SESSION_COOKIE_HTTPONLY"] = True
+ app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+-# Only send cookies over HTTPS once deployed behind TLS. Locally (http://)
+-# this must stay False or the login cookie will silently never be set.
+-app.config["SESSION_COOKIE_SECURE"] = os.environ.get("FLASK_ENV") == "production"
++# HTTPS-only cookies everywhere except local development (plain http://), where a
++# Secure cookie would never be stored and login would silently fail.
++app.config["SESSION_COOKIE_SECURE"] = not IS_DEV
++# A form left open for a while (e.g. a long product edit) should still save: 8 hours.
++app.config["WTF_CSRF_TIME_LIMIT"] = 60 * 60 * 8
+ 
+-# 25 MB cap on a single upload request, so a full-size phone photo is fine but
++# 60 MB cap on a single request, so several full-size phone photos are fine but
+ # no one can fill the disk via the admin image upload field. Accepted photos
+ # are shrunk before saving (see services/images.py).
+ app.config["MAX_CONTENT_LENGTH"] = 60 * 1024 * 1024
+@@ -118,6 +143,10 @@
+     "notify": (os.environ.get("NOTIFY_EMAIL", "") or os.environ.get("BUSINESS_EMAIL", "")).strip(),
+ }
+ 
++if app.config["MAIL"]["host"] and not app.config["PUBLIC_BASE_URL"]:
++    app.logger.warning("MAIL_* is set but PUBLIC_BASE_URL is blank: links in emails will be built from the "
++                       "request's Host header. Set PUBLIC_BASE_URL (and ALLOWED_HOSTS) to your real address.")
++
+ db.init_app(app)
+ csrf = CSRFProtect(app)
+ 
+@@ -194,6 +223,25 @@
+     return render_template("404.html"), 404
+ 
+ 
++@app.errorhandler(CSRFError)
++def csrf_failed(_err):
++    """An expired or missing form token: say so kindly and go back, instead of a bare 400 page."""
++    flash(i18n.t("Your session expired before the form was sent. Please try again."), "error")
++    ref = request.referrer or ""
++    if ref.startswith(request.host_url):
++        return redirect(ref)
++    return redirect(url_for("home"))
++
++
++@app.errorhandler(500)
++def server_error(_err):
++    db.session.rollback()
++    try:
++        return render_template("500.html"), 500
++    except Exception:  # noqa: BLE001 - never let the error page itself fail
++        return "Something went wrong on our side. Please try again in a moment.", 500
++
++
+ @app.errorhandler(413)
+ def too_large(_err):
+     """A photo bigger than the upload limit: explain it instead of showing a raw error page."""
+@@ -209,6 +257,11 @@
+     resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+     resp.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
+     resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
++    resp.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()")
++    resp.headers.setdefault("Cross-Origin-Opener-Policy", "same-origin")
++    # Private pages (admin, accounts, bag, a customer's order link) must never turn up in search results.
++    if request.path.startswith(("/admin", "/account", "/cart", "/checkout", "/order/", "/unsubscribe/")):
++        resp.headers.setdefault("X-Robots-Tag", "noindex, nofollow")
+     resp.vary.add("Cookie")            # the page language follows the language cookie
+     resp.vary.add("Accept-Language")   # ...or the browser language on a first visit
+     if request.is_secure:
+@@ -281,4 +334,6 @@
+     upgrade_schema(db)   # adds new order columns to an existing database, never drops data
+ 
+ if __name__ == '__main__':
+-    app.run(debug=True, port=5001)
+\ No newline at end of file
++    # Local development server only (set FLASK_ENV=development in .env). On a live host use
++    # gunicorn/waitress instead, e.g.:  gunicorn app:app
++    app.run(debug=IS_DEV, port=5001)
+\ No newline at end of file
+--- a/models/__init__.py
++++ b/models/__init__.py
+@@ -26,6 +26,14 @@
+ 
+ db = SQLAlchemy()
+ 
++_DUMMY_HASH = generate_password_hash("verayah-not-a-real-password")
++
++
++def burn_password_check(raw_password):
++    """Called when a login names an account that doesn't exist, so the reply takes as long
++    as a real password check and can't be used to discover which emails have accounts."""
++    check_password_hash(_DUMMY_HASH, raw_password or "")
++
+ 
+ class AdminUser(UserMixin, db.Model):
+     __tablename__ = "admin_users"
+--- a/requirements.txt
++++ b/requirements.txt
+@@ -7,3 +7,7 @@
+ email_validator>=2.0,<3
+ python-dotenv>=1.2.2,<2
+ Pillow>=13.0,<14
++# Production web server (Linux hosts). Windows: use "waitress" instead.
++gunicorn>=23,<26; sys_platform != "win32"
++# Only if you switch DATABASE_URL to PostgreSQL:
++# psycopg[binary]>=3.2,<4
+--- a/routes/account_routes.py
++++ b/routes/account_routes.py
+@@ -3,7 +3,7 @@
+     Blueprint, render_template, redirect, url_for, flash, request
+ )
+ 
+-from models import db, Customer, Product, WishlistItem
++from models import db, Customer, Product, WishlistItem, burn_password_check
+ from forms.public_forms import (
+     RegisterForm, CustomerLoginForm, AccountDetailsForm, DeleteAccountForm
+ )
+@@ -62,6 +62,8 @@
+             flash(t("Too many failed attempts. Please wait 15 minutes and try again."), "error")
+             return render_template("account/login.html", form=form, next=nxt)
+         customer = Customer.query.filter_by(email=email).first()
++        if customer is None:
++            burn_password_check(form.password.data)
+         if customer and customer.check_password(form.password.data):
+             customer_login_throttle.clear(tkey)
+             login_customer(customer)
+--- a/routes/admin_routes.py
++++ b/routes/admin_routes.py
+@@ -23,8 +23,10 @@
+ from flask_login import login_user, logout_user, login_required, current_user
+ from werkzeug.utils import secure_filename
+ 
++from sqlalchemy.exc import IntegrityError
++
+ from models import (
+-    db, AdminUser, Product, ProductVariant, ProductImage, Order, OrderItem,
++    db, AdminUser, burn_password_check, Product, ProductVariant, ProductImage, Order, OrderItem,
+     Customer, Subscriber, ContactMessage, JournalPost, WishlistItem
+ )
+ from services.journal import unique_slug
+@@ -170,6 +172,23 @@
+     return stock_changes
+ 
+ 
++def _shade_problem():
++    """Look at the submitted shade rows BEFORE anything is saved. Returns a message or None.
++    A product needs at least one shade, and each shade name may appear only once."""
++    names = [s.strip() for s in request.form.getlist("variant_shade") if s and s.strip()]
++    if not names:
++        return t("Add at least one shade with a stock quantity.")
++    seen = set()
++    for name in names:
++        if name.casefold() in seen:
++            return t('Each shade can only appear once per product ("{shade}" is listed twice).', shade=name)
++        seen.add(name.casefold())
++    return None
++
++
++_SHADE_CLASH = "Two shades clash (same name on this product). Please give each shade a different name."
++
++
+ def _apply_stock_changes(changes):
+     for variant_id, delta in changes:
+         stock.adjust(variant_id, delta)
+@@ -192,6 +211,8 @@
+             return render_template("admin/login.html", form=form)
+ 
+         user = AdminUser.query.filter_by(username=username).first()
++        if user is None:
++            burn_password_check(form.password.data)
+         if user and user.check_password(form.password.data):
+             admin_login_throttle.clear(tkey)
+             login_user(user)
+@@ -258,18 +279,21 @@
+             sort_order=form.sort_order.data or 0,
+         )
+         extra_files, remove_ids, problem = _extra_photo_problem(None)
++        problem = problem or _shade_problem()
+         if problem:
+             flash(problem, "error")
+             return render_template("admin/product_form.html", form=form, mode="new")
+         if form.image.data:
+             product.image_filename = _save_product_image(form.image.data)
+         _sync_variants(product)
+-        if not product.variants:
+-            flash(t("Add at least one shade with a stock quantity."), "error")
+-            return render_template("admin/product_form.html", form=form, mode="new")
+         _apply_extra_photos(product, extra_files, remove_ids)
+         db.session.add(product)
+-        db.session.commit()
++        try:
++            db.session.commit()
++        except IntegrityError:
++            db.session.rollback()
++            flash(t(_SHADE_CLASH), "error")
++            return render_template("admin/product_form.html", form=form, mode="new")
+         flash(t('"{name}" was added.', name=product.name), "success")
+         return redirect(url_for("admin.products_list"))
+     return render_template("admin/product_form.html", form=form, mode="new")
+@@ -292,6 +316,7 @@
+         product.is_active = form.is_active.data
+         product.sort_order = form.sort_order.data or 0
+         extra_files, remove_ids, problem = _extra_photo_problem(product)
++        problem = problem or _shade_problem()
+         if problem:
+             db.session.rollback()
+             flash(problem, "error")
+@@ -299,14 +324,16 @@
+         if form.image.data:
+             product.image_filename = _save_product_image(form.image.data)
+         stock_changes = _sync_variants(product)
+-        if not product.variants:
+-            flash(t("Add at least one shade with a stock quantity."), "error")
+-            return render_template("admin/product_form.html", form=form, mode="edit", product=product)
+         _apply_extra_photos(product, extra_files, remove_ids)
+         product.updated_at = datetime.utcnow()
+-        db.session.flush()
+-        _apply_stock_changes(stock_changes)
+-        db.session.commit()
++        try:
++            db.session.flush()
++            _apply_stock_changes(stock_changes)
++            db.session.commit()
++        except IntegrityError:
++            db.session.rollback()
++            flash(t(_SHADE_CLASH), "error")
++            return render_template("admin/product_form.html", form=form, mode="edit", product=product)
+         flash(t('"{name}" was updated.', name=product.name), "success")
+         return redirect(url_for("admin.products_list"))
+ 
+@@ -472,14 +499,14 @@
+             if not pid or not vid or not qty:
+                 continue
+             try:
+-                qty = int(qty)
++                qty, pid_int, vid_int = int(qty), int(pid), int(vid)
+             except ValueError:
+                 continue
+             if qty <= 0:
+                 continue
+ 
+-            product = Product.query.get(int(pid))
+-            variant = ProductVariant.query.get(int(vid))
++            product = db.session.get(Product, pid_int)
++            variant = db.session.get(ProductVariant, vid_int)
+             if not product or not variant or variant.product_id != product.id:
+                 continue
+ 
+--- a/routes/shop_routes.py
++++ b/routes/shop_routes.py
+@@ -89,7 +89,10 @@
+     except ValueError:
+         return redirect(url_for("shop.cart"))
+     variant = db.session.get(ProductVariant, variant_id)
+-    if variant and qty > variant.stock_quantity:
++    if variant is None:                      # a made-up id must not put a phantom line in the bag
++        bag.set_qty(variant_id, 0)
++        return redirect(url_for("shop.cart"))
++    if qty > variant.stock_quantity:
+         qty = variant.stock_quantity
+         flash(t("Only {n} available - quantity adjusted.", n=variant.stock_quantity), "info")
+     bag.set_qty(variant_id, qty)
+--- a/scripts/update_stock_2026_09.py
++++ b/scripts/update_stock_2026_09.py
+@@ -29,6 +29,11 @@
+     ("Dream Catcher Earring Set", "Seafoam"): 2,
+ }
+ 
++if "--i-know-this-overwrites-stock" not in sys.argv:
++    sys.exit("This script OVERWRITES live stock: it sets the counts below and zeroes every other shade.\n"
++             "It was a one-off for the Sept 2026 stocktake. If you really mean it, run it again with\n"
++             "  --i-know-this-overwrites-stock")
++
+ with app.app_context():
+     touched = set()
+     for (name, shade), qty in STOCK_UPDATES.items():
+--- a/services/translations_es.py
++++ b/services/translations_es.py
+@@ -629,3 +629,14 @@
+     "Reply to this email to answer them directly.": "Responde a este correo para contestarles directamente.",
+     "Website message: {topic}": "Mensaje del sitio web: {topic}",
+ })
++
++
++# --- added by the security/bug audit (Nov 2026) ---
++ES.update({
++    "Your session expired before the form was sent. Please try again.": "Tu sesión expiró antes de enviar el formulario. Inténtalo de nuevo.",
++    'Each shade can only appear once per product ("{shade}" is listed twice).': 'Cada tono solo puede aparecer una vez por producto ("{shade}" está repetido).',
++    "Two shades clash (same name on this product). Please give each shade a different name.": "Dos tonos tienen el mismo nombre en este producto. Dale a cada tono un nombre distinto.",
++    "Something went wrong": "Algo salió mal",
++    "Something went wrong on our side": "Algo salió mal de nuestro lado",
++    "Please try again in a moment. If it keeps happening, contact us and we will sort it out.": "Inténtalo de nuevo en un momento. Si sigue pasando, contáctanos y lo resolvemos.",
++})
+--- a/static/js/script.js
++++ /dev/null
+@@ -1,34 +0,0 @@
+-// --- extracted from <script> ---
+-var pieces = [
+-  { cat:'Fine Line',    title:'Botanical Bloom',   icon:'bloom',   img:'portfolio/botanical-bloom.jpg' },
+-  { cat:'Ornamental',   title:'Sun Mandala',        icon:'mandala', img:'portfolio/sun-mandala.jpg' },
+-  { cat:'Illustrative', title:'Evil Eye Talisman',  icon:'eye',     img:'portfolio/evil-eye-talisman.jpg' },
+-  { cat:'Fine Line',    title:'Celestial Arc',      icon:'arc',     img:'portfolio/celestial-arc.jpg' },
+-  { cat:'Geometric',    title:'Sacred Serpent',     icon:'serpent', img:'portfolio/sacred-serpent.jpg' },
+-  { cat:'Illustrative', title:'Wild Roses',         icon:'rose',    img:'portfolio/wild-roses.jpg' },
+-  { cat:'Calligraphy',  title:'Sacred Script',      icon:'script',  img:'portfolio/sacred-script.jpg' },
+-  { cat:'Ornamental',   title:'Golden scarab',      icon:'scarab',  img:'portfolio/golden-scarab.jpg' },
+-  { cat:'Fine Line',    title:'Lotus Rising',       icon:'lotus',   img:'portfolio/lotus-rising.jpg' }
+-];
+-document.addEventListener("DOMContentLoaded", function () {
+-  const burger = document.querySelector(".burger");
+-  const nav = document.querySelector(".navlinks");
+-
+-  if (burger) {
+-    burger.addEventListener("click", () => {
+-      nav.classList.toggle("open");
+-    });
+-  }
+-
+-  const form = document.querySelector("form");
+-  const note = document.querySelector(".form-note");
+-
+-  if (form) {
+-    form.addEventListener("submit", function (e) {
+-      e.preventDefault();
+-      note.textContent = "Message sent successfully.";
+-      note.classList.add("ok");
+-      form.reset();
+-    });
+-  }
+-});
+\ No newline at end of file
+--- /dev/null
++++ b/templates/500.html
+@@ -0,0 +1,12 @@
++{% extends "base.html" %}
++{% block title %}{{ _("Something went wrong") }} | Verayah{% endblock %}
++{% block content %}
++<section class="page-section"><div class="wrap" style="text-align:center;padding:5rem 0;">
++  <span class="eyebrow">500</span>
++  <h1>{{ _("Something went wrong on our side") }}</h1>
++  <p class="muted">{{ _("Please try again in a moment. If it keeps happening, contact us and we will sort it out.") }}</p>
++  <p style="margin-top:1.5rem;">
++    <a href="{{ url_for('home') }}" class="btn-fill">{{ _("Back to home") }}</a>
++  </p>
++</div></section>
++{% endblock %}
